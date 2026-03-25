@@ -1,27 +1,48 @@
 cmake_minimum_required(VERSION 3.19)
-project(Garage
-    LANGUAGES CXX
+project(garage
+    LANGUAGES C CXX
     VERSION   1.0.0
 )
 
 if (GARAGE_BUILD_SHARED)
-    add_library(Garage SHARED)
-    target_compile_definitions(Garage PRIVATE GARAGE_BUILD_SHARED)
+    add_library(garage SHARED)
+    target_compile_definitions(garage PRIVATE GARAGE_BUILD_SHARED)
 else()
-    add_library(Garage STATIC)
-    target_compile_definitions(Garage PRIVATE GARAGE_BUILD_STATIC)
+    add_library(garage STATIC)
+    target_compile_definitions(garage PRIVATE GARAGE_BUILD_STATIC)
 endif()
 
-target_sources(Garage
+if (GARAGE_GRAPHICS_GL)
+    target_compile_definitions(garage PRIVATE GARAGE_GRAPHICS_GL)
+endif()
+
+target_sources(garage
     PUBLIC
-        Public/Garage/Test.hpp
+        src/dx12/renderer_dx12.cpp
+        src/gl/renderer_gl.cpp
+        src/application.cpp
     PRIVATE
-        Private/Test.cpp
+        include/garage/dx12/renderer_dx12.hpp
+        include/garage/gl/renderer_gl.hpp
+        include/garage/application.hpp
+        include/garage/renderer.hpp
 )
 
-target_include_directories(Garage
+target_include_directories(garage
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Public>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Public/Garage>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/garage>
+)
+
+find_package(glad CONFIG REQUIRED)
+target_link_libraries(garage PRIVATE glad::glad)
+
+find_package(glfw3 CONFIG REQUIRED)
+target_link_libraries(garage PRIVATE glfw)
+
+set_target_properties(garage
+    PROPERTIES
+        OUTPUT_NAME "libgarage"
+        DEBUG_POSTFIX "d"
 )
