@@ -18,14 +18,14 @@ endif()
 
 target_sources(garage
     PUBLIC
-        src/dx12/renderer_dx12.cpp
-        src/gl/renderer_gl.cpp
-        src/application.cpp
-    PRIVATE
         include/garage/dx12/renderer_dx12.hpp
         include/garage/gl/renderer_gl.hpp
         include/garage/application.hpp
         include/garage/renderer.hpp
+    PRIVATE
+        src/dx12/renderer_dx12.cpp
+        src/gl/renderer_gl.cpp
+        src/application.cpp
 )
 
 target_include_directories(garage

@@ -1,4 +1,4 @@
-#include "Application.hpp"
+#include "application.hpp"
 
 #include <iostream>
 
@@ -13,7 +13,7 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-#include "Renderer.hpp"
+#include "renderer.hpp"
 
 namespace Garage
 {

@@ -1,7 +1,7 @@
 #ifndef GARAGE_RENDERERDX11_HPP
 #define GARAGE_RENDERERDX11_HPP
 
-#include "Renderer.hpp"
+#include "renderer.hpp"
 
 namespace Garage
 {

@@ -6,6 +6,7 @@
 #ifndef GARAGE_TEST_HPP
 #define GARAGE_TEST_HPP
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 
