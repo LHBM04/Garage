@@ -1,0 +1,60 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "x64-base",
+            "hidden": true,
+            "cacheVariables": {
+                "GARAGE_BUILD_RUNTIME": "ON"
+            }
+        },
+        {
+            "name": "x64-static-base",
+            "inherits": "x64-base",
+            "hidden": true,
+            "cacheVariables": {
+                "GARAGE_BUILD_SHARED": "ON"
+            }
+        },
+        {
+            "name": "x64-shared-base",
+            "inherits": "x64-base",
+            "hidden": true,
+            "cacheVariables": {
+                "GARAGE_BUILD_SHARED": "ON"
+            }
+        },
+        {
+            "name": "x64-static-debug",
+            "inherits": "x64-static-base",
+            "binaryDir": "${sourceDir}/Out/Win32/Static/x64/Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "x64-static-release",
+            "inherits": "x64-static-base",
+            "binaryDir": "${sourceDir}/Out/Win32/Static/x64/Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "x64-shared-debug",
+            "inherits": "x64-shared-base",
+            "binaryDir": "${sourceDir}/Out/Win32/Shared/x64/Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "x64-shared-release",
+            "inherits": "x64-shared-base",
+            "binaryDir": "${sourceDir}/Out/Win32/Shared/x64/Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ]
+}
