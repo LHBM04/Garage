@@ -1,6 +1,3 @@
-# Created by https://www.toptal.com/developers/gitignore/api/c,c++,cmake,visualstudio,visualstudiocode,clion,clion+all,clion+iml,xcode,vcpkg,conan
-# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,cmake,visualstudio,visualstudiocode,clion,clion+all,clion+iml,xcode,vcpkg,conan
-
 ### C ###
 # Prerequisites
 *.d
@@ -777,5 +774,3 @@ FodyWeavers.xsd
 
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
-
-# End of https://www.toptal.com/developers/gitignore/api/c,c++,cmake,visualstudio,visualstudiocode,clion,clion+all,clion+iml,xcode,vcpkg,conan
