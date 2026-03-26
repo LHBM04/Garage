@@ -1,5 +1,5 @@
-#ifndef GARAGE_RENDERERDX11_HPP
-#define GARAGE_RENDERERDX11_HPP
+#ifndef __GARAGE_RENDERERDX12_HPP__
+#define __GARAGE_RENDERERDX12_HPP__
 
 #include "renderer.hpp"
 
