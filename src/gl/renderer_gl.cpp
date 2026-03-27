@@ -1,4 +1,4 @@
-#include "renderer.hpp"
+#include "../garage/graphics/gl/renderer_gl.hpp"
 
 #include <glad/glad.h>
 
@@ -6,23 +6,40 @@
 
 namespace Garage
 {
-	bool Renderer::Initialize(const Specification& specification) noexcept
+	RendererGL::~RendererGL()
 	{
-        int version = gladLoadGL();
-		if (version == 0)
+        Release();
+	}
+
+	bool RendererGL::Initialize(const RendererBase::Specification& specification)
+	{
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
 			return false;
 		}
-
-		glViewport(specification.x, specification.y, 
-				   specification.width, specification.height);
+		glViewport(0, 0, specification.width, specification.height);
         
+		glEnable(GL_DEPTH_TEST);
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
 		return true;
     }
 
-    void Renderer::Clear() noexcept
-    {
+	void RendererGL::Release()
+	{
+		
+    }
+
+	void RendererGL::Clear()
+	{
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void RendererGL::Present()
+	{
+
 	}
 }

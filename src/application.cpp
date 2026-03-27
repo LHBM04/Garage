@@ -1,19 +1,8 @@
-#include "application.hpp"
-
-#include <iostream>
-
-#if defined(GARAGE_PLATFORM_WINDOWS)
-    #define GLFW_EXPOSE_NATIVE_WIN32
-#elif defined(GARAGE_PLATFORM_LINUX)
-    #define GLFW_EXPOSE_NATIVE_X11
-#elif defined(GARAGE_PLATFORM_MACOS)
-    #define GLFW_EXPOSE_NATIVE_COCOA
-#endif
+#include "../garage/application.hpp"
 
 #include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 
-#include "renderer.hpp"
+#include "../garage/graphics/renderer.hpp"
 
 namespace Garage
 {
@@ -58,15 +47,14 @@ namespace Garage
             glfwMakeContextCurrent(window);
             glfwSetKeyCallback(window, KeyCallback);
         }
-        // 2. 렌더러 초기화
-        // {
-        //     Renderer::Specification rendererSpecification;
-        //     rendererSpecification.window = window;
-        //     rendererSpecification.width  = specification.width;
-        //     rendererSpecification.height = specification.height;
-        // 
-        //     Renderer::Initialize(rendererSpecification);
-        // }
+
+        //2. 렌더러 초기화
+        {
+            Renderer::Descriptor desc;
+            desc.window = window;
+
+            Renderer::Initialize(desc);
+        }
 
         return true;
     }
@@ -76,8 +64,6 @@ namespace Garage
         while (!glfwWindowShouldClose(window))
         {
             glfwPollEvents();
-
-            // Renderer::Clear();
 
             glfwSwapBuffers(window);
         }

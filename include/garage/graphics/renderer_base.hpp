@@ -7,11 +7,13 @@
 #define GARAGE_RENDERER_HPP
 
 #include <cstdint>
+#include <memory>
 
 namespace Garage
 {
-	class Renderer
+	class RendererBase
 	{
+    public:
 		/**
 		 * @brief Specification
 		 * 
@@ -19,14 +21,36 @@ namespace Garage
 		 */
 		struct Specification final
 		{
+		    /**
+		     
+		     */
 		    void* window{ nullptr };
 
+			/**
+			 * @brief 
+			 */
 			std::uint32_t x{ 0 };
+
+			/**
+			 * @brief 
+			 */
 			std::uint32_t y{ 0 };
 
+			/**
+			 * @brief 
+			 */
 			std::uint32_t width{ 800 };
+
+			/**
+			 * @brief 
+			 */
 			std::uint32_t height{ 600 };
 		};
+
+		/**
+		 * @brief 소멸자.
+		 */
+		virtual ~RendererBase();
 
 		/**
 		 * @brief 렌더러를 초기화합니다.
@@ -35,17 +59,22 @@ namespace Garage
 		 * 
 		 * @return bool 초기화 성공 여부
 		 */
-        bool Initialize(const Specification& specification) noexcept;
+        virtual bool Initialize(const Specification& specification) = 0;
 
 		/**
-		 * @brief 
+		 * @brief 렌더러를 해제합니다.
 		 */
-		void Release();
+		virtual void Release() = 0;
 
 		/**
-         * @brief 화면을 지웁니다.
+		 * @brief 화면 지우기.
 		 */
-		void Clear() noexcept;
+		virtual void Clear() = 0;
+		
+		/**
+		 * @brief 화면 그리기.
+		 */
+		virtual void Present() = 0;
 	};
 }
 

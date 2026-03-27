@@ -15,6 +15,7 @@ add_library(garage
 target_sources(garage
     PRIVATE
         src/gl/renderer_gl.cpp
+        src/gl/shader_gl.cpp
         src/application.cpp
         src/renderer.cpp
  )
