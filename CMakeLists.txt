@@ -14,10 +14,10 @@ add_library(garage
 
 target_sources(garage
     PRIVATE
-        src/graphics/gl/renderer_gl.cpp
-        src/graphics/gl/shader_gl.cpp
-        src/graphics/renderer.cpp
-        src/application.cpp
+        src/platform/graphics/gl/renderer_gl.cpp
+        src/platform/graphics/gl/shader_gl.cpp
+        src/platform/graphics/renderer.cpp
+        src/platform/application.cpp
  )
 target_include_directories(garage
     PUBLIC
