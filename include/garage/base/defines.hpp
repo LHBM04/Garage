@@ -17,4 +17,14 @@
         #error "Unknown platform."
 #endif
 
+#if defined(GARAGE_BUILD_SHARED)
+    #if defined(GARAGE_COMPILER_MSVC)
+        #define GARAGE_API __declspec(dllexport)
+    #elif defined(GARAGE_COMPILER_GCC) || defined(GARAGE_COMPILER_CLANG)
+        #define GARAGE_API __attribute__((visibility("default")))
+    #endif
+#else
+    #define GARAGE_API
+#endif
+
 #endif
