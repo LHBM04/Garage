@@ -3,8 +3,8 @@
  * 
  * @brief Declares the test application interface.
  */
-#ifndef GARAGE_TEST_HPP
-#define GARAGE_TEST_HPP
+#ifndef __GARAGE_APPLICATION_HPP__
+#define __GARAGE_APPLICATION_HPP__
 
 #include <cstdint>
 #include <string>
