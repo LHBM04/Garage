@@ -1,8 +1,7 @@
-#include "../garage/application.hpp"
+#include "application.hpp"
+#include "graphics/renderer.hpp"
 
 #include <GLFW/glfw3.h>
-
-#include "../garage/graphics/renderer.hpp"
 
 namespace Garage
 {

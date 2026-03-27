@@ -14,14 +14,14 @@ add_library(garage
 
 target_sources(garage
     PRIVATE
-        src/gl/renderer_gl.cpp
-        src/gl/shader_gl.cpp
+        src/graphics/gl/renderer_gl.cpp
+        src/graphics/gl/shader_gl.cpp
+        src/graphics/renderer.cpp
         src/application.cpp
-        src/renderer.cpp
  )
 target_include_directories(garage
     PUBLIC
-        include/garage
+        include/
     PRIVATE
         include/garage
 )

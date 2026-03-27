@@ -1,4 +1,4 @@
-#include "../garage/graphics/gl/renderer_gl.hpp"
+#include "graphics/gl/renderer_gl.hpp"
 
 #include <glad/glad.h>
 

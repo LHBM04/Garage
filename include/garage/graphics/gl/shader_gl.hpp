@@ -1,7 +1,7 @@
 #ifndef __GARAGE_SHADERGL_HPP__
 #define __GARAGE_SHADERGL_HPP__
 
-#include "../shader_base.hpp"
+#include "../garage/graphics/shader_base.hpp"
 
 namespace Garage
 {

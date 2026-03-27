@@ -1,6 +1,6 @@
-#include "../garage/graphics/renderer.hpp"
-#include "../garage/graphics/renderer_base.hpp"
-#include "../garage/graphics/gl/renderer_gl.hpp"
+#include "graphics/renderer.hpp"
+#include "graphics/renderer_base.hpp"
+#include "graphics/gl/renderer_gl.hpp"
 
 #include <memory>
 
