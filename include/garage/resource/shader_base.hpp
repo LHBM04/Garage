@@ -13,7 +13,7 @@
 #include "../garage/base/defines.hpp"
 #include "../garage/base/types.hpp"
 
-#include "../garage/resource_base.hpp"
+#include "resource_base.hpp"
 
 namespace Garage
 {
