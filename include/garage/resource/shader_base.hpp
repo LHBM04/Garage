@@ -24,8 +24,22 @@ namespace Garage
 	 */
 	class GARAGE_API ShaderBase : public ResourceBase;
 	{
-		using ShaderName = std::string_view;
     public:
+        /**
+         * @brief 셰이더 이름을 정의합니다.
+         */
+        using Name = std::string_view;
+
+        /**
+         * @brief 셰이더 프로그램 ID를 정의합니다.
+         */
+        using Handle = std::uint32_t;
+
+        /**
+         * @enum EType
+         * 
+         * @brief 셰이더의 타입을 정의합니다.
+         */
         enum class EType : UInt8
         {
             /**
@@ -48,7 +62,7 @@ namespace Garage
          * @brief 
          * @return 
          */
-        virtual std::uint32 GetProgramID() const = 0;
+        virtual Handle GetProgramID() const = 0;
 
         /**
          * @brief 
