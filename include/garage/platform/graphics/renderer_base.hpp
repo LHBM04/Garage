@@ -3,8 +3,8 @@
  * 
  * @brief 렌더러의 기본 동작을 정의합니다.
  */
-#ifndef GARAGE_RENDERER_HPP
-#define GARAGE_RENDERER_HPP
+#ifndef __GARAGE_RENDERER_HPP__
+#define __GARAGE_RENDERER_HPP__
 
 #include <cstdint>
 #include <memory>
