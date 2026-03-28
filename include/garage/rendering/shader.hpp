@@ -1,8 +1,3 @@
-/**
- * @file shader_base.hpp
- * 
- * @brief 셰이더의 기본 동작이 선언됩니다.
- */
 #ifndef __GARAGE_SHADERBASE_HPP__
 #define __GARAGE_SHADERBASE_HPP__
 
@@ -10,10 +5,10 @@
 #include <string>
 #include <string_view>
 
-#include "../base/defines.hpp"
-#include "../base/types.hpp"
+#include "garage/base/defines.hpp"
+#include "garage/base/types.hpp"
 
-#include "../resource/resource.hpp"
+#include "garage/resource/resource.hpp"
 
 namespace Garage
 {
@@ -63,7 +58,7 @@ namespace Garage
          * 
          * @return 
          */
-        virtual Handle GetProgramID() const = 0;
+        virtual Handle GetHandle() const = 0;
 
         /**
          * @brief 
