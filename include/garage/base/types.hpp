@@ -28,6 +28,9 @@ namespace Garage
     using float32 = float;
     using float64 = double;
 #endif
+
+    using Size  = std::ptrdiff_t;
+    using USize = std::size_t;
 }
 
 #endif
