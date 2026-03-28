@@ -11,9 +11,8 @@
       "inherits": "base",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_MANIFEST_FEATURES": "binding-dx12;binding-xaudio2;binding-gameinput",
-        "VCPKG_MANIFEST_DEFAULT_FEATURES": "OFF",
-        "GARAGE_BUILD_RUNTIME": "ON"
+        "GARAGE_BUILD_RUNTIME": "ON",
+        "GARAGE_GRAPHICS_GL": "ON"
       }
     },
     {
@@ -21,9 +20,8 @@
       "inherits": "base",
       "hidden": true,
       "cacheVariables": {
-        "VCPKG_MANIFEST_FEATURES": "binding-opengl3;binding-openal",
-        "VCPKG_MANIFEST_DEFAULT_FEATURES": "OFF",
-        "GARAGE_BUILD_RUNTIME": "ON"
+        "GARAGE_BUILD_RUNTIME": "ON",
+        "GARAGE_GRAPHICS_GL": "ON"
       }
     },
     {
@@ -35,6 +33,14 @@
       }
     },
     {
+      "name": "linux-x64-static-base",
+      "inherits": "linux-x64-base",
+      "hidden": true,
+      "cacheVariables": {
+        "GARAGE_BUILD_SHARED": "OFF"
+      }
+    }
+    {
       "name": "windows-x64-shared-base",
       "inherits": "windows-x64-base",
       "hidden": true,
@@ -43,15 +49,24 @@
       }
     },
     {
+      "name": "linux-x64-shared-base",
+      "inherits": "linux-x64-base",
+      "hidden": true,
+      "cacheVariables": {
+        "GARAGE_BUILD_SHARED": "ON"
+      }
+    },
+    {
       "name": "windows-x64-static-debug",
+      "displayName": "x64 Debug Static (Windows)",
       "inherits": "windows-x64-static-base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "GARAGE_GRAPHICS_GL": "ON"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "windows-x64-static-release",
+      "displayName": "x64 Release Static (Windows)",
       "inherits": "windows-x64-static-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
@@ -59,6 +74,7 @@
     },
     {
       "name": "windows-x64-shared-debug",
+      "displayName": "x64 Debug Shared (Windows)",
       "inherits": "windows-x64-shared-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
@@ -66,6 +82,7 @@
     },
     {
       "name": "windows-x64-shared-release",
+      "displayName": "x64 Release Shared (Windows)",
       "inherits": "windows-x64-shared-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
@@ -73,20 +90,34 @@
     },
     {
       "name": "linux-x64-static-debug",
-      "inherits": "linux-x64-base",
+      "displayName": "x64 Debug Static (Linux)",
+      "inherits": "linux-x64-static-base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "GARAGE_GRAPHICS_GL": "ON",
-        "GARAGE_BUILD_SHARED": "OFF"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "linux-x64-static-release",
-      "inherits": "linux-x64-base",
+      "displayName": "x64 Release Static (Linux)",
+      "inherits": "linux-x64-static-base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "GARAGE_GRAPHICS_GL": "ON",
-        "GARAGE_BUILD_SHARED": "OFF"
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-x64-shared-debug",
+      "displayName": "x64 Debug Shared (Linux)",
+      "inherits": "linux-x64-shared-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-x64-shared-release",
+      "displayName": "x64 Release Shared (Linux)",
+      "inherits": "linux-x64-shared-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ]
