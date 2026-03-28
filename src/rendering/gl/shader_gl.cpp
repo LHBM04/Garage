@@ -2,7 +2,7 @@
 
 namespace Garage
 {
-	Shader::Handle ShaderGL::GetProgramID() const
+	Shader::Handle ShaderGL::GetHandle() const
 	{
 		return 0;
 	}

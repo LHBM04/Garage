@@ -22,7 +22,7 @@ namespace Garage
          * @brief
          * @return
          */
-        Shader::Handle GetProgramID() const override;
+        Shader::Handle GetHandle() const override;
 
         /**
          * @brief
