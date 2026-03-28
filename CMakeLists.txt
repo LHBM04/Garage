@@ -29,14 +29,18 @@ endif()
 if (GARAGE_PLATFORM_WINDOWS)
     target_sources(garage
         PRIVATE
+            src/rendering/gl/mesh_gl.cpp
             src/rendering/gl/render_device_gl.cpp
             src/rendering/gl/shader_gl.cpp
+            src/rendering/gl/texture_gl.cpp
+            src/rendering/gl/vertex_buffer_gl.cpp
             src/rendering/renderer.cpp
             src/application.cpp
     )
 else()
     target_sources(garage
         PRIVATE
+            src/rendering/gl/mesh_gl.cpp
             src/rendering/gl/render_device_gl.cpp
             src/rendering/gl/shader_gl.cpp
             src/rendering/gl/texture_gl.cpp
@@ -52,6 +56,7 @@ target_include_directories(garage
         $<INSTALL_INTERFACE:include>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/assimp/include
         ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/include
         ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include
         ${CMAKE_CURRENT_SOURCE_DIR}/external/stb
@@ -60,13 +65,15 @@ target_include_directories(garage
 add_subdirectory(external/glfw)
 target_link_libraries(garage PRIVATE glfw)
 
-target_include_directories(garage PRIVATE external/glad/include)
 target_sources(garage
     PUBLIC
         external/glad/include/glad/glad.h
     PRIVATE
         external/glad/src/glad.c
 )
+
+add_subdirectory(external/assimp)
+target_link_libraries(garage PRIVATE assimp::assimp)
 
 set_target_properties(garage
     PROPERTIES
