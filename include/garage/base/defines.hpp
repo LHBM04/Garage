@@ -1,8 +1,3 @@
-/**
- * @file defines.hpp
- *
- * @brief 
- */
 #ifndef __GARAGE_DEFINES_HPP__
 #define __GARAGE_DEFINES_HPP__
 

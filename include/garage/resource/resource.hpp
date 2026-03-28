@@ -3,9 +3,12 @@
 
 #include <filesystem>
 
+#include "garage/base/defines.hpp"
+#include "garage/base/types.hpp"
+
 namespace Garage
 {
-	class Resource
+	class GARAGE_API Resource
 	{
 	public:
 		using Path = std::filesystem::path;
