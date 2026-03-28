@@ -14,6 +14,11 @@
 
 namespace Garage
 {
+	/**
+	 * @class RenderDevice
+	 * 
+	 * @brief 렌더 디바이스의 기본 동작을 정의합니다.
+	 */
 	class GARAGE_API RenderDevice
 	{
     public:
@@ -25,7 +30,7 @@ namespace Garage
 		struct Specification final
 		{
 		    /**
-		     *
+             * @brief 렌더러가 사용할 창의 핸들.
 		     */
 		    void* window{ nullptr };
 
