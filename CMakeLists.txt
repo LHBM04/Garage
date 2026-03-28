@@ -39,6 +39,7 @@ else()
         PRIVATE
             src/rendering/gl/render_device_gl.cpp
             src/rendering/gl/shader_gl.cpp
+            src/rendering/gl/texture_gl.cpp
             src/rendering/gl/vertex_buffer_gl.cpp
             src/rendering/renderer.cpp
             src/application.cpp
@@ -52,6 +53,8 @@ target_include_directories(garage
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/stb
 )
 
 add_subdirectory(external/glfw)
