@@ -1,6 +1,8 @@
 #ifndef __GARAGE_MESH_HPP__
 #define __GARAGE_MESH_HPP__
 
+#include <vector>
+
 #include "garage/base/defines.hpp"
 #include "garage/base/types.hpp"
 
@@ -47,7 +49,7 @@ namespace Garage
 		/**
 		 * @brief 해당 메시를 바인딩합니다.
 		 */
-		virtual void Bind() const = 0;
+		virtual void Bind() = 0;
 
 		/**
 		 * @brief 해당 메시를 언바인딩합니다.

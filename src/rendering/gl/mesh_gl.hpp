@@ -26,7 +26,7 @@ namespace Garage
 		/**
 		 * @brief 해당 메쉬를 바인딩합니다.
 		 */
-		void Bind() const override;
+		void Bind() override;
 
 		/**
 		 * @brief 해당 메쉬를 언바인딩합니다.

@@ -93,11 +93,11 @@ namespace Garage
 		return true;
     }
 
-	void MeshGL::Bind() const
+	void MeshGL::Bind()
 	{
         glGenVertexArrays(1, (GLuint*)&vertexArray);
-		glGenBuffers(1, (GLuint*)vertexBuffer);
-		glGenBuffers(1, (GLuint*)elementBuffer);
+		glGenBuffers(1, &vertexBuffer);
+		glGenBuffers(1, &elementBuffer);
 
 		glBindVertexArray(vertexArray);
 
@@ -129,7 +129,7 @@ namespace Garage
 		if (vertexArray != 0)
 		{
 			glBindVertexArray(vertexArray);
-            glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);
 		}
 	}
