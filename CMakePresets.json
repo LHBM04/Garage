@@ -9,20 +9,12 @@
     {
       "name": "windows-x64-base",
       "inherits": "base",
-      "hidden": true,
-      "cacheVariables": {
-        "GARAGE_BUILD_RUNTIME": "ON",
-        "GARAGE_GRAPHICS_GL": "ON"
-      }
+      "hidden": true
     },
     {
       "name": "linux-x64-base",
       "inherits": "base",
-      "hidden": true,
-      "cacheVariables": {
-        "GARAGE_BUILD_RUNTIME": "ON",
-        "GARAGE_GRAPHICS_GL": "ON"
-      }
+      "hidden": true
     },
     {
       "name": "windows-x64-static-base",
@@ -39,7 +31,7 @@
       "cacheVariables": {
         "GARAGE_BUILD_SHARED": "OFF"
       }
-    }
+    },
     {
       "name": "windows-x64-shared-base",
       "inherits": "windows-x64-base",

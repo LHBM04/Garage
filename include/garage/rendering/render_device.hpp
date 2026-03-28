@@ -9,9 +9,12 @@
 #include <cstdint>
 #include <memory>
 
+#include "garage/base/defines.hpp"
+#include "garage/base/types.hpp"
+
 namespace Garage
 {
-	class RenderDevice
+	class GARAGE_API RenderDevice
 	{
     public:
 		/**

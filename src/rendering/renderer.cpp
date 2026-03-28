@@ -1,11 +1,13 @@
+#include <memory>
+
 #include "garage/rendering/renderer.hpp"
 #include "garage/rendering/render_device.hpp"
 
-#if defined(GARAGE_RENDERER_GL)
+#if defined(GARAGE_PLATFORM_WINDOWS)
+    #include "rendering/gl/render_device_gl.hpp"
+#elif defined(GARAGE_PLATFORM_LINUX)
     #include "rendering/gl/render_device_gl.hpp"
 #endif
-
-#include <memory>
 
 namespace Garage
 {
@@ -29,8 +31,10 @@ namespace Garage
         spec.width = desc.width;
         spec.height = desc.height;
 
-#if defined(GARAGE_RENDERER_GL)
-        renderDevice = new RenderDeviceGL;
+#if defined(GARAGE_PLATFORM_WINDOWS)
+        device = new RenderDeviceGL;
+#elif defined(GARAGE_PLATFORM_LINUX)
+        device = new RenderDeviceGL;
 #endif
         device->Initialize(spec);
     }

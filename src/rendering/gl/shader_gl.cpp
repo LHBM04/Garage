@@ -31,4 +31,16 @@ namespace Garage
 	{
 		
 	}
+
+    void ShaderGL::SetUniformMatrix4x4(Name name, void* value)
+    {
+	}
+
+    void ShaderGL::Compile(const std::string& vertexSource, const std::string& fragmentSource)
+    {
+	}
+
+    void ShaderGL::Use()
+    {
+	}
 }

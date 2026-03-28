@@ -8,13 +8,12 @@
 
 #if !defined(GARAGE_PLATFORM_WINDOWS) && !defined(GARAGE_PLATFORM_LINUX) && !defined(GARAGE_PLATFORM_MACOS)
     #if defined(_WIN32) || defined(_WIN64)
-        #define GARAGE_PLATFORM_WINDOWS 1
+        #define GARAGE_PLATFORM_WINDOWS
     #elif defined(__linux__)
-        #define GARAGE_PLATFORM_LINUX 1
-    #elif defined(__APPLE__) || defined(__MACH__)
-        #define GARAGE_PLATFORM_MACOS 1
+        #define GARAGE_PLATFORM_LINUX
     #else
         #error "Unknown platform."
+    #endif
 #endif
 
 #if defined(GARAGE_BUILD_SHARED)
@@ -24,9 +23,7 @@
         #define GARAGE_API __attribute__((visibility("default")))
     #endif
 #else
-    #define GARAGE_API
-#endif
-
+    #define GARAGE_API 
 #endif
 
 #endif

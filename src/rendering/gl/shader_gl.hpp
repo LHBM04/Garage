@@ -1,6 +1,9 @@
 #ifndef __GARAGE_SHADERGL_HPP__
 #define __GARAGE_SHADERGL_HPP__
 
+#include "garage/base/defines.hpp"
+#include "garage/base/types.hpp"
+
 #include "garage/rendering/shader.hpp"
 
 namespace Garage
@@ -10,7 +13,7 @@ namespace Garage
 	 * 
 	 * @brief GL 셰이더를 정의합니다.
 	 */
-	class ShaderGL : public Shader
+	class GARAGE_API ShaderGL : public Shader
 	{
     public:
         ~ShaderGL() override = default;
@@ -19,7 +22,7 @@ namespace Garage
          * @brief
          * @return
          */
-        Handle GetProgramID() const override;
+        Shader::Handle GetProgramID() const override;
 
         /**
          * @brief

@@ -4,6 +4,9 @@
 #ifndef __GARAGE_RENDERER_HPP__
 #define __GARAGE_RENDERER_HPP__
 
+#include "garage/base/defines.hpp"
+#include "garage/base/types.hpp"
+
 namespace Garage
 {
 	class RenderDevice;
@@ -32,18 +35,18 @@ namespace Garage
 		 * @brief 
 		 * @return 
 		 */
-		[[nodiscard]] RenderDevice* GetDevice();
+        [[nodiscard]] RenderDevice* GARAGE_API GetDevice();
 
 		/**
 		 * @brief 
 		 * @param desc
 		 */
-		void Initialize(const Descriptor& desc);
+        void GARAGE_API Initialize(const Descriptor& desc);
 
 		/**
 		 * @brief 
 		 */
-		void Release();
+        void GARAGE_API Release();
 	}
 }
 

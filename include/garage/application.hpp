@@ -10,6 +10,9 @@
 #include <string>
 #include <string_view>
 
+#include "garage/base/defines.hpp"
+#include "garage/base/types.hpp"
+
 namespace Garage
 {
     namespace Application
@@ -44,12 +47,12 @@ namespace Garage
          *
          * @return bool 초기화 성공 여부
          */
-        bool Initialize(const Specification& specification) noexcept;
+        bool GARAGE_API Initialize(const Specification& specification) noexcept;
 
         /**
          * @brief 애플리케이션을 실행합니다.
          */
-        void Run() noexcept;
+        void GARAGE_API Run() noexcept;
     }
 }
 

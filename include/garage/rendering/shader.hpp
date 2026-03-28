@@ -22,7 +22,7 @@ namespace Garage
      * 
      * @brief 셰이더의 기본 동작을 정의합니다.
 	 */
-	class GARAGE_API Shader : public Resource
+    class GARAGE_API Shader : public Resource
 	{
     public:
         /**

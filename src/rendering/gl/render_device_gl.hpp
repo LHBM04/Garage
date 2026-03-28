@@ -8,7 +8,7 @@ namespace Garage
 	/**
 	 * @brief 
 	 */
-	class RenderDeviceGL : public RenderDevice
+    class GARAGE_API RenderDeviceGL : public RenderDevice
 	{
 	public:
         ~RenderDeviceGL() override;

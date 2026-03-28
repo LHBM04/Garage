@@ -1,8 +1,8 @@
-#include "rendering/gl/render_device_gl.hpp"
-
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
+
+#include "rendering/gl/render_device_gl.hpp"
 
 namespace Garage
 {
