@@ -6,6 +6,8 @@
 
 namespace Garage
 {
+	class RenderDevice;
+
 	namespace Renderer
 	{
 		struct Descriptor
@@ -25,6 +27,12 @@ namespace Garage
 			 */
             int height;
 		};
+
+		/**
+		 * @brief 
+		 * @return 
+		 */
+		[[nodiscard]] RenderDevice* GetDevice();
 
 		/**
 		 * @brief 
