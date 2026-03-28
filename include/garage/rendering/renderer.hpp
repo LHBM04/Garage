@@ -35,7 +35,7 @@ namespace Garage
 		 * @brief 
 		 * @return 
 		 */
-        [[nodiscard]] RenderDevice* GARAGE_API GetDevice();
+        [[nodiscard]] GARAGE_API RenderDevice* GetDevice();
 
 		/**
 		 * @brief 
