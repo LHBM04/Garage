@@ -3,15 +3,15 @@
  * 
  * @brief 렌더러의 기본 동작을 정의합니다.
  */
-#ifndef __GARAGE_RENDERER_HPP__
-#define __GARAGE_RENDERER_HPP__
+#ifndef __GARAGE_RENDERDEVICE_HPP__
+#define __GARAGE_RENDERDEVICE_HPP__
 
 #include <cstdint>
 #include <memory>
 
 namespace Garage
 {
-	class RendererBase
+	class RenderDevice
 	{
     public:
 		/**
@@ -22,7 +22,7 @@ namespace Garage
 		struct Specification final
 		{
 		    /**
-		     
+		     *
 		     */
 		    void* window{ nullptr };
 
@@ -50,7 +50,7 @@ namespace Garage
 		/**
 		 * @brief 소멸자.
 		 */
-		virtual ~RendererBase();
+		virtual ~RenderDevice() = default;
 
 		/**
 		 * @brief 렌더러를 초기화합니다.

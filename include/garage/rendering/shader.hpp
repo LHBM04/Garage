@@ -10,10 +10,10 @@
 #include <string>
 #include <string_view>
 
-#include "../garage/base/defines.hpp"
-#include "../garage/base/types.hpp"
+#include "../base/defines.hpp"
+#include "../base/types.hpp"
 
-#include "resource_base.hpp"
+#include "../resource/resource.hpp"
 
 namespace Garage
 {
@@ -22,7 +22,7 @@ namespace Garage
      * 
      * @brief 셰이더의 기본 동작을 정의합니다.
 	 */
-	class GARAGE_API ShaderBase : public ResourceBase;
+	class GARAGE_API Shader : public Resource
 	{
     public:
         /**
@@ -56,55 +56,62 @@ namespace Garage
         /**
          * @brief 소멸자.
          */
-        virtual ~ShaderBase() = default;
+        virtual ~Shader() = default;
 
         /**
          * @brief 
+         * 
          * @return 
          */
         virtual Handle GetProgramID() const = 0;
 
         /**
          * @brief 
+         * 
          * @param name 
          * @param value 
          */
-        virtual void SetUniformInt(ShaderName name, int value) = 0;
+        virtual void SetUniformInt(Name name, int value) = 0;
 
         /**
          * @brief 
+         * 
          * @param name 
          * @param value 
          */
-        virtual void SetUniformFloat(ShaderName name, float value) = 0;
+        virtual void SetUniformFloat(Name name, float value) = 0;
 
         /**
          * @brief 
+         * 
          * @param name 
          * @param value 
          */
-        virtual void SetUniformVector2(ShaderName name, void* value) = 0;
+        virtual void SetUniformVector2(Name name, void* value) = 0;
 
         /**
          * @brief 
+         * 
          * @param name 
          * @param value 
          */
-        virtual void SetUniformVector3(ShaderName name, void* value) = 0;
+        virtual void SetUniformVector3(Name name, void* value) = 0;
 
         /**
          * @brief 
+         * 
          * @param name 
          * @param value 
          */
-        virtual void SetUniformVector4(ShaderName name, void* value) = 0;
+        virtual void SetUniformVector4(Name name, void* value) = 0;
 
         /**
          * @brief 
+         * 
          * @param name 
          * @param value 
          */
-        virtual void SetUniformMatrix4x4(ShaderName name, void* value) = 0;
+        virtual void SetUniformMatrix4x4(Name name, void* value) = 0;
         
         /**
          * @brief 

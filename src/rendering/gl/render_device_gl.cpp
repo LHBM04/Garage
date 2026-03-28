@@ -1,4 +1,4 @@
-#include "garage/platform/graphics/gl/renderer_gl.hpp"
+#include "rendering/gl/render_device_gl.hpp"
 
 #include <glad/glad.h>
 
@@ -6,12 +6,12 @@
 
 namespace Garage
 {
-	RendererGL::~RendererGL()
+	RenderDeviceGL::~RenderDeviceGL()
 	{
         Release();
 	}
 
-	bool RendererGL::Initialize(const RendererBase::Specification& specification)
+	bool RenderDeviceGL::Initialize(const RenderDevice::Specification& specification)
 	{
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
@@ -27,18 +27,18 @@ namespace Garage
 		return true;
     }
 
-	void RendererGL::Release()
+	void RenderDeviceGL::Release()
 	{
 		
     }
 
-	void RendererGL::Clear()
+	void RenderDeviceGL::Clear()
 	{
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void RendererGL::Present()
+	void RenderDeviceGL::Present()
 	{
 
 	}

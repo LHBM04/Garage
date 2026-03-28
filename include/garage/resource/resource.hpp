@@ -5,11 +5,15 @@
 
 namespace Garage
 {
-	class ResourceBase
+	class Resource
 	{
-		using Path = std::filesystem::path;
 	public:
-		virtual ~ResourceBase();
+		using Path = std::filesystem::path;
+
+		/**
+		 * @brief 소멸자.
+		 */
+        virtual ~Resource() = default;
 
 		/**
 		 * @brief 해당 리소스를 불러옵니다.

@@ -8,22 +8,21 @@ project(garage
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_library(garage
-    STATIC
-)
-
+add_library(garage STATIC)
 target_sources(garage
     PRIVATE
-        src/platform/graphics/gl/renderer_gl.cpp
-        src/platform/graphics/gl/shader_gl.cpp
-        src/platform/graphics/renderer.cpp
-        src/platform/application.cpp
- )
+        src/rendering/gl/render_device_gl.cpp
+        src/rendering/gl/shader_gl.cpp
+        src/rendering/renderer.cpp
+        src/application.cpp
+)
 target_include_directories(garage
     PUBLIC
-        include/
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
     PRIVATE
-        include/garage
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/include
 )
 
 add_subdirectory(external/glfw)

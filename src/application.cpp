@@ -1,5 +1,5 @@
-#include "application.hpp"
-#include "graphics/renderer.hpp"
+#include "garage/application.hpp"
+#include "garage/rendering/renderer.hpp"
 
 #include <GLFW/glfw3.h>
 

@@ -1,7 +1,7 @@
 #ifndef __GARAGE_SHADERGL_HPP__
 #define __GARAGE_SHADERGL_HPP__
 
-#include "../../../resource/shader_base.hpp"
+#include "garage/rendering/shader.hpp"
 
 namespace Garage
 {
@@ -10,7 +10,7 @@ namespace Garage
 	 * 
 	 * @brief GL 셰이더를 정의합니다.
 	 */
-	class ShaderGL : public ShaderBase
+	class ShaderGL : public Shader
 	{
     public:
         ~ShaderGL() override = default;
@@ -26,42 +26,42 @@ namespace Garage
          * @param name
          * @param value
          */
-        void SetUniformInt(ShaderName name, int value) override;
+        void SetUniformInt(Name name, int value) override;
 
         /**
          * @brief
          * @param name
          * @param value
          */
-        void SetUniformFloat(ShaderName name, float value) override;
+        void SetUniformFloat(Name name, float value) override;
 
         /**
          * @brief
          * @param name
          * @param value
          */
-        void SetUniformVector2(ShaderName name, void* value) override;
+        void SetUniformVector2(Name name, void* value) override;
 
         /**
          * @brief
          * @param name
          * @param value
          */
-        void SetUniformVector3(ShaderName name, void* value) override;
+        void SetUniformVector3(Name name, void* value) override;
 
         /**
          * @brief
          * @param name
          * @param value
          */
-        void SetUniformVector4(ShaderName name, void* value) override;
+        void SetUniformVector4(Name name, void* value) override;
 
         /**
          * @brief
          * @param name
          * @param value
          */
-        void SetUniformMatrix4x4(ShaderName name, void* value) override;
+        void SetUniformMatrix4x4(Name name, void* value) override;
 
         /**
          * @brief

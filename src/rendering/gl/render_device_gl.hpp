@@ -1,17 +1,17 @@
 #ifndef GARAGE_RENDERERGL_HPP
 #define GARAGE_RENDERERGL_HPP
 
-#include "../garage/graphics/renderer_base.hpp"
+#include "garage/rendering/render_device.hpp"
 
 namespace Garage
 {
 	/**
 	 * @brief 
 	 */
-	class RendererGL : public RendererBase
+	class RenderDeviceGL : public RenderDevice
 	{
 	public:
-        ~RendererGL() override;
+        ~RenderDeviceGL() override;
 
         /**
          * @brief GL 렌더러를 초기화합니다. 
