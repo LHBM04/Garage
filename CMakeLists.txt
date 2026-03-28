@@ -39,6 +39,7 @@ else()
         PRIVATE
             src/rendering/gl/render_device_gl.cpp
             src/rendering/gl/shader_gl.cpp
+            src/rendering/gl/vertex_buffer_gl.cpp
             src/rendering/renderer.cpp
             src/application.cpp
     )
