@@ -6,8 +6,13 @@ project(
   DESCRIPTION "Garage - The portable C++ framework for 2D/3D games"
   LANGUAGES CXX)
 
-add_library(garage
-  src/garage.cpp)
+if (BUILD_SHARED_LIBS)
+  add_library(garage SHARED
+    src/garage.cpp)
+else()
+  add_library(garage STATIC
+    src/garage.cpp)
+endif()
 
 target_include_directories(garage
   PUBLIC
