@@ -18,3 +18,9 @@ target_include_directories(garage
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/garage/
 )
+
+find_package(SDL3 CONFIG REQUIRED)
+target_link_libraries(garage
+  PRIVATE
+    SDL3::SDL3
+)
