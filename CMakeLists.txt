@@ -6,11 +6,6 @@ project(
   DESCRIPTION "Garage - The portable C++ framework for 2D/3D games"
   LANGUAGES CXX)
 
-set(GARAGE_RUNTIME_INCLUDE
-  include/garage/window.hpp
-  include/garage/window_options.hpp
-)
-
 set(GARAGE_RUNTIME_SOURCES
   src/window.cpp
 )

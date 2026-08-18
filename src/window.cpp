@@ -1,5 +1,5 @@
-﻿#include "garage/window.hpp"
-#include "garage/window_options.hpp"
+﻿#include "garage/platform/window.hpp"
+#include "garage/platform/window_options.hpp"
 
 #include <SDL3/SDL.h>
 
