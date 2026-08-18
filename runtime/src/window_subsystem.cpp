@@ -1,9 +1,7 @@
-#include "garage/platform/window_subsystem.h"
+﻿#include "platform/window_subsystem.h"
 
 #include <vector>
 #include <SDL3/SDL_events.h>
-
-#include "window_impl.hpp"
 
 namespace Garage
 {
@@ -22,7 +20,16 @@ namespace Garage
                 windows.push_back(window_);
             }
             
-            void PollEvents()
+            void RemoveWindow(Window* window_) override
+            {
+                auto result = std::ranges::find(windows, window_);
+                if (result != windows.end())
+                {
+                    windows.erase(result);
+                }
+            }
+            
+            void PollEvents() override
             {
                 SDL_Event event;
                 while (SDL_PollEvent(&event))
@@ -31,15 +38,11 @@ namespace Garage
                     {
                         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                         {
-                            auto result = std::ranges::find_if(windows, [&event](Window* window) {
-                                return SDL_GetWindowID(dynamic_cast<Window_Impl*>(window)->GetNativeHandle()) == event.window.windowID;
-                            });
-                            if (result == windows.end())
-                            {
-                                continue;
-                            }
-                            
-                            Window* window = *result;
+                            // auto result = std::ranges::find(windows, window_);
+                            // if (result != windows.end())
+                            // {
+                            //     windows.erase(result);
+                            // }
                             
                             break;
                         }
