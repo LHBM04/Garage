@@ -1,6 +1,3 @@
 #pragma once
 
-namespace Garage
-{
-    void DoSomething();
-}
+#include "garage_platform.hpp"

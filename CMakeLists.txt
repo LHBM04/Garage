@@ -8,10 +8,10 @@ project(
 
 if (BUILD_SHARED_LIBS)
   add_library(garage SHARED
-    src/garage.cpp)
+    src/garage_platform.cpp)
 else()
   add_library(garage STATIC
-    src/garage.cpp)
+    src/garage_platform.cpp)
 endif()
 
 target_include_directories(garage
