@@ -8,6 +8,7 @@ project(
 
 set(GARAGE_RUNTIME_SOURCES
   src/window.cpp
+  src/window_subsystem.cpp
 )
 
 add_library(garage ${GARAGE_RUNTIME_SOURCES})
