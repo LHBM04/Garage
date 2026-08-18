@@ -6,17 +6,24 @@ project(
   DESCRIPTION "Garage - The portable C++ framework for 2D/3D games"
   LANGUAGES CXX)
 
-if (BUILD_SHARED_LIBS)
-  add_library(garage SHARED
-    src/garage_platform.cpp)
-else()
-  add_library(garage STATIC
-    src/garage_platform.cpp)
+set(GARAGE_RUNTIME_INCLUDE
+  include/garage/window.hpp
+  include/garage/window_options.hpp
+)
+
+set(GARAGE_RUNTIME_SOURCES
+  src/window.cpp
+)
+
+add_library(garage ${GARAGE_RUNTIME_SOURCES})
+
+if(MSVC)
+  add_compile_options(/utf-8)
 endif()
 
 target_include_directories(garage
-  PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/garage/
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 find_package(SDL3 CONFIG REQUIRED)

@@ -1,4 +1,5 @@
-#include "garage_platform.hpp"
+﻿#include "garage/window.hpp"
+#include "garage/window_options.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -10,7 +11,7 @@ namespace Garage
         {
         public:
             explicit Window_Impl(SDL_Window* handle) noexcept
-                : handle(std::move(handle))
+                : handle(handle)
             {
             }
 
@@ -28,9 +29,9 @@ namespace Garage
                 return SDL_GetWindowTitle(handle);
             }
 
-            Window& SetTitle(const std::string& title) noexcept override
+            Window& SetTitle(std::string_view title) noexcept override
             {
-                SDL_SetWindowTitle(handle, title.c_str());
+                SDL_SetWindowTitle(handle, title.data());
                 return *this;
             }
 
@@ -112,8 +113,11 @@ namespace Garage
 		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED + options.positionY);
 		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, options.sizeX);
 		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, options.sizeY);
-
-		// SDL_SetBooleanProperty(props, SDL_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true);
+	    
+	    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, options.flags & Fullscreen);
+	    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, options.flags & Borderless);
+	    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, options.flags & Resizable);
+		SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true);
 
 		SDL_Window* window = SDL_CreateWindowWithProperties(props);
 		if (!window)
