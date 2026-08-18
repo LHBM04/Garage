@@ -29,7 +29,7 @@ namespace Garage
          * @return TSubsystem* 해당 타입의 서브시스템 인스턴스
          */
         template <FromSubsystem TSubsystem>
-        TSubsystem* GetSubsystem() const;
+        TSubsystem* GetSubsystem();
         
         /**
          * @brief 해당 엔진으로부터 지정한 타입의 서브시스템 인스턴스를 가져옵니다.
@@ -58,7 +58,7 @@ namespace Garage
     }
     
     template <FromSubsystem TSubsystem>
-    TSubsystem* Engine::GetSubsystem() const
+    TSubsystem* Engine::GetSubsystem()
     {
         return dynamic_cast<TSubsystem*>(subsystemsByType.at(std::type_index(typeid(TSubsystem))));
     }
