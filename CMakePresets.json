@@ -10,13 +10,15 @@
       "name": "base",
       "hidden": true,
       "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD_REQUIRED":  "ON",
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}\\scripts\\buildsystems\\vcpkg.cmake"
       }
     },
     {
       "name": "x64-debug-static",
       "inherits": "base",
-      "binaryDir": "${sourceDir}\\build\\debug-x64-static",
+      "binaryDir": "${sourceDir}\\out\\debug-x64-static",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "OFF",
         "CMAKE_BUILD_TYPE": "Debug"
@@ -25,7 +27,7 @@
     {
       "name": "x64-release-static",
       "inherits": "base",
-      "binaryDir": "${sourceDir}\\build\\release-x64-static",
+      "binaryDir": "${sourceDir}\\out\\release-x64-static",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "OFF",
         "CMAKE_BUILD_TYPE": "Release"
@@ -34,7 +36,7 @@
     {
       "name": "x64-debug-shared",
       "inherits": "base",
-      "binaryDir": "${sourceDir}\\build\\debug-x64-shared",
+      "binaryDir": "${sourceDir}\\out\\debug-x64-shared",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "ON",
         "CMAKE_BUILD_TYPE": "Debug"
@@ -43,7 +45,7 @@
     {
       "name": "x64-release-shared",
       "inherits": "base",
-      "binaryDir": "${sourceDir}\\build\\release-x64-shared",
+      "binaryDir": "${sourceDir}\\out\\release-x64-shared",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "ON",
         "CMAKE_BUILD_TYPE": "Release"
