@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "../subsystem.h"
+#include "../subsystem.hpp"
 
 namespace Garage
 {
