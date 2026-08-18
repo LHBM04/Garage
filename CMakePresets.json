@@ -7,17 +7,19 @@
   },
   "configurePresets": [
     {
-      "name": "base",
+      "name": "runtime-base",
       "hidden": true,
       "cacheVariables": {
         "CMAKE_CXX_STANDARD": "20",
         "CMAKE_CXX_STANDARD_REQUIRED":  "ON",
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}\\scripts\\buildsystems\\vcpkg.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}\\scripts\\buildsystems\\vcpkg.cmake",
+        "GARAGE_BUILD_RUNTIME": "ON",
+        "GARAGE_BUILD_EXAMPLE": "ON"
       }
     },
     {
       "name": "x64-debug-static",
-      "inherits": "base",
+      "inherits": "runtime-base",
       "binaryDir": "${sourceDir}\\out\\debug-x64-static",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "OFF",
@@ -26,7 +28,7 @@
     },
     {
       "name": "x64-release-static",
-      "inherits": "base",
+      "inherits": "runtime-base",
       "binaryDir": "${sourceDir}\\out\\release-x64-static",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "OFF",
@@ -35,7 +37,7 @@
     },
     {
       "name": "x64-debug-shared",
-      "inherits": "base",
+      "inherits": "runtime-base",
       "binaryDir": "${sourceDir}\\out\\debug-x64-shared",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "ON",
@@ -44,7 +46,7 @@
     },
     {
       "name": "x64-release-shared",
-      "inherits": "base",
+      "inherits": "runtime-base",
       "binaryDir": "${sourceDir}\\out\\release-x64-shared",
       "cacheVariables": {
         "BUILD_SHARED_LIBS": "ON",

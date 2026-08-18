@@ -11,8 +11,11 @@ if(MSVC)
 endif()
 
 target_include_directories(runtime
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
   PRIVATE
-    include/garage
+    ${CMAKE_CURRENT_SOURCE_DIR}/include  
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 find_package(SDL3 CONFIG REQUIRED)

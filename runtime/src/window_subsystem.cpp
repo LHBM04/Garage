@@ -1,4 +1,4 @@
-﻿#include "platform/window_subsystem.h"
+﻿#include "garage/platform/window_subsystem.h"
 
 #include <vector>
 #include <SDL3/SDL_events.h>

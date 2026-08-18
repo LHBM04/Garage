@@ -1,8 +1,8 @@
-﻿#include "platform/window.hpp"
+﻿#include "garage/platform/window.hpp"
 
 #include <SDL3/SDL.h>
 
-#include "platform/window_options.hpp"
+#include "garage/platform/window_options.hpp"
 
 namespace Garage
 {

@@ -6,4 +6,12 @@ project(
   DESCRIPTION "Garage - The portable C++ framework for 2D/3D games"
   LANGUAGES CXX)
 
-add_subdirectory(runtime)
+# 런타임 빌드
+if (GARAGE_BUILD_RUNTIME)
+  add_subdirectory(runtime)
+endif()
+
+# 예제 빌드
+if (GARAGE_BUILD_EXAMPLE)
+  add_subdirectory(example)
+endif()
