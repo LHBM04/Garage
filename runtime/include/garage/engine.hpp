@@ -34,7 +34,7 @@ namespace Garage
         /**
          * @brief 해당 엔진으로부터 지정한 타입의 서브시스템 인스턴스를 가져옵니다.
          * @tparam TSubsystem 지정할 서브시스템 타입
-         * @return TSubsystem* 해당 타입의 서브시스템 인스턴스
+         * @return const TSubsystem* 해당 타입의 서브시스템 인스턴스
          */
         template <FromSubsystem TSubsystem>
         const TSubsystem* GetSubsystem() const;

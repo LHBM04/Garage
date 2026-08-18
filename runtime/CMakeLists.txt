@@ -1,6 +1,7 @@
 set(GARAGE_RUNTIME_SOURCES
+  src/entry.cpp
   src/window.cpp
-  src/window_subsystem.cpp
+  src/window_subsystem_impl.cpp
 )
 
 add_library(runtime ${GARAGE_RUNTIME_SOURCES})
@@ -20,6 +21,6 @@ target_include_directories(runtime
 
 find_package(SDL3 CONFIG REQUIRED)
 target_link_libraries(runtime
-  PRIVATE
+  PUBLIC
     SDL3::SDL3
 )
