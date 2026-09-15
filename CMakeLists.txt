@@ -8,3 +8,5 @@ add_library(garage
 target_include_directories(garage 
     PUBLIC 
         include)
+
+include (cmake/dependencies.cmake)
