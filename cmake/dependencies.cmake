@@ -7,3 +7,5 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(sdl3)
+
+target_link_libraries(garage PRIVATE SDL3::SDL3)
