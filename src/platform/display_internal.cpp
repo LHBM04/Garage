@@ -16,13 +16,13 @@ namespace Garage
         }
     }
 
-    DisplayInternal::DisplayInternal(DisplayInternal&& other)
+    DisplayInternal::DisplayInternal(DisplayInternal&& other) noexcept
         : window(other.window)
     {
-
+        other.window = nullptr;
     }
 
-    DisplayInternal& DisplayInternal::operator=(DisplayInternal&& other)
+    DisplayInternal& DisplayInternal::operator=(DisplayInternal&& other) noexcept
     {
         this->window = other.window;
         other.window = nullptr;
