@@ -76,6 +76,7 @@
 | `feature/기능명` | 기능을 개발한다. | `develop` | `develop` |
 | `fix/문제명` | 일반적인 결함을 수정한다. | `develop` | `develop` |
 | `docs/문서명` | 문서만 변경한다. | `develop` | `develop` |
+| `chore/작업명` | 빌드 및 개발 환경 등 프로젝트 설정을 변경한다. | `develop` | `develop` |
 | `release/버전` | 배포를 준비한다. | `develop` | `main`과 `develop` |
 | `hotfix/문제명` | 배포된 버전의 긴급 결함을 수정한다. | `main` | `main`과 `develop` |
 
