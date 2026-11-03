@@ -45,6 +45,7 @@
 | 클래스, 구조체, 열거형 | PascalCase |
 | 멤버 변수, 지역 변수, 매개변수 | camelCase |
 | 매크로 및 모든 상수 | SCREAMING_SNAKE_CASE |
+| 파일 및 폴더 | 소문자 snake_case |
 
 ### 코드 스타일
 
