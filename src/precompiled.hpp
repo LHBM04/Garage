@@ -6,6 +6,7 @@
 #include <bitset>
 #include <chrono>
 #include <cmath>
+#include <compare>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
