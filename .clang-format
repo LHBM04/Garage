@@ -9,6 +9,8 @@ AlignTrailingComments: true
 AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
+AllowShortLambdasOnASingleLine: None
+AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: false
