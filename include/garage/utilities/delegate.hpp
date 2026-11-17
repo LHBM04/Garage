@@ -60,27 +60,27 @@ namespace Garage
     template <class... TArgs>
     typename Delegate<TArgs...>::ListenerId Delegate<TArgs...>::AddListener(Listener callback)
     {
-        const ListenerId id = nextListenerId++;
-        subscriptions.push_back(std::make_shared<Subscription>(Subscription{id, std::move(callback), true}));
-        return id;
+        const ListenerId ID = nextListenerId++;
+        subscriptions.push_back(std::make_shared<Subscription>(Subscription{ID, std::move(callback), true}));
+        return ID;
     }
 
     template <class... TArgs>
     void Delegate<TArgs...>::RemoveListener(ListenerId id) noexcept
     {
-        const auto subscription = std::ranges::find(subscriptions, id, &Subscription::id);
-        if (subscription != subscriptions.end())
+        const auto SUBSCRIPTION = std::ranges::find(subscriptions, id, &Subscription::id);
+        if (SUBSCRIPTION != subscriptions.end())
         {
-            (*subscription)->isConnected = false;
-            subscriptions.erase(subscription);
+            (*SUBSCRIPTION)->isConnected = false;
+            subscriptions.erase(SUBSCRIPTION);
         }
     }
 
     template <class... TArgs>
     void Delegate<TArgs...>::Broadcast(TArgs... args) const
     {
-        const SubscriptionList snapshot = subscriptions;
-        for (const SubscriptionPtr& subscription : snapshot)
+        const SubscriptionList SNAPSHOT = subscriptions;
+        for (const SubscriptionPtr& subscription : SNAPSHOT)
         {
             if (subscription->isConnected && subscription->callback)
             {

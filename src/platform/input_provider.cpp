@@ -1,23 +1,29 @@
 ﻿#include "garage/platform/input_provider.hpp"
 
+#include "garage/core/types.hpp"
+
+#include "garage/math/vector2d.hpp"
+
+#include "garage/platform/input_states.hpp"
+
 namespace Garage
 {
     bool InputProvider::IsKeyPressed(EKeyCode key) const noexcept
     {
-        const USize index = static_cast<USize>(key);
-        return index < currentKeys.size() && currentKeys[index] && !previousKeys[index];
+        const USize INDEX = static_cast<USize>(key);
+        return INDEX < currentKeys.size() && currentKeys[INDEX] && !previousKeys[INDEX];
     }
 
     bool InputProvider::IsKeyHeld(EKeyCode key) const noexcept
     {
-        const USize index = static_cast<USize>(key);
-        return index < currentKeys.size() && currentKeys[index];
+        const USize INDEX = static_cast<USize>(key);
+        return INDEX < currentKeys.size() && currentKeys[INDEX];
     }
 
     bool InputProvider::IsKeyReleased(EKeyCode key) const noexcept
     {
-        const USize index = static_cast<USize>(key);
-        return index < currentKeys.size() && !currentKeys[index] && previousKeys[index];
+        const USize INDEX = static_cast<USize>(key);
+        return INDEX < currentKeys.size() && !currentKeys[INDEX] && previousKeys[INDEX];
     }
 
     bool InputProvider::HasMouseButtonState() const noexcept
@@ -27,20 +33,20 @@ namespace Garage
 
     bool InputProvider::IsMouseButtonPressed(EButtonCode button) const noexcept
     {
-        const UInt32 mask = static_cast<UInt32>(button);
-        return (currentButtons & mask) != 0 && (previousButtons & mask) == 0;
+        const UInt32 MASK = static_cast<UInt32>(button);
+        return (currentButtons & MASK) != 0 && (previousButtons & MASK) == 0;
     }
 
     bool InputProvider::IsMouseButtonHeld(EButtonCode button) const noexcept
     {
-        const UInt32 mask = static_cast<UInt32>(button);
-        return (currentButtons & mask) != 0;
+        const UInt32 MASK = static_cast<UInt32>(button);
+        return (currentButtons & MASK) != 0;
     }
 
     bool InputProvider::IsMouseButtonReleased(EButtonCode button) const noexcept
     {
-        const UInt32 mask = static_cast<UInt32>(button);
-        return (currentButtons & mask) == 0 && (previousButtons & mask) != 0;
+        const UInt32 MASK = static_cast<UInt32>(button);
+        return (currentButtons & MASK) == 0 && (previousButtons & MASK) != 0;
     }
 
     bool InputProvider::HasMousePosition() const noexcept
@@ -102,24 +108,24 @@ namespace Garage
 
     void InputProvider::SetKey(EKeyCode key, bool isDown) noexcept
     {
-        const USize index = static_cast<USize>(key);
-        if (index < currentKeys.size())
+        const USize INDEX = static_cast<USize>(key);
+        if (INDEX < currentKeys.size())
         {
-            currentKeys.set(index, isDown);
+            currentKeys.set(INDEX, isDown);
         }
     }
 
     void InputProvider::SetMouseButton(EButtonCode button, bool isDown) noexcept
     {
         hasMouseButtonState = true;
-        const UInt32 mask   = static_cast<UInt32>(button);
+        const UInt32 MASK   = static_cast<UInt32>(button);
         if (isDown)
         {
-            currentButtons |= mask;
+            currentButtons |= MASK;
         }
         else
         {
-            currentButtons &= ~mask;
+            currentButtons &= ~MASK;
         }
     }
 

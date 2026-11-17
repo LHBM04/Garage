@@ -135,14 +135,14 @@ namespace Garage
 
         [[nodiscard]] constexpr Float32 SmoothStep(Float32 edge0, Float32 edge1, Float32 x) noexcept
         {
-            const Float32 t = Clamp01((x - edge0) / (edge1 - edge0));
-            return t * t * (3.0f - 2.0f * t);
+            const Float32 T = Clamp01((x - edge0) / (edge1 - edge0));
+            return T * T * (3.0f - 2.0f * T);
         }
 
         [[nodiscard]] constexpr Float32 SmootherStep(Float32 edge0, Float32 edge1, Float32 x) noexcept
         {
-            const Float32 t = Clamp01((x - edge0) / (edge1 - edge0));
-            return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
+            const Float32 T = Clamp01((x - edge0) / (edge1 - edge0));
+            return T * T * T * (T * (T * 6.0f - 15.0f) + 10.0f);
         }
 
         [[nodiscard]] inline Float32 MoveTowards(Float32 current, Float32 target, Float32 maxDelta) noexcept
@@ -162,24 +162,24 @@ namespace Garage
                                                 Float32  deltaTime) noexcept
         {
             smoothTime          = std::max(0.0001f, smoothTime);
-            const Float32 omega = 2.0f / smoothTime;
-            const Float32 x     = omega * deltaTime;
-            const Float32 exp   = 1.0f / (1.0f + x + 0.48f * x * x + 0.235f * x * x * x);
+            const Float32 OMEGA = 2.0f / smoothTime;
+            const Float32 X     = OMEGA * deltaTime;
+            const Float32 EXP   = 1.0f / (1.0f + X + 0.48f * X * X + 0.235f * X * X * X);
 
-            Float32       change     = current - target;
-            const Float32 originalTo = target;
-            const Float32 maxChange  = maxSpeed * smoothTime;
-            change                   = Clamp(change, -maxChange, maxChange);
-            target                   = current - change;
+            Float32       change      = current - target;
+            const Float32 ORIGINAL_TO = target;
+            const Float32 MAX_CHANGE  = maxSpeed * smoothTime;
+            change                    = Clamp(change, -MAX_CHANGE, MAX_CHANGE);
+            target                    = current - change;
 
-            const Float32 temp = (currentVelocity + omega * change) * deltaTime;
-            currentVelocity    = (currentVelocity - omega * temp) * exp;
-            Float32 output     = target + (change + temp) * exp;
+            const Float32 TEMP = (currentVelocity + OMEGA * change) * deltaTime;
+            currentVelocity    = (currentVelocity - OMEGA * TEMP) * EXP;
+            Float32 output     = target + (change + TEMP) * EXP;
 
-            if ((originalTo - current > 0.0f) == (output > originalTo))
+            if ((ORIGINAL_TO - current > 0.0f) == (output > ORIGINAL_TO))
             {
-                output          = originalTo;
-                currentVelocity = (deltaTime > EPSILON) ? ((output - originalTo) / deltaTime) : 0.0f;
+                output          = ORIGINAL_TO;
+                currentVelocity = (deltaTime > EPSILON) ? ((output - ORIGINAL_TO) / deltaTime) : 0.0f;
             }
 
             return output;
@@ -229,32 +229,32 @@ namespace Garage
         [[nodiscard]] inline Float32
                 MoveTowardsAngle(Float32 currentDegrees, Float32 targetDegrees, Float32 maxDeltaDegrees) noexcept
         {
-            const Float32 deltaAngle = DeltaAngle(currentDegrees, targetDegrees);
-            if (-maxDeltaDegrees < deltaAngle && deltaAngle < maxDeltaDegrees)
+            const Float32 DELTA_ANGLE = DeltaAngle(currentDegrees, targetDegrees);
+            if (-maxDeltaDegrees < DELTA_ANGLE && DELTA_ANGLE < maxDeltaDegrees)
             {
                 return targetDegrees;
             }
-            return MoveTowards(currentDegrees, currentDegrees + deltaAngle, maxDeltaDegrees);
+            return MoveTowards(currentDegrees, currentDegrees + DELTA_ANGLE, maxDeltaDegrees);
         }
 
         [[nodiscard]] inline Float32 PositiveArc(Float32 aRadians, Float32 bRadians) noexcept
         {
-            const Float32 diff = PositiveAngle(bRadians) - PositiveAngle(aRadians);
-            if (diff < 0.0f)
+            const Float32 DIFF = PositiveAngle(bRadians) - PositiveAngle(aRadians);
+            if (DIFF < 0.0f)
             {
-                return diff + DOUBLE_PI;
+                return DIFF + DOUBLE_PI;
             }
-            return diff;
+            return DIFF;
         }
 
         [[nodiscard]] inline Float32 PositiveArcDegrees(Float32 aDegrees, Float32 bDegrees) noexcept
         {
-            const Float32 diff = PositiveAngleDegrees(bDegrees) - PositiveAngleDegrees(aDegrees);
-            if (diff < 0.0f)
+            const Float32 DIFF = PositiveAngleDegrees(bDegrees) - PositiveAngleDegrees(aDegrees);
+            if (DIFF < 0.0f)
             {
-                return diff + 360.0f;
+                return DIFF + 360.0f;
             }
-            return diff;
+            return DIFF;
         }
 
         [[nodiscard]] inline bool IsAngleInRange(Float32 angleRadians, Float32 aRadians, Float32 bRadians) noexcept

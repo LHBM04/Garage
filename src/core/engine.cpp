@@ -14,27 +14,27 @@ namespace Garage
 
         app = target;
 
-        if (const ESystemStatus status = Startup(); status != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = Startup(); STATUS != ESystemStatus::CONTINUE)
         {
             Shutdown();
-            return static_cast<Int32>(status);
+            return static_cast<Int32>(STATUS);
         }
 
-        if (const ESystemStatus status = app->Startup(); status != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = app->Startup(); STATUS != ESystemStatus::CONTINUE)
         {
             app->Shutdown();
             Shutdown();
-            return static_cast<Int32>(status);
+            return static_cast<Int32>(STATUS);
         }
 
         while (true)
         {
-            if (const ESystemStatus status = Routine(); status != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = Routine(); STATUS != ESystemStatus::CONTINUE)
             {
                 app->Shutdown();
                 Shutdown();
 
-                return static_cast<Int32>(status);
+                return static_cast<Int32>(STATUS);
             }
         }
     }
@@ -47,24 +47,24 @@ namespace Garage
 
     ESystemStatus Engine::Routine()
     {
-        if (const ESystemStatus status = PreTick(); status != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = PreTick(); STATUS != ESystemStatus::CONTINUE)
         {
-            return status;
+            return STATUS;
         }
 
-        if (const ESystemStatus status = Tick(); status != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = Tick(); STATUS != ESystemStatus::CONTINUE)
         {
-            return status;
+            return STATUS;
         }
 
-        if (const ESystemStatus status = app->Routine(); status != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = app->Routine(); STATUS != ESystemStatus::CONTINUE)
         {
-            return status;
+            return STATUS;
         }
 
-        if (const ESystemStatus status = PostTick(); status != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = PostTick(); STATUS != ESystemStatus::CONTINUE)
         {
-            return status;
+            return STATUS;
         }
 
         return ESystemStatus::CONTINUE;
@@ -80,9 +80,9 @@ namespace Garage
     {
         for (EngineSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus status = subsystem->OnPreTick(); status != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnPreTick(); STATUS != ESystemStatus::CONTINUE)
             {
-                return status;
+                return STATUS;
             }
         }
 
@@ -93,9 +93,9 @@ namespace Garage
     {
         for (EngineSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus status = subsystem->OnTick(); status != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnTick(); STATUS != ESystemStatus::CONTINUE)
             {
-                return status;
+                return STATUS;
             }
         }
 
@@ -106,9 +106,9 @@ namespace Garage
     {
         for (EngineSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus status = subsystem->OnPostTick(); status != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnPostTick(); STATUS != ESystemStatus::CONTINUE)
             {
-                return status;
+                return STATUS;
             }
         }
 

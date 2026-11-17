@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 
 project(Garage VERSION 0.1.0 LANGUAGES CXX)
 
+include(cmake/clangd.cmake)
+
 set(GARAGE_DEBUG FALSE)
 set(GARAGE_RELEASE FALSE)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -47,6 +49,7 @@ file(GLOB_RECURSE GARAGE_HEADERS CONFIGURE_DEPENDS
 if(GARAGE_SOURCES)
     add_library(Garage ${GARAGE_SOURCES} ${GARAGE_HEADERS})
     add_library(Garage::Garage ALIAS Garage)
+    add_dependencies(Garage garage-clangd)
 
     target_include_directories(Garage
         PUBLIC

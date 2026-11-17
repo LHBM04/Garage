@@ -8,17 +8,19 @@
 #include <SDL3/SDL_init.h>
 
 #include "garage/core/engine.hpp"
+#include "garage/core/system_status.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/math/vector2d.hpp"
 
 #include "garage/platform/display.hpp"
 #include "garage/platform/display_events.hpp"
 #include "garage/platform/display_subsystem.hpp"
+#include "garage/platform/event.hpp"
 #include "garage/platform/input_events.hpp"
+#include "platform/display_impl.hpp"
 
 #include "garage/utilities/logger.hpp"
-
-#include "platform/display_impl.hpp"
 
 namespace Garage
 {
@@ -38,7 +40,7 @@ namespace Garage
         Engine*           engine           = Engine::GetInstance();
         DisplaySubsystem* displaySubsystem = (engine != nullptr) ? engine->GetSubsystem<DisplaySubsystem>() : nullptr;
 
-        auto findDisplay = [displaySubsystem](UInt32 windowId) noexcept -> IDisplay*
+        auto const FIND_DISPLAY = [displaySubsystem](UInt32 windowId) noexcept -> IDisplay*
         {
             if (displaySubsystem == nullptr || windowId == 0)
             {
@@ -68,50 +70,52 @@ namespace Garage
                 }
                 case SDL_EVENT_DID_ENTER_FOREGROUND:
                 {
-                    PushEvent(InputActivationEvent{nullptr, true});
+                    PushEvent(InputActivationEvent{.display = nullptr, .isActive = true});
                     break;
                 }
                 case SDL_EVENT_WILL_ENTER_BACKGROUND:
                 {
-                    PushEvent(InputActivationEvent{nullptr, false});
+                    PushEvent(InputActivationEvent{.display = nullptr, .isActive = false});
                     break;
                 }
                 case SDL_EVENT_WINDOW_MOVED:
                 {
-                    if (IDisplay* display = findDisplay(sdlEvent.window.windowID); display != nullptr)
+                    if (IDisplay const* display = FIND_DISPLAY(sdlEvent.window.windowID); display != nullptr)
                     {
-                        PushEvent(DisplayMoveEvent{display, Vector2DInt{sdlEvent.window.data1, sdlEvent.window.data2}});
+                        PushEvent(DisplayMoveEvent{.display = display,
+                                                   .position =
+                                                           Vector2DInt{sdlEvent.window.data1, sdlEvent.window.data2}});
                     }
                     break;
                 }
                 case SDL_EVENT_WINDOW_RESIZED:
                 {
-                    if (IDisplay* display = findDisplay(sdlEvent.window.windowID); display != nullptr)
+                    if (IDisplay const* display = FIND_DISPLAY(sdlEvent.window.windowID); display != nullptr)
                     {
-                        PushEvent(
-                                DisplayResizeEvent{display, Vector2DInt{sdlEvent.window.data1, sdlEvent.window.data2}});
+                        PushEvent(DisplayResizeEvent{
+                                .display = display, .size = Vector2DInt{sdlEvent.window.data1, sdlEvent.window.data2}});
                     }
                     break;
                 }
                 case SDL_EVENT_WINDOW_FOCUS_GAINED:
                 {
-                    if (IDisplay* display = findDisplay(sdlEvent.window.windowID); display != nullptr)
+                    if (IDisplay const* display = FIND_DISPLAY(sdlEvent.window.windowID); display != nullptr)
                     {
-                        PushEvent(DisplayFocusEvent{display, true});
+                        PushEvent(DisplayFocusEvent{.display = display, .isFocused = true});
                     }
                     break;
                 }
                 case SDL_EVENT_WINDOW_FOCUS_LOST:
                 {
-                    if (IDisplay* display = findDisplay(sdlEvent.window.windowID); display != nullptr)
+                    if (IDisplay const* display = FIND_DISPLAY(sdlEvent.window.windowID); display != nullptr)
                     {
-                        PushEvent(DisplayFocusEvent{display, false});
+                        PushEvent(DisplayFocusEvent{.display = display, .isFocused = false});
                     }
                     break;
                 }
                 case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                 {
-                    if (IDisplay* display = findDisplay(sdlEvent.window.windowID); display != nullptr)
+                    if (IDisplay* display = FIND_DISPLAY(sdlEvent.window.windowID); display != nullptr)
                     {
                         display->SetShouldClose(true);
                         PushEvent(DisplayCloseEvent{display});
@@ -120,9 +124,10 @@ namespace Garage
                 }
                 case SDL_EVENT_MOUSE_WHEEL:
                 {
-                    IDisplay* display = findDisplay(sdlEvent.wheel.windowID);
+                    IDisplay const* display = FIND_DISPLAY(sdlEvent.wheel.windowID);
                     PushEvent(
-                            MouseWheelEvent{display, Vector2DInt{sdlEvent.wheel.integer_x, sdlEvent.wheel.integer_y}});
+                            MouseWheelEvent{.display = display,
+                                            .delta = Vector2DInt{sdlEvent.wheel.integer_x, sdlEvent.wheel.integer_y}});
                     break;
                 }
                 default:

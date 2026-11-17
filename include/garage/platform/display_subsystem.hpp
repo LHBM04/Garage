@@ -37,11 +37,11 @@ namespace Garage
         [[nodiscard]] IDisplay*       GetDisplay(USize index) noexcept;
         [[nodiscard]] const IDisplay* GetDisplay(USize index) const noexcept;
 
-        [[nodiscard]] IDisplay*       FindDisplayByID(IDisplay::ID id) noexcept;
-        [[nodiscard]] const IDisplay* FindDisplayByID(IDisplay::ID id) const noexcept;
+        [[nodiscard]] IDisplay*       FindDisplayByID(IDisplay::EId id) noexcept;
+        [[nodiscard]] const IDisplay* FindDisplayByID(IDisplay::EId id) const noexcept;
 
         [[nodiscard]] bool IsDisplayValid(const IDisplay* display) const noexcept;
-        [[nodiscard]] bool IsDisplayValid(IDisplay::ID id) const noexcept;
+        [[nodiscard]] bool IsDisplayValid(IDisplay::EId id) const noexcept;
 
     private:
         std::vector<std::unique_ptr<IDisplay>> displays = {};

@@ -16,9 +16,9 @@ namespace Garage
 
     ESystemStatus App::Routine()
     {
-        if (const ESystemStatus status = EarlyUpdate(); status != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = EarlyUpdate(); STATUS != ESystemStatus::CONTINUE)
         {
-            return status;
+            return STATUS;
         }
 
         Engine*        engine        = Engine::GetInstance();
@@ -27,28 +27,28 @@ namespace Garage
         {
             while (timeSubsystem->ShouldFixedStep())
             {
-                if (const ESystemStatus status = FixedUpdate(); status != ESystemStatus::CONTINUE)
+                if (const ESystemStatus STATUS = FixedUpdate(); STATUS != ESystemStatus::CONTINUE)
                 {
-                    return status;
+                    return STATUS;
                 }
             }
         }
         else
         {
-            if (const ESystemStatus status = FixedUpdate(); status != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = FixedUpdate(); STATUS != ESystemStatus::CONTINUE)
             {
-                return status;
+                return STATUS;
             }
         }
 
-        if (const ESystemStatus status = Update(); status != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = Update(); STATUS != ESystemStatus::CONTINUE)
         {
-            return status;
+            return STATUS;
         }
 
-        if (const ESystemStatus status = LateUpdate(); status != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = LateUpdate(); STATUS != ESystemStatus::CONTINUE)
         {
-            return status;
+            return STATUS;
         }
 
         return ESystemStatus::CONTINUE;
@@ -64,9 +64,9 @@ namespace Garage
     {
         for (AppSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus status = subsystem->OnEarlyUpdate(); status != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnEarlyUpdate(); STATUS != ESystemStatus::CONTINUE)
             {
-                return status;
+                return STATUS;
             }
         }
 
@@ -77,9 +77,9 @@ namespace Garage
     {
         for (AppSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus status = subsystem->OnFixedUpdate(); status != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnFixedUpdate(); STATUS != ESystemStatus::CONTINUE)
             {
-                return status;
+                return STATUS;
             }
         }
 
@@ -90,9 +90,9 @@ namespace Garage
     {
         for (AppSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus status = subsystem->OnUpdate(); status != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnUpdate(); STATUS != ESystemStatus::CONTINUE)
             {
-                return status;
+                return STATUS;
             }
         }
 
@@ -103,9 +103,9 @@ namespace Garage
     {
         for (AppSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus status = subsystem->OnLateUpdate(); status != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnLateUpdate(); STATUS != ESystemStatus::CONTINUE)
             {
-                return status;
+                return STATUS;
             }
         }
 

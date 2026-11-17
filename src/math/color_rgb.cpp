@@ -4,9 +4,12 @@
 #include <cmath>
 
 #include "garage/core/defines.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/math/color_rgba.hpp"
 #include "garage/math/mathf.hpp"
+#include "garage/math/vector3d.hpp"
+#include "garage/math/vector4d.hpp"
 
 namespace Garage
 {
@@ -178,8 +181,8 @@ namespace Garage
     template <Scalarable TScalar>
     bool ColorRGB<TScalar>::IsHDR() const noexcept
     {
-        constexpr TScalar maximum = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return elements[0] > maximum || elements[1] > maximum || elements[2] > maximum;
+        constexpr TScalar MAXIMUM = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return elements[0] > MAXIMUM || elements[1] > MAXIMUM || elements[2] > MAXIMUM;
     }
 
     template <Scalarable TScalar>
@@ -209,29 +212,29 @@ namespace Garage
     template <Scalarable TScalar>
     ColorRGB<TScalar> ColorRGB<TScalar>::GetWhite() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGB(maxVal, maxVal, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGB(MAX_VAL, MAX_VAL, MAX_VAL);
     }
 
     template <Scalarable TScalar>
     ColorRGB<TScalar> ColorRGB<TScalar>::GetRed() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGB(maxVal, TScalar{0}, TScalar{0});
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGB(MAX_VAL, TScalar{0}, TScalar{0});
     }
 
     template <Scalarable TScalar>
     ColorRGB<TScalar> ColorRGB<TScalar>::GetGreen() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGB(TScalar{0}, maxVal, TScalar{0});
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGB(TScalar{0}, MAX_VAL, TScalar{0});
     }
 
     template <Scalarable TScalar>
     ColorRGB<TScalar> ColorRGB<TScalar>::GetBlue() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGB(TScalar{0}, TScalar{0}, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGB(TScalar{0}, TScalar{0}, MAX_VAL);
     }
 
     template <Scalarable TScalar>
@@ -250,15 +253,15 @@ namespace Garage
     template <Scalarable TScalar>
     ColorRGB<TScalar> ColorRGB<TScalar>::GetCyan() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGB(TScalar{0}, maxVal, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGB(TScalar{0}, MAX_VAL, MAX_VAL);
     }
 
     template <Scalarable TScalar>
     ColorRGB<TScalar> ColorRGB<TScalar>::GetMagenta() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGB(maxVal, TScalar{0}, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGB(MAX_VAL, TScalar{0}, MAX_VAL);
     }
 
     template <Scalarable TScalar>
@@ -353,54 +356,54 @@ namespace Garage
             retval.elements[1] = 0.0f;
             retval.elements[2] = 0.0f;
 
-            const Float32 hScaled = h * 6.0f;
-            const auto    sector  = static_cast<Int32>(std::floor(hScaled));
-            const Float32 frac    = hScaled - static_cast<Float32>(sector);
-            const Float32 p       = v * (1.0f - s);
-            const Float32 q       = v * (1.0f - s * frac);
-            const Float32 t       = v * (1.0f - s * (1.0f - frac));
+            const Float32 H_SCALED = h * 6.0f;
+            const auto    SECTOR   = static_cast<Int32>(std::floor(H_SCALED));
+            const Float32 FRAC     = H_SCALED - static_cast<Float32>(SECTOR);
+            const Float32 P        = v * (1.0f - s);
+            const Float32 Q        = v * (1.0f - s * FRAC);
+            const Float32 T        = v * (1.0f - s * (1.0f - FRAC));
 
-            switch (sector)
+            switch (SECTOR)
             {
                 case 0:
                     retval.elements[0] = v;
-                    retval.elements[1] = t;
-                    retval.elements[2] = p;
+                    retval.elements[1] = T;
+                    retval.elements[2] = P;
                     break;
                 case 1:
-                    retval.elements[0] = q;
+                    retval.elements[0] = Q;
                     retval.elements[1] = v;
-                    retval.elements[2] = p;
+                    retval.elements[2] = P;
                     break;
                 case 2:
-                    retval.elements[0] = p;
+                    retval.elements[0] = P;
                     retval.elements[1] = v;
-                    retval.elements[2] = t;
+                    retval.elements[2] = T;
                     break;
                 case 3:
-                    retval.elements[0] = p;
-                    retval.elements[1] = q;
+                    retval.elements[0] = P;
+                    retval.elements[1] = Q;
                     retval.elements[2] = v;
                     break;
                 case 4:
-                    retval.elements[0] = t;
-                    retval.elements[1] = p;
+                    retval.elements[0] = T;
+                    retval.elements[1] = P;
                     retval.elements[2] = v;
                     break;
                 case 5:
                     retval.elements[0] = v;
-                    retval.elements[1] = p;
-                    retval.elements[2] = q;
+                    retval.elements[1] = P;
+                    retval.elements[2] = Q;
                     break;
                 case 6:
                     retval.elements[0] = v;
-                    retval.elements[1] = t;
-                    retval.elements[2] = p;
+                    retval.elements[1] = T;
+                    retval.elements[2] = P;
                     break;
                 case -1:
                     retval.elements[0] = v;
-                    retval.elements[1] = p;
-                    retval.elements[2] = q;
+                    retval.elements[1] = P;
+                    retval.elements[2] = Q;
                     break;
                 default:
                     break;
@@ -421,30 +424,30 @@ namespace Garage
     void ColorRGB<TScalar>::RGBToHSV(const ColorRGB& rgbColor, Float32& h, Float32& s, Float32& v) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 maxComp = std::max(rgbColor.elements[0], std::max(rgbColor.elements[1], rgbColor.elements[2]));
-        const Float32 minComp = std::min(rgbColor.elements[0], std::min(rgbColor.elements[1], rgbColor.elements[2]));
-        const Float32 delta   = maxComp - minComp;
+        const Float32 MAX_COMP = std::max(rgbColor.elements[0], std::max(rgbColor.elements[1], rgbColor.elements[2]));
+        const Float32 MIN_COMP = std::min(rgbColor.elements[0], std::min(rgbColor.elements[1], rgbColor.elements[2]));
+        const Float32 DELTA    = MAX_COMP - MIN_COMP;
 
-        v = maxComp;
-        if (maxComp <= 0.0f || delta <= 0.0f)
+        v = MAX_COMP;
+        if (MAX_COMP <= 0.0f || DELTA <= 0.0f)
         {
             s = 0.0f;
             h = 0.0f;
             return;
         }
 
-        s = delta / maxComp;
-        if (rgbColor.elements[0] >= maxComp)
+        s = DELTA / MAX_COMP;
+        if (rgbColor.elements[0] >= MAX_COMP)
         {
-            h = (rgbColor.elements[1] - rgbColor.elements[2]) / delta;
+            h = (rgbColor.elements[1] - rgbColor.elements[2]) / DELTA;
         }
-        else if (rgbColor.elements[1] >= maxComp)
+        else if (rgbColor.elements[1] >= MAX_COMP)
         {
-            h = 2.0f + (rgbColor.elements[2] - rgbColor.elements[0]) / delta;
+            h = 2.0f + (rgbColor.elements[2] - rgbColor.elements[0]) / DELTA;
         }
         else
         {
-            h = 4.0f + (rgbColor.elements[0] - rgbColor.elements[1]) / delta;
+            h = 4.0f + (rgbColor.elements[0] - rgbColor.elements[1]) / DELTA;
         }
 
         h /= 6.0f;

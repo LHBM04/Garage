@@ -13,7 +13,7 @@ namespace Garage
     class GARAGE_API IDisplay
     {
     public:
-        enum class ID : UInt32;
+        enum class EId : UInt32;
 
         IDisplay() noexcept          = default;
         virtual ~IDisplay() noexcept = default;
@@ -24,7 +24,7 @@ namespace Garage
         IDisplay(IDisplay&&)            = delete;
         IDisplay& operator=(IDisplay&&) = delete;
 
-        [[nodiscard]] virtual ID GetID() const noexcept = 0;
+        [[nodiscard]] virtual EId GetID() const noexcept = 0;
 
         [[nodiscard]] virtual std::string_view GetCaption() const noexcept                 = 0;
         virtual void                           SetCaption(std::string_view value) noexcept = 0;

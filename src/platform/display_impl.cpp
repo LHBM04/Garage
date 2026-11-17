@@ -1,17 +1,23 @@
 ﻿#include "platform/display_impl.hpp"
 
+#include <string_view>
 #include <string>
 
 #include <SDL3/SDL_video.h>
 
 #include "garage/core/defines.hpp"
+#include "garage/core/types.hpp"
+
+#include "garage/math/vector2d.hpp"
+
+#include "garage/platform/display.hpp"
 
 namespace Garage
 {
     DisplayImpl::DisplayImpl(SDL_Window* window) noexcept
         : window(window)
     {
-        nextId = static_cast<ID>(static_cast<UInt32>(nextId) + 1U);
+        nextId = static_cast<EId>(static_cast<UInt32>(nextId) + 1U);
         id     = nextId;
     }
 
@@ -35,7 +41,7 @@ namespace Garage
         return static_cast<UInt32>(SDL_GetWindowID(window));
     }
 
-    IDisplay::ID DisplayImpl::GetID() const noexcept
+    IDisplay::EId DisplayImpl::GetID() const noexcept
     {
         return id;
     }
@@ -57,8 +63,8 @@ namespace Garage
     {
         ASSERT(window != nullptr);
 
-        const std::string title(value);
-        SDL_SetWindowTitle(window, title.c_str());
+        const std::string TITLE(value);
+        SDL_SetWindowTitle(window, TITLE.c_str());
     }
 
     Vector2DInt DisplayImpl::GetPosition() const noexcept

@@ -1,14 +1,19 @@
 ﻿#include "garage/math/bounding_oriented_box.hpp"
 
-#include <algorithm>
 #include <array>
 #include <cmath>
+#include <compare>
 
 #include "garage/core/defines.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/math/bounding_box.hpp"
 #include "garage/math/bounding_sphere.hpp"
 #include "garage/math/mathf.hpp"
+#include "garage/math/matrix4x4.hpp"
+#include "garage/math/quaternion.hpp"
+#include "garage/math/vector3d.hpp"
+#include "garage/math/vector4d.hpp"
 
 namespace Garage
 {
@@ -16,13 +21,13 @@ namespace Garage
     {
         [[nodiscard]] Vector4D<Float32> NormalizePlane(const Vector4D<Float32>& plane) noexcept
         {
-            const Vector3D<Float32> normal(plane.GetX(), plane.GetY(), plane.GetZ());
+            const Vector3D<Float32> NORMAL(plane.GetX(), plane.GetY(), plane.GetZ());
             ASSERT(plane.IsFinite());
-            const Float32 lenSq = normal.GetSqrMagnitude();
-            ASSERT(lenSq > Mathf::EPSILON);
+            const Float32 LEN_SQ = NORMAL.GetSqrMagnitude();
+            ASSERT(LEN_SQ > Mathf::EPSILON);
 
-            const Float32 invLen = 1.0f / std::sqrt(lenSq);
-            return plane * invLen;
+            const Float32 INV_LEN = 1.0f / std::sqrt(LEN_SQ);
+            return plane * INV_LEN;
         }
 
         [[nodiscard]] Vector3D<Float32> NormalizeDirection(const Vector3D<Float32>& direction) noexcept
@@ -73,13 +78,13 @@ namespace Garage
 
     std::partial_ordering BoundingOrientedBox::operator<=>(const BoundingOrientedBox& other) const noexcept
     {
-        if (const auto cmp = center <=> other.center; cmp != 0)
+        if (const auto CMP = center <=> other.center; CMP != 0)
         {
-            return cmp;
+            return CMP;
         }
-        if (const auto cmp = extents <=> other.extents; cmp != 0)
+        if (const auto CMP = extents <=> other.extents; CMP != 0)
         {
-            return cmp;
+            return CMP;
         }
         return orientation <=> other.orientation;
     }
@@ -159,11 +164,11 @@ namespace Garage
                 std::array<Float32, 3>{-1.0f, 1.0f, -1.0f},
         };
 
-        const Quaternion<Float32> normRot = NormalizeRotation(orientation);
+        const Quaternion<Float32> NORM_ROT = NormalizeRotation(orientation);
         for (USize i = 0; i < CORNER_COUNT; ++i)
         {
-            const Vector3D<Float32> offset(OFFSETS[i][0], OFFSETS[i][1], OFFSETS[i][2]);
-            corners[i] = center + (normRot * Vector3D<Float32>::Scale(extents, offset));
+            const Vector3D<Float32> OFFSET(OFFSETS[i][0], OFFSETS[i][1], OFFSETS[i][2]);
+            corners[i] = center + (NORM_ROT * Vector3D<Float32>::Scale(extents, OFFSET));
         }
     }
 
@@ -197,13 +202,13 @@ namespace Garage
 
     void BoundingOrientedBox::Transform(BoundingOrientedBox& out, const Matrix4x4<Float32>& matrix) const noexcept
     {
-        const Vector3D<Float32>   newCenter   = matrix.MultiplyPoint3x4(center);
-        const Vector3D<Float32>   matrixScale = matrix.GetScale();
-        const Quaternion<Float32> matrixRot   = matrix.GetRotation();
-        const Quaternion<Float32> normSelfRot = NormalizeRotation(orientation);
-        out.center                            = newCenter;
-        out.extents                           = Vector3D<Float32>::Scale(extents, matrixScale);
-        out.orientation                       = Quaternion<Float32>::Normalize(normSelfRot * matrixRot);
+        const Vector3D<Float32>   NEW_CENTER    = matrix.MultiplyPoint3x4(center);
+        const Vector3D<Float32>   MATRIX_SCALE  = matrix.GetScale();
+        const Quaternion<Float32> MATRIX_ROT    = matrix.GetRotation();
+        const Quaternion<Float32> NORM_SELF_ROT = NormalizeRotation(orientation);
+        out.center                              = NEW_CENTER;
+        out.extents                             = Vector3D<Float32>::Scale(extents, MATRIX_SCALE);
+        out.orientation                         = Quaternion<Float32>::Normalize(NORM_SELF_ROT * MATRIX_ROT);
     }
 
     void BoundingOrientedBox::Transform(BoundingOrientedBox&       out,
@@ -211,36 +216,36 @@ namespace Garage
                                         const Quaternion<Float32>& rotation,
                                         const Vector3D<Float32>&   translation) const noexcept
     {
-        const Quaternion<Float32> normRot     = NormalizeRotation(rotation);
-        const Quaternion<Float32> normSelfRot = NormalizeRotation(orientation);
-        out.center                            = (normRot * (center * scale)) + translation;
-        out.extents                           = extents * std::abs(scale);
-        out.orientation                       = Quaternion<Float32>::Normalize(normSelfRot * normRot);
+        const Quaternion<Float32> NORM_ROT      = NormalizeRotation(rotation);
+        const Quaternion<Float32> NORM_SELF_ROT = NormalizeRotation(orientation);
+        out.center                              = (NORM_ROT * (center * scale)) + translation;
+        out.extents                             = extents * std::abs(scale);
+        out.orientation                         = Quaternion<Float32>::Normalize(NORM_SELF_ROT * NORM_ROT);
     }
 
     bool BoundingOrientedBox::Contains(const Vector3D<Float32>& point) const noexcept
     {
-        const Quaternion<Float32> invRot  = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
-        const Vector3D<Float32>   localPt = invRot * (point - center);
-        const BoundingBox         localBox(Vector3D<Float32>::GetZero(), extents);
-        return localBox.Contains(localPt);
+        const Quaternion<Float32> INV_ROT  = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
+        const Vector3D<Float32>   LOCAL_PT = INV_ROT * (point - center);
+        const BoundingBox         LOCAL_BOX(Vector3D<Float32>::GetZero(), extents);
+        return LOCAL_BOX.Contains(LOCAL_PT);
     }
 
     bool BoundingOrientedBox::Contains(const Vector3D<Float32>& v0,
                                        const Vector3D<Float32>& v1,
                                        const Vector3D<Float32>& v2) const noexcept
     {
-        const Quaternion<Float32> invRot = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
-        const BoundingBox         localBox(Vector3D<Float32>::GetZero(), extents);
-        return localBox.Contains(invRot * (v0 - center), invRot * (v1 - center), invRot * (v2 - center));
+        const Quaternion<Float32> INV_ROT = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
+        const BoundingBox         LOCAL_BOX(Vector3D<Float32>::GetZero(), extents);
+        return LOCAL_BOX.Contains(INV_ROT * (v0 - center), INV_ROT * (v1 - center), INV_ROT * (v2 - center));
     }
 
     bool BoundingOrientedBox::Contains(const BoundingSphere& sphere) const noexcept
     {
-        const Quaternion<Float32> invRot = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
-        const BoundingSphere      localSphere(invRot * (sphere.GetCenter() - center), sphere.GetRadius());
-        const BoundingBox         localBox(Vector3D<Float32>::GetZero(), extents);
-        return localBox.Contains(localSphere);
+        const Quaternion<Float32> INV_ROT = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
+        const BoundingSphere      LOCAL_SPHERE(INV_ROT * (sphere.GetCenter() - center), sphere.GetRadius());
+        const BoundingBox         LOCAL_BOX(Vector3D<Float32>::GetZero(), extents);
+        return LOCAL_BOX.Contains(LOCAL_SPHERE);
     }
 
     bool BoundingOrientedBox::Contains(const BoundingBox& box) const noexcept
@@ -250,8 +255,8 @@ namespace Garage
 
     bool BoundingOrientedBox::Contains(const BoundingOrientedBox& box) const noexcept
     {
-        const CornerArray corners = box.GetCorners();
-        for (const Vector3D<Float32>& corner : corners)
+        const CornerArray CORNERS = box.GetCorners();
+        for (const Vector3D<Float32>& corner : CORNERS)
         {
             if (!Contains(corner))
             {
@@ -263,10 +268,10 @@ namespace Garage
 
     bool BoundingOrientedBox::Intersects(const BoundingSphere& sphere) const noexcept
     {
-        const Quaternion<Float32> invRot = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
-        const BoundingSphere      localSphere(invRot * (sphere.GetCenter() - center), sphere.GetRadius());
-        const BoundingBox         localBox(Vector3D<Float32>::GetZero(), extents);
-        return localBox.Intersects(localSphere);
+        const Quaternion<Float32> INV_ROT = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
+        const BoundingSphere      LOCAL_SPHERE(INV_ROT * (sphere.GetCenter() - center), sphere.GetRadius());
+        const BoundingBox         LOCAL_BOX(Vector3D<Float32>::GetZero(), extents);
+        return LOCAL_BOX.Intersects(LOCAL_SPHERE);
     }
 
     bool BoundingOrientedBox::Intersects(const BoundingBox& box) const noexcept
@@ -276,37 +281,37 @@ namespace Garage
 
     bool BoundingOrientedBox::Intersects(const BoundingOrientedBox& box) const noexcept
     {
-        const Quaternion<Float32> rotA = NormalizeRotation(orientation);
-        const Quaternion<Float32> rotB = NormalizeRotation(box.orientation);
+        const Quaternion<Float32> ROT_A = NormalizeRotation(orientation);
+        const Quaternion<Float32> ROT_B = NormalizeRotation(box.orientation);
 
-        const std::array<Vector3D<Float32>, 3> axesA = {rotA * Vector3D<Float32>::GetRight(),
-                                                        rotA * Vector3D<Float32>::GetUp(),
-                                                        rotA * Vector3D<Float32>::GetForward()};
-        const std::array<Vector3D<Float32>, 3> axesB = {rotB * Vector3D<Float32>::GetRight(),
-                                                        rotB * Vector3D<Float32>::GetUp(),
-                                                        rotB * Vector3D<Float32>::GetForward()};
+        const std::array<Vector3D<Float32>, 3> AXES_A = {ROT_A * Vector3D<Float32>::GetRight(),
+                                                         ROT_A * Vector3D<Float32>::GetUp(),
+                                                         ROT_A * Vector3D<Float32>::GetForward()};
+        const std::array<Vector3D<Float32>, 3> AXES_B = {ROT_B * Vector3D<Float32>::GetRight(),
+                                                         ROT_B * Vector3D<Float32>::GetUp(),
+                                                         ROT_B * Vector3D<Float32>::GetForward()};
 
-        const Vector3D<Float32> diff = box.center - center;
+        const Vector3D<Float32> DIFF = box.center - center;
 
-        auto testAxis = [&](const Vector3D<Float32>& axis) noexcept -> bool
+        auto const TEST_AXIS = [&](const Vector3D<Float32>& axis) noexcept -> bool
         {
             if (axis.GetSqrMagnitude() <= Mathf::EPSILON)
             {
                 return true;
             }
-            const Float32 rA = extents.GetX() * std::abs(Vector3D<Float32>::Dot(axesA[0], axis)) +
-                    extents.GetY() * std::abs(Vector3D<Float32>::Dot(axesA[1], axis)) +
-                    extents.GetZ() * std::abs(Vector3D<Float32>::Dot(axesA[2], axis));
-            const Float32 rB = box.extents.GetX() * std::abs(Vector3D<Float32>::Dot(axesB[0], axis)) +
-                    box.extents.GetY() * std::abs(Vector3D<Float32>::Dot(axesB[1], axis)) +
-                    box.extents.GetZ() * std::abs(Vector3D<Float32>::Dot(axesB[2], axis));
-            const Float32 dist = std::abs(Vector3D<Float32>::Dot(diff, axis));
-            return dist <= (rA + rB);
+            const Float32 R_A = extents.GetX() * std::abs(Vector3D<Float32>::Dot(AXES_A[0], axis)) +
+                    extents.GetY() * std::abs(Vector3D<Float32>::Dot(AXES_A[1], axis)) +
+                    extents.GetZ() * std::abs(Vector3D<Float32>::Dot(AXES_A[2], axis));
+            const Float32 R_B = box.extents.GetX() * std::abs(Vector3D<Float32>::Dot(AXES_B[0], axis)) +
+                    box.extents.GetY() * std::abs(Vector3D<Float32>::Dot(AXES_B[1], axis)) +
+                    box.extents.GetZ() * std::abs(Vector3D<Float32>::Dot(AXES_B[2], axis));
+            const Float32 DIST = std::abs(Vector3D<Float32>::Dot(DIFF, axis));
+            return DIST <= (R_A + R_B);
         };
 
         for (USize i = 0; i < 3; ++i)
         {
-            if (!testAxis(axesA[i]) || !testAxis(axesB[i]))
+            if (!TEST_AXIS(AXES_A[i]) || !TEST_AXIS(AXES_B[i]))
             {
                 return false;
             }
@@ -316,7 +321,7 @@ namespace Garage
         {
             for (USize j = 0; j < 3; ++j)
             {
-                if (!testAxis(Vector3D<Float32>::Cross(axesA[i], axesB[j])))
+                if (!TEST_AXIS(Vector3D<Float32>::Cross(AXES_A[i], AXES_B[j])))
                 {
                     return false;
                 }
@@ -330,37 +335,37 @@ namespace Garage
                                          const Vector3D<Float32>& v1,
                                          const Vector3D<Float32>& v2) const noexcept
     {
-        const Quaternion<Float32> invRot = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
-        const BoundingBox         localBox(Vector3D<Float32>::GetZero(), extents);
-        return localBox.Intersects(invRot * (v0 - center), invRot * (v1 - center), invRot * (v2 - center));
+        const Quaternion<Float32> INV_ROT = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
+        const BoundingBox         LOCAL_BOX(Vector3D<Float32>::GetZero(), extents);
+        return LOCAL_BOX.Intersects(INV_ROT * (v0 - center), INV_ROT * (v1 - center), INV_ROT * (v2 - center));
     }
 
     bool BoundingOrientedBox::Intersects(const Vector4D<Float32>& plane) const noexcept
     {
-        const Vector4D<Float32>   p         = NormalizePlane(plane);
-        const Vector3D<Float32>   planeNorm = Vector3D<Float32>(p.GetX(), p.GetY(), p.GetZ());
-        const Quaternion<Float32> normRot   = NormalizeRotation(orientation);
-        const Vector3D<Float32>   axisX     = normRot * Vector3D<Float32>::GetRight();
-        const Vector3D<Float32>   axisY     = normRot * Vector3D<Float32>::GetUp();
-        const Vector3D<Float32>   axisZ     = normRot * Vector3D<Float32>::GetForward();
+        const Vector4D<Float32>   P          = NormalizePlane(plane);
+        const Vector3D<Float32>   PLANE_NORM = Vector3D<Float32>(P.GetX(), P.GetY(), P.GetZ());
+        const Quaternion<Float32> NORM_ROT   = NormalizeRotation(orientation);
+        const Vector3D<Float32>   AXIS_X     = NORM_ROT * Vector3D<Float32>::GetRight();
+        const Vector3D<Float32>   AXIS_Y     = NORM_ROT * Vector3D<Float32>::GetUp();
+        const Vector3D<Float32>   AXIS_Z     = NORM_ROT * Vector3D<Float32>::GetForward();
 
-        const Float32 r = extents.GetX() * std::abs(Vector3D<Float32>::Dot(planeNorm, axisX)) +
-                extents.GetY() * std::abs(Vector3D<Float32>::Dot(planeNorm, axisY)) +
-                extents.GetZ() * std::abs(Vector3D<Float32>::Dot(planeNorm, axisZ));
-        const Float32 s = PlaneSignedDistance(p, center);
-        return std::abs(s) <= r;
+        const Float32 R = extents.GetX() * std::abs(Vector3D<Float32>::Dot(PLANE_NORM, AXIS_X)) +
+                extents.GetY() * std::abs(Vector3D<Float32>::Dot(PLANE_NORM, AXIS_Y)) +
+                extents.GetZ() * std::abs(Vector3D<Float32>::Dot(PLANE_NORM, AXIS_Z));
+        const Float32 S = PlaneSignedDistance(P, center);
+        return std::abs(S) <= R;
     }
 
     bool BoundingOrientedBox::Intersects(const Vector3D<Float32>& origin,
                                          const Vector3D<Float32>& direction,
                                          Float32&                 distance) const noexcept
     {
-        const Vector3D<Float32>   dir         = NormalizeDirection(direction);
-        const Quaternion<Float32> invRot      = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
-        const Vector3D<Float32>   localOrigin = invRot * (origin - center);
-        const Vector3D<Float32>   localDir    = invRot * dir;
-        const BoundingBox         localBox(Vector3D<Float32>::GetZero(), extents);
-        return localBox.Intersects(localOrigin, localDir, distance);
+        const Vector3D<Float32>   DIR          = NormalizeDirection(direction);
+        const Quaternion<Float32> INV_ROT      = Quaternion<Float32>::Conjugate(NormalizeRotation(orientation));
+        const Vector3D<Float32>   LOCAL_ORIGIN = INV_ROT * (origin - center);
+        const Vector3D<Float32>   LOCAL_DIR    = INV_ROT * DIR;
+        const BoundingBox         LOCAL_BOX(Vector3D<Float32>::GetZero(), extents);
+        return LOCAL_BOX.Intersects(LOCAL_ORIGIN, LOCAL_DIR, distance);
     }
 
     bool BoundingOrientedBox::ContainedBy(const Vector4D<Float32>& plane0,
@@ -370,21 +375,21 @@ namespace Garage
                                           const Vector4D<Float32>& plane4,
                                           const Vector4D<Float32>& plane5) const noexcept
     {
-        const std::array<Vector4D<Float32>, 6> planes  = {plane0, plane1, plane2, plane3, plane4, plane5};
-        const Quaternion<Float32>              normRot = NormalizeRotation(orientation);
-        const Vector3D<Float32>                axisX   = normRot * Vector3D<Float32>::GetRight();
-        const Vector3D<Float32>                axisY   = normRot * Vector3D<Float32>::GetUp();
-        const Vector3D<Float32>                axisZ   = normRot * Vector3D<Float32>::GetForward();
+        const std::array<Vector4D<Float32>, 6> PLANES   = {plane0, plane1, plane2, plane3, plane4, plane5};
+        const Quaternion<Float32>              NORM_ROT = NormalizeRotation(orientation);
+        const Vector3D<Float32>                AXIS_X   = NORM_ROT * Vector3D<Float32>::GetRight();
+        const Vector3D<Float32>                AXIS_Y   = NORM_ROT * Vector3D<Float32>::GetUp();
+        const Vector3D<Float32>                AXIS_Z   = NORM_ROT * Vector3D<Float32>::GetForward();
 
-        for (const Vector4D<Float32>& plane : planes)
+        for (const Vector4D<Float32>& plane : PLANES)
         {
-            const Vector4D<Float32> p         = NormalizePlane(plane);
-            const Vector3D<Float32> planeNorm = Vector3D<Float32>(p.GetX(), p.GetY(), p.GetZ());
-            const Float32           r         = extents.GetX() * std::abs(Vector3D<Float32>::Dot(planeNorm, axisX)) +
-                    extents.GetY() * std::abs(Vector3D<Float32>::Dot(planeNorm, axisY)) +
-                    extents.GetZ() * std::abs(Vector3D<Float32>::Dot(planeNorm, axisZ));
-            const Float32 s = PlaneSignedDistance(p, center);
-            if (s > -r)
+            const Vector4D<Float32> P          = NormalizePlane(plane);
+            const Vector3D<Float32> PLANE_NORM = Vector3D<Float32>(P.GetX(), P.GetY(), P.GetZ());
+            const Float32           R          = extents.GetX() * std::abs(Vector3D<Float32>::Dot(PLANE_NORM, AXIS_X)) +
+                    extents.GetY() * std::abs(Vector3D<Float32>::Dot(PLANE_NORM, AXIS_Y)) +
+                    extents.GetZ() * std::abs(Vector3D<Float32>::Dot(PLANE_NORM, AXIS_Z));
+            const Float32 S = PlaneSignedDistance(P, center);
+            if (S > -R)
             {
                 return false;
             }

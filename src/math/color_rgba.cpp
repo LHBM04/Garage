@@ -1,12 +1,14 @@
 ﻿#include "garage/math/color_rgba.hpp"
 
-#include <algorithm>
 #include <cmath>
 
 #include "garage/core/defines.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/math/color_rgb.hpp"
 #include "garage/math/mathf.hpp"
+#include "garage/math/vector3d.hpp"
+#include "garage/math/vector4d.hpp"
 
 namespace Garage
 {
@@ -313,29 +315,29 @@ namespace Garage
     template <Scalarable TScalar>
     ColorRGBA<TScalar> ColorRGBA<TScalar>::GetWhite() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGBA(maxVal, maxVal, maxVal, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGBA(MAX_VAL, MAX_VAL, MAX_VAL, MAX_VAL);
     }
 
     template <Scalarable TScalar>
     ColorRGBA<TScalar> ColorRGBA<TScalar>::GetRed() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGBA(maxVal, TScalar{0}, TScalar{0}, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGBA(MAX_VAL, TScalar{0}, TScalar{0}, MAX_VAL);
     }
 
     template <Scalarable TScalar>
     ColorRGBA<TScalar> ColorRGBA<TScalar>::GetGreen() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGBA(TScalar{0}, maxVal, TScalar{0}, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGBA(TScalar{0}, MAX_VAL, TScalar{0}, MAX_VAL);
     }
 
     template <Scalarable TScalar>
     ColorRGBA<TScalar> ColorRGBA<TScalar>::GetBlue() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGBA(TScalar{0}, TScalar{0}, maxVal, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGBA(TScalar{0}, TScalar{0}, MAX_VAL, MAX_VAL);
     }
 
     template <Scalarable TScalar>
@@ -354,15 +356,15 @@ namespace Garage
     template <Scalarable TScalar>
     ColorRGBA<TScalar> ColorRGBA<TScalar>::GetCyan() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGBA(TScalar{0}, maxVal, maxVal, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGBA(TScalar{0}, MAX_VAL, MAX_VAL, MAX_VAL);
     }
 
     template <Scalarable TScalar>
     ColorRGBA<TScalar> ColorRGBA<TScalar>::GetMagenta() noexcept
     {
-        constexpr TScalar maxVal = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
-        return ColorRGBA(maxVal, TScalar{0}, maxVal, maxVal);
+        constexpr TScalar MAX_VAL = static_cast<TScalar>(Integral<TScalar> ? 255 : 1);
+        return ColorRGBA(MAX_VAL, TScalar{0}, MAX_VAL, MAX_VAL);
     }
 
     template <Scalarable TScalar>

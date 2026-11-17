@@ -2,10 +2,14 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string_view>
+
+#include "garage/core/types.hpp"
 
 #include "garage/math/mathf.hpp"
 
 #include "garage/platform/input_provider.hpp"
+#include "garage/platform/input_states.hpp"
 
 namespace Garage
 {
@@ -82,19 +86,19 @@ namespace Garage
                 }
                 case EBindingKind::AXIS_1D:
                 {
-                    const Float32 axis = static_cast<Float32>(provider.IsKeyHeld(binding.secondaryKey)) -
+                    const Float32 AXIS = static_cast<Float32>(provider.IsKeyHeld(binding.secondaryKey)) -
                             static_cast<Float32>(provider.IsKeyHeld(binding.primaryKey));
-                    x += axis;
+                    x += AXIS;
                     break;
                 }
                 case EBindingKind::VECTOR_2D:
                 {
-                    const Float32 horizontal = static_cast<Float32>(provider.IsKeyHeld(binding.rightKey)) -
+                    const Float32 HORIZONTAL = static_cast<Float32>(provider.IsKeyHeld(binding.rightKey)) -
                             static_cast<Float32>(provider.IsKeyHeld(binding.leftKey));
-                    const Float32 vertical = static_cast<Float32>(provider.IsKeyHeld(binding.primaryKey)) -
+                    const Float32 VERTICAL = static_cast<Float32>(provider.IsKeyHeld(binding.primaryKey)) -
                             static_cast<Float32>(provider.IsKeyHeld(binding.secondaryKey));
-                    x += horizontal;
-                    y += vertical;
+                    x += HORIZONTAL;
+                    y += VERTICAL;
                     break;
                 }
             }
@@ -103,24 +107,24 @@ namespace Garage
         x = std::clamp(x, -1.0f, 1.0f);
         y = std::clamp(y, -1.0f, 1.0f);
 
-        const bool activeNow = (std::abs(x) > Mathf::EPSILON) || (std::abs(y) > Mathf::EPSILON);
-        const bool wasActive = isActive;
+        const bool ACTIVE_NOW = (std::abs(x) > Mathf::EPSILON) || (std::abs(y) > Mathf::EPSILON);
+        const bool WAS_ACTIVE = isActive;
 
-        currentValue = activeNow ? Vector2DFloat{x, y} : Vector2DFloat{};
-        isActive     = activeNow;
+        currentValue = ACTIVE_NOW ? Vector2DFloat{x, y} : Vector2DFloat{};
+        isActive     = ACTIVE_NOW;
 
-        if (!wasActive && activeNow)
+        if (!WAS_ACTIVE && ACTIVE_NOW)
         {
-            onStarted.Broadcast(InputActionContext{EInputPhase::STARTED, currentValue});
-            onPerformed.Broadcast(InputActionContext{EInputPhase::PERFORMED, currentValue});
+            onStarted.Broadcast(InputActionContext{.phase = EInputPhase::STARTED, .value = currentValue});
+            onPerformed.Broadcast(InputActionContext{.phase = EInputPhase::PERFORMED, .value = currentValue});
         }
-        else if (wasActive && activeNow)
+        else if (WAS_ACTIVE && ACTIVE_NOW)
         {
-            onPerformed.Broadcast(InputActionContext{EInputPhase::PERFORMED, currentValue});
+            onPerformed.Broadcast(InputActionContext{.phase = EInputPhase::PERFORMED, .value = currentValue});
         }
-        else if (wasActive && !activeNow)
+        else if (WAS_ACTIVE && !ACTIVE_NOW)
         {
-            onCanceled.Broadcast(InputActionContext{EInputPhase::CANCELED, Vector2DFloat{}});
+            onCanceled.Broadcast(InputActionContext{.phase = EInputPhase::CANCELED, .value = Vector2DFloat{}});
         }
     }
 
@@ -130,7 +134,7 @@ namespace Garage
         {
             isActive     = false;
             currentValue = {};
-            onCanceled.Broadcast(InputActionContext{EInputPhase::CANCELED, Vector2DFloat{}});
+            onCanceled.Broadcast(InputActionContext{.phase = EInputPhase::CANCELED, .value = Vector2DFloat{}});
         }
     }
 

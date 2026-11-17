@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <compare>
 
 #include "garage/core/defines.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/math/mathf.hpp"
 #include "garage/math/vector2d.hpp"
@@ -175,13 +177,13 @@ namespace Garage
     template <Scalarable TScalar>
     std::partial_ordering Vector3D<TScalar>::operator<=>(const Vector3D& other) const noexcept
     {
-        if (const auto cmp = elements[0] <=> other.elements[0]; cmp != 0)
+        if (const auto CMP = elements[0] <=> other.elements[0]; CMP != 0)
         {
-            return cmp;
+            return CMP;
         }
-        if (const auto cmp = elements[1] <=> other.elements[1]; cmp != 0)
+        if (const auto CMP = elements[1] <=> other.elements[1]; CMP != 0)
         {
-            return cmp;
+            return CMP;
         }
         return elements[2] <=> other.elements[2];
     }
@@ -408,9 +410,9 @@ namespace Garage
     Vector3D<TScalar> Vector3D<TScalar>::ClampMagnitude(const Vector3D& vector, Float32 maxLength) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 sqrMag = vector.GetSqrMagnitude();
-        const Float32 maxSqr = maxLength * maxLength;
-        if (sqrMag <= maxSqr)
+        const Float32 SQR_MAG = vector.GetSqrMagnitude();
+        const Float32 MAX_SQR = maxLength * maxLength;
+        if (SQR_MAG <= MAX_SQR)
         {
             return vector;
         }
@@ -430,12 +432,12 @@ namespace Garage
     Vector3D<TScalar> Vector3D<TScalar>::Normalize(const Vector3D& value) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 mag = value.GetMagnitude();
-        if (mag <= Mathf::EPSILON)
+        const Float32 MAG = value.GetMagnitude();
+        if (MAG <= Mathf::EPSILON)
         {
             return GetZero();
         }
-        return value / mag;
+        return value / MAG;
     }
 
     template <Scalarable TScalar>
@@ -482,31 +484,31 @@ namespace Garage
     Float32 Vector3D<TScalar>::Angle(const Vector3D& a, const Vector3D& b) noexcept
         requires Floatable<TScalar>
     {
-        const Vector3D from = Normalize(a);
-        const Vector3D to   = Normalize(b);
-        const Float32  dot  = std::clamp(Dot(from, to), -1.0f, 1.0f);
-        return std::acos(dot);
+        const Vector3D FROM = Normalize(a);
+        const Vector3D TO   = Normalize(b);
+        const Float32  DOT  = std::clamp(Dot(FROM, TO), -1.0f, 1.0f);
+        return std::acos(DOT);
     }
 
     template <Scalarable TScalar>
     Float32 Vector3D<TScalar>::SignedAngle(const Vector3D& from, const Vector3D& to, const Vector3D& axis) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 unsignedAngle = Angle(from, to);
-        const Float32 sign          = Dot(axis, Cross(from, to));
-        return (sign >= 0.0f) ? unsignedAngle : -unsignedAngle;
+        const Float32 UNSIGNED_ANGLE = Angle(from, to);
+        const Float32 SIGN           = Dot(axis, Cross(from, to));
+        return (SIGN >= 0.0f) ? UNSIGNED_ANGLE : -UNSIGNED_ANGLE;
     }
 
     template <Scalarable TScalar>
     Vector3D<TScalar> Vector3D<TScalar>::Project(const Vector3D& vector, const Vector3D& onNormal) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 denom = Dot(onNormal, onNormal);
-        if (denom <= Mathf::EPSILON)
+        const Float32 DENOM = Dot(onNormal, onNormal);
+        if (DENOM <= Mathf::EPSILON)
         {
             return GetZero();
         }
-        return onNormal * (Dot(vector, onNormal) / denom);
+        return onNormal * (Dot(vector, onNormal) / DENOM);
     }
 
     template <Scalarable TScalar>
@@ -527,14 +529,14 @@ namespace Garage
     Vector3D<TScalar> Vector3D<TScalar>::Refract(const Vector3D& vector, const Vector3D& normal, Float32 eta) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 cosI  = Dot(normal, vector);
-        const Float32 sinT2 = eta * eta * (1.0f - cosI * cosI);
-        if (sinT2 > 1.0f)
+        const Float32 COS_I  = Dot(normal, vector);
+        const Float32 SIN_T2 = eta * eta * (1.0f - COS_I * COS_I);
+        if (SIN_T2 > 1.0f)
         {
             return GetZero();
         }
-        const Float32 cosT = std::sqrt(1.0f - sinT2);
-        return vector * eta - normal * (eta * cosI + cosT);
+        const Float32 COS_T = std::sqrt(1.0f - SIN_T2);
+        return vector * eta - normal * (eta * COS_I + COS_T);
     }
 
     template <Scalarable TScalar>
@@ -564,32 +566,32 @@ namespace Garage
     Vector3D<TScalar> Vector3D<TScalar>::SlerpUnclamped(const Vector3D& a, const Vector3D& b, Float32 t) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 aMag = a.GetMagnitude();
-        const Float32 bMag = b.GetMagnitude();
+        const Float32 A_MAG = a.GetMagnitude();
+        const Float32 B_MAG = b.GetMagnitude();
 
-        if (aMag <= Mathf::EPSILON || bMag <= Mathf::EPSILON)
+        if (A_MAG <= Mathf::EPSILON || B_MAG <= Mathf::EPSILON)
         {
             return LerpUnclamped(a, b, t);
         }
 
-        const Vector3D from = a / aMag;
-        const Vector3D to   = b / bMag;
+        const Vector3D FROM = a / A_MAG;
+        const Vector3D TO   = b / B_MAG;
 
-        const Float32 dot   = std::clamp(Dot(from, to), -1.0f, 1.0f);
-        const Float32 theta = std::acos(dot) * t;
+        const Float32 DOT   = std::clamp(Dot(FROM, TO), -1.0f, 1.0f);
+        const Float32 THETA = std::acos(DOT) * t;
 
-        Vector3D      relative    = to - from * dot;
-        const Float32 relativeMag = relative.GetMagnitude();
-        if (relativeMag <= Mathf::EPSILON)
+        Vector3D      relative     = TO - FROM * DOT;
+        const Float32 RELATIVE_MAG = relative.GetMagnitude();
+        if (RELATIVE_MAG <= Mathf::EPSILON)
         {
             return LerpUnclamped(a, b, t);
         }
 
-        relative /= relativeMag;
-        const Vector3D direction = from * std::cos(theta) + relative * std::sin(theta);
-        const Float32  magnitude = Mathf::LerpUnclamped(aMag, bMag, t);
+        relative /= RELATIVE_MAG;
+        const Vector3D DIRECTION = FROM * std::cos(THETA) + relative * std::sin(THETA);
+        const Float32  MAGNITUDE = Mathf::LerpUnclamped(A_MAG, B_MAG, t);
 
-        return direction * magnitude;
+        return DIRECTION * MAGNITUDE;
     }
 
     template <Scalarable TScalar>
@@ -598,15 +600,15 @@ namespace Garage
                                                      Float32         maxDistanceDelta) noexcept
         requires Floatable<TScalar>
     {
-        const Vector3D delta    = target - current;
-        const Float32  distance = delta.GetMagnitude();
+        const Vector3D DELTA    = target - current;
+        const Float32  DISTANCE = DELTA.GetMagnitude();
 
-        if (distance <= maxDistanceDelta || distance <= Mathf::EPSILON)
+        if (DISTANCE <= maxDistanceDelta || DISTANCE <= Mathf::EPSILON)
         {
             return target;
         }
 
-        return current + (delta / distance) * maxDistanceDelta;
+        return current + (DELTA / DISTANCE) * maxDistanceDelta;
     }
 
     template <Scalarable TScalar>
@@ -616,23 +618,23 @@ namespace Garage
                                                        Float32         maxMagnitudeDelta) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 currentMag = current.GetMagnitude();
-        const Float32 targetMag  = target.GetMagnitude();
+        const Float32 CURRENT_MAG = current.GetMagnitude();
+        const Float32 TARGET_MAG  = target.GetMagnitude();
 
-        if (currentMag <= Mathf::EPSILON || targetMag <= Mathf::EPSILON)
+        if (CURRENT_MAG <= Mathf::EPSILON || TARGET_MAG <= Mathf::EPSILON)
         {
             return MoveTowards(current, target, maxMagnitudeDelta);
         }
 
-        const Vector3D currentDir = current / currentMag;
-        const Vector3D targetDir  = target / targetMag;
+        const Vector3D CURRENT_DIR = current / CURRENT_MAG;
+        const Vector3D TARGET_DIR  = target / TARGET_MAG;
 
-        const Float32  angle    = Angle(currentDir, targetDir);
-        const Float32  t        = (angle <= Mathf::EPSILON) ? 1.0f : std::min(1.0f, maxRadiansDelta / angle);
-        const Vector3D newDir   = SlerpUnclamped(currentDir, targetDir, t).GetNormalized();
-        const Float32  deltaMag = std::clamp(targetMag - currentMag, -maxMagnitudeDelta, maxMagnitudeDelta);
+        const Float32  ANGLE     = Angle(CURRENT_DIR, TARGET_DIR);
+        const Float32  T         = (ANGLE <= Mathf::EPSILON) ? 1.0f : std::min(1.0f, maxRadiansDelta / ANGLE);
+        const Vector3D NEW_DIR   = SlerpUnclamped(CURRENT_DIR, TARGET_DIR, T).GetNormalized();
+        const Float32  DELTA_MAG = std::clamp(TARGET_MAG - CURRENT_MAG, -maxMagnitudeDelta, maxMagnitudeDelta);
 
-        return newDir * (currentMag + deltaMag);
+        return NEW_DIR * (CURRENT_MAG + DELTA_MAG);
     }
 
     template <Scalarable TScalar>
@@ -645,24 +647,24 @@ namespace Garage
         requires Floatable<TScalar>
     {
         smoothTime          = std::max(0.0001f, smoothTime);
-        const Float32 omega = 2.0f / smoothTime;
-        const Float32 xVal  = omega * deltaTime;
-        const Float32 exp   = 1.0f / (1.0f + xVal + 0.48f * xVal * xVal + 0.235f * xVal * xVal * xVal);
+        const Float32 OMEGA = 2.0f / smoothTime;
+        const Float32 X_VAL = OMEGA * deltaTime;
+        const Float32 EXP   = 1.0f / (1.0f + X_VAL + 0.48f * X_VAL * X_VAL + 0.235f * X_VAL * X_VAL * X_VAL);
 
-        Vector3D       change         = current - target;
-        const Vector3D originalTarget = target;
+        Vector3D       change          = current - target;
+        const Vector3D ORIGINAL_TARGET = target;
 
-        const Float32 maxChange       = maxSpeed * smoothTime;
-        change                        = ClampMagnitude(change, maxChange);
-        const Vector3D adjustedTarget = current - change;
+        const Float32 MAX_CHANGE       = maxSpeed * smoothTime;
+        change                         = ClampMagnitude(change, MAX_CHANGE);
+        const Vector3D ADJUSTED_TARGET = current - change;
 
-        const Vector3D temp = (currentVelocity + change * omega) * deltaTime;
-        currentVelocity     = (currentVelocity - temp * omega) * exp;
-        Vector3D output     = adjustedTarget + (change + temp) * exp;
+        const Vector3D TEMP = (currentVelocity + change * OMEGA) * deltaTime;
+        currentVelocity     = (currentVelocity - TEMP * OMEGA) * EXP;
+        Vector3D output     = ADJUSTED_TARGET + (change + TEMP) * EXP;
 
-        if (Dot(originalTarget - current, output - originalTarget) > 0.0f)
+        if (Dot(ORIGINAL_TARGET - current, output - ORIGINAL_TARGET) > 0.0f)
         {
-            output          = originalTarget;
+            output          = ORIGINAL_TARGET;
             currentVelocity = Vector3D(0.0f, 0.0f, 0.0f);
         }
 

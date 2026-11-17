@@ -3,12 +3,18 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <compare>
 
 #include "garage/core/defines.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/math/bounding_oriented_box.hpp"
 #include "garage/math/bounding_sphere.hpp"
 #include "garage/math/mathf.hpp"
+#include "garage/math/matrix4x4.hpp"
+#include "garage/math/quaternion.hpp"
+#include "garage/math/vector3d.hpp"
+#include "garage/math/vector4d.hpp"
 
 namespace Garage
 {
@@ -25,23 +31,23 @@ namespace Garage
 
             for (USize axis = 0; axis < 3; ++axis)
             {
-                const Float32 o    = origin[axis];
-                const Float32 d    = dir[axis];
-                const Float32 bMin = boxMin[axis];
-                const Float32 bMax = boxMax[axis];
+                const Float32 O     = origin[axis];
+                const Float32 D     = dir[axis];
+                const Float32 B_MIN = boxMin[axis];
+                const Float32 B_MAX = boxMax[axis];
 
-                if (std::abs(d) <= Mathf::EPSILON)
+                if (std::abs(D) <= Mathf::EPSILON)
                 {
-                    if (o < bMin || o > bMax)
+                    if (O < B_MIN || O > B_MAX)
                     {
                         return false;
                     }
                 }
                 else
                 {
-                    const Float32 invD = 1.0f / d;
-                    Float32       t1   = (bMin - o) * invD;
-                    Float32       t2   = (bMax - o) * invD;
+                    const Float32 INV_D = 1.0f / D;
+                    Float32       t1    = (B_MIN - O) * INV_D;
+                    Float32       t2    = (B_MAX - O) * INV_D;
                     if (t1 > t2)
                     {
                         std::swap(t1, t2);
@@ -61,13 +67,13 @@ namespace Garage
 
         [[nodiscard]] Vector4D<Float32> NormalizePlane(const Vector4D<Float32>& plane) noexcept
         {
-            const Vector3D<Float32> normal(plane.GetX(), plane.GetY(), plane.GetZ());
+            const Vector3D<Float32> NORMAL(plane.GetX(), plane.GetY(), plane.GetZ());
             ASSERT(plane.IsFinite());
-            const Float32 lenSq = normal.GetSqrMagnitude();
-            ASSERT(lenSq > Mathf::EPSILON);
+            const Float32 LEN_SQ = NORMAL.GetSqrMagnitude();
+            ASSERT(LEN_SQ > Mathf::EPSILON);
 
-            const Float32 invLen = 1.0f / std::sqrt(lenSq);
-            return plane * invLen;
+            const Float32 INV_LEN = 1.0f / std::sqrt(LEN_SQ);
+            return plane * INV_LEN;
         }
 
         [[nodiscard]] Vector3D<Float32> NormalizeDirection(const Vector3D<Float32>& direction) noexcept
@@ -90,8 +96,8 @@ namespace Garage
                                          const Vector3D<Float32>& v1,
                                          const Vector3D<Float32>& v2) noexcept
         {
-            const Vector3D<Float32> normal = Vector3D<Float32>::Cross(v1 - v0, v2 - v0);
-            ASSERT(normal.GetSqrMagnitude() > 0.0f);
+            const Vector3D<Float32> NORMAL = Vector3D<Float32>::Cross(v1 - v0, v2 - v0);
+            ASSERT(NORMAL.GetSqrMagnitude() > 0.0f);
         }
 
         [[nodiscard]] Float32 PlaneSignedDistance(const Vector4D<Float32>& normalizedPlane,
@@ -122,9 +128,9 @@ namespace Garage
 
     std::partial_ordering BoundingBox::operator<=>(const BoundingBox& other) const noexcept
     {
-        if (const auto cmp = center <=> other.center; cmp != 0)
+        if (const auto CMP = center <=> other.center; CMP != 0)
         {
-            return cmp;
+            return CMP;
         }
         return extents <=> other.extents;
     }
@@ -208,8 +214,8 @@ namespace Garage
 
         for (USize i = 0; i < CORNER_COUNT; ++i)
         {
-            const Vector3D<Float32> offset(OFFSETS[i][0], OFFSETS[i][1], OFFSETS[i][2]);
-            corners[i] = center + Vector3D<Float32>::Scale(extents, offset);
+            const Vector3D<Float32> OFFSET(OFFSETS[i][0], OFFSETS[i][1], OFFSETS[i][2]);
+            corners[i] = center + Vector3D<Float32>::Scale(extents, OFFSET);
         }
     }
 
@@ -256,21 +262,21 @@ namespace Garage
                                 const Quaternion<Float32>& rotation,
                                 const Vector3D<Float32>&   translation) const noexcept
     {
-        const Quaternion<Float32> normRot = NormalizeRotation(rotation);
-        CornerArray               corners = GetCorners();
+        const Quaternion<Float32> NORM_ROT = NormalizeRotation(rotation);
+        CornerArray               corners  = GetCorners();
         for (Vector3D<Float32>& corner : corners)
         {
-            corner = (normRot * (corner * scale)) + translation;
+            corner = (NORM_ROT * (corner * scale)) + translation;
         }
         out = CreateFromPoints(corners);
     }
 
     bool BoundingBox::Contains(const Vector3D<Float32>& point) const noexcept
     {
-        const Vector3D<Float32> bMin = GetMin();
-        const Vector3D<Float32> bMax = GetMax();
-        return point.GetX() >= bMin.GetX() && point.GetX() <= bMax.GetX() && point.GetY() >= bMin.GetY() &&
-                point.GetY() <= bMax.GetY() && point.GetZ() >= bMin.GetZ() && point.GetZ() <= bMax.GetZ();
+        const Vector3D<Float32> B_MIN = GetMin();
+        const Vector3D<Float32> B_MAX = GetMax();
+        return point.GetX() >= B_MIN.GetX() && point.GetX() <= B_MAX.GetX() && point.GetY() >= B_MIN.GetY() &&
+                point.GetY() <= B_MAX.GetY() && point.GetZ() >= B_MIN.GetZ() && point.GetZ() <= B_MAX.GetZ();
     }
 
     bool BoundingBox::Contains(const Vector3D<Float32>& v0,
@@ -283,30 +289,30 @@ namespace Garage
 
     bool BoundingBox::Contains(const BoundingSphere& sphere) const noexcept
     {
-        const Vector3D<Float32> bMin = GetMin();
-        const Vector3D<Float32> bMax = GetMax();
-        const Vector3D<Float32> sc   = sphere.GetCenter();
-        const Float32           r    = sphere.GetRadius();
+        const Vector3D<Float32> B_MIN = GetMin();
+        const Vector3D<Float32> B_MAX = GetMax();
+        const Vector3D<Float32> SC    = sphere.GetCenter();
+        const Float32           R     = sphere.GetRadius();
 
-        return sc.GetX() - r >= bMin.GetX() && sc.GetX() + r <= bMax.GetX() && sc.GetY() - r >= bMin.GetY() &&
-                sc.GetY() + r <= bMax.GetY() && sc.GetZ() - r >= bMin.GetZ() && sc.GetZ() + r <= bMax.GetZ();
+        return SC.GetX() - R >= B_MIN.GetX() && SC.GetX() + R <= B_MAX.GetX() && SC.GetY() - R >= B_MIN.GetY() &&
+                SC.GetY() + R <= B_MAX.GetY() && SC.GetZ() - R >= B_MIN.GetZ() && SC.GetZ() + R <= B_MAX.GetZ();
     }
 
     bool BoundingBox::Contains(const BoundingBox& box) const noexcept
     {
-        const Vector3D<Float32> aMin = GetMin();
-        const Vector3D<Float32> aMax = GetMax();
-        const Vector3D<Float32> bMin = box.GetMin();
-        const Vector3D<Float32> bMax = box.GetMax();
+        const Vector3D<Float32> A_MIN = GetMin();
+        const Vector3D<Float32> A_MAX = GetMax();
+        const Vector3D<Float32> B_MIN = box.GetMin();
+        const Vector3D<Float32> B_MAX = box.GetMax();
 
-        return aMin.GetX() <= bMin.GetX() && bMax.GetX() <= aMax.GetX() && aMin.GetY() <= bMin.GetY() &&
-                bMax.GetY() <= aMax.GetY() && aMin.GetZ() <= bMin.GetZ() && bMax.GetZ() <= aMax.GetZ();
+        return A_MIN.GetX() <= B_MIN.GetX() && B_MAX.GetX() <= A_MAX.GetX() && A_MIN.GetY() <= B_MIN.GetY() &&
+                B_MAX.GetY() <= A_MAX.GetY() && A_MIN.GetZ() <= B_MIN.GetZ() && B_MAX.GetZ() <= A_MAX.GetZ();
     }
 
     bool BoundingBox::Contains(const BoundingOrientedBox& box) const noexcept
     {
-        const CornerArray corners = box.GetCorners();
-        for (const Vector3D<Float32>& corner : corners)
+        const CornerArray CORNERS = box.GetCorners();
+        for (const Vector3D<Float32>& corner : CORNERS)
         {
             if (!Contains(corner))
             {
@@ -318,22 +324,22 @@ namespace Garage
 
     bool BoundingBox::Intersects(const BoundingSphere& sphere) const noexcept
     {
-        const Vector3D<Float32> sc      = sphere.GetCenter();
-        const Vector3D<Float32> closest = Vector3D<Float32>::Clamp(sc, GetMin(), GetMax());
-        const Float32           distSq  = (sc - closest).GetSqrMagnitude();
-        const Float32           r       = sphere.GetRadius();
-        return distSq <= r * r;
+        const Vector3D<Float32> SC      = sphere.GetCenter();
+        const Vector3D<Float32> CLOSEST = Vector3D<Float32>::Clamp(SC, GetMin(), GetMax());
+        const Float32           DIST_SQ = (SC - CLOSEST).GetSqrMagnitude();
+        const Float32           R       = sphere.GetRadius();
+        return DIST_SQ <= R * R;
     }
 
     bool BoundingBox::Intersects(const BoundingBox& box) const noexcept
     {
-        const Vector3D<Float32> aMin = GetMin();
-        const Vector3D<Float32> aMax = GetMax();
-        const Vector3D<Float32> bMin = box.GetMin();
-        const Vector3D<Float32> bMax = box.GetMax();
+        const Vector3D<Float32> A_MIN = GetMin();
+        const Vector3D<Float32> A_MAX = GetMax();
+        const Vector3D<Float32> B_MIN = box.GetMin();
+        const Vector3D<Float32> B_MAX = box.GetMax();
 
-        return aMax.GetX() >= bMin.GetX() && aMin.GetX() <= bMax.GetX() && aMax.GetY() >= bMin.GetY() &&
-                aMin.GetY() <= bMax.GetY() && aMax.GetZ() >= bMin.GetZ() && aMin.GetZ() <= bMax.GetZ();
+        return A_MAX.GetX() >= B_MIN.GetX() && A_MIN.GetX() <= B_MAX.GetX() && A_MAX.GetY() >= B_MIN.GetY() &&
+                A_MIN.GetY() <= B_MAX.GetY() && A_MAX.GetZ() >= B_MIN.GetZ() && A_MIN.GetZ() <= B_MAX.GetZ();
     }
 
     bool BoundingBox::Intersects(const BoundingOrientedBox& box) const noexcept
@@ -346,37 +352,37 @@ namespace Garage
                                  const Vector3D<Float32>& v2) const noexcept
     {
         AssertNonDegenerateTriangle(v0, v1, v2);
-        const BoundingBox triBox = CreateFromPoints(std::array<Vector3D<Float32>, 3>{v0, v1, v2});
-        if (!Intersects(triBox))
+        const BoundingBox TRI_BOX = CreateFromPoints(std::array<Vector3D<Float32>, 3>{v0, v1, v2});
+        if (!Intersects(TRI_BOX))
         {
             return false;
         }
 
-        const Vector3D<Float32> p0 = v0 - center;
-        const Vector3D<Float32> p1 = v1 - center;
-        const Vector3D<Float32> p2 = v2 - center;
-        const Vector3D<Float32> n  = Vector3D<Float32>::Cross(p1 - p0, p2 - p0);
-        const Float32           r  = extents.GetX() * std::abs(n.GetX()) + extents.GetY() * std::abs(n.GetY()) +
-                extents.GetZ() * std::abs(n.GetZ());
-        const Float32 s = Vector3D<Float32>::Dot(n, p0);
-        return std::abs(s) <= r;
+        const Vector3D<Float32> P0 = v0 - center;
+        const Vector3D<Float32> P1 = v1 - center;
+        const Vector3D<Float32> P2 = v2 - center;
+        const Vector3D<Float32> N  = Vector3D<Float32>::Cross(P1 - P0, P2 - P0);
+        const Float32           R  = extents.GetX() * std::abs(N.GetX()) + extents.GetY() * std::abs(N.GetY()) +
+                extents.GetZ() * std::abs(N.GetZ());
+        const Float32 S = Vector3D<Float32>::Dot(N, P0);
+        return std::abs(S) <= R;
     }
 
     bool BoundingBox::Intersects(const Vector4D<Float32>& plane) const noexcept
     {
-        const Vector4D<Float32> p = NormalizePlane(plane);
-        const Float32           r = extents.GetX() * std::abs(p.GetX()) + extents.GetY() * std::abs(p.GetY()) +
-                extents.GetZ() * std::abs(p.GetZ());
-        const Float32 s = PlaneSignedDistance(p, center);
-        return std::abs(s) <= r;
+        const Vector4D<Float32> P = NormalizePlane(plane);
+        const Float32           R = extents.GetX() * std::abs(P.GetX()) + extents.GetY() * std::abs(P.GetY()) +
+                extents.GetZ() * std::abs(P.GetZ());
+        const Float32 S = PlaneSignedDistance(P, center);
+        return std::abs(S) <= R;
     }
 
     bool BoundingBox::Intersects(const Vector3D<Float32>& origin,
                                  const Vector3D<Float32>& direction,
                                  Float32&                 distance) const noexcept
     {
-        const Vector3D<Float32> dir = NormalizeDirection(direction);
-        return RayIntersectsAABB(origin, dir, GetMin(), GetMax(), distance);
+        const Vector3D<Float32> DIR = NormalizeDirection(direction);
+        return RayIntersectsAABB(origin, DIR, GetMin(), GetMax(), distance);
     }
 
     bool BoundingBox::ContainedBy(const Vector4D<Float32>& plane0,
@@ -386,14 +392,14 @@ namespace Garage
                                   const Vector4D<Float32>& plane4,
                                   const Vector4D<Float32>& plane5) const noexcept
     {
-        const std::array<Vector4D<Float32>, 6> planes = {plane0, plane1, plane2, plane3, plane4, plane5};
-        for (const Vector4D<Float32>& plane : planes)
+        const std::array<Vector4D<Float32>, 6> PLANES = {plane0, plane1, plane2, plane3, plane4, plane5};
+        for (const Vector4D<Float32>& plane : PLANES)
         {
-            const Vector4D<Float32> p = NormalizePlane(plane);
-            const Float32           r = extents.GetX() * std::abs(p.GetX()) + extents.GetY() * std::abs(p.GetY()) +
-                    extents.GetZ() * std::abs(p.GetZ());
-            const Float32 s = PlaneSignedDistance(p, center);
-            if (s > -r)
+            const Vector4D<Float32> P = NormalizePlane(plane);
+            const Float32           R = extents.GetX() * std::abs(P.GetX()) + extents.GetY() * std::abs(P.GetY()) +
+                    extents.GetZ() * std::abs(P.GetZ());
+            const Float32 S = PlaneSignedDistance(P, center);
+            if (S > -R)
             {
                 return false;
             }
@@ -409,15 +415,15 @@ namespace Garage
 
     BoundingBox BoundingBox::CreateMerged(const BoundingBox& b1, const BoundingBox& b2) noexcept
     {
-        const Vector3D<Float32> minPt = Vector3D<Float32>::Min(b1.GetMin(), b2.GetMin());
-        const Vector3D<Float32> maxPt = Vector3D<Float32>::Max(b1.GetMax(), b2.GetMax());
-        return CreateFromMinMax(minPt, maxPt);
+        const Vector3D<Float32> MIN_PT = Vector3D<Float32>::Min(b1.GetMin(), b2.GetMin());
+        const Vector3D<Float32> MAX_PT = Vector3D<Float32>::Max(b1.GetMax(), b2.GetMax());
+        return CreateFromMinMax(MIN_PT, MAX_PT);
     }
 
     BoundingBox BoundingBox::CreateFromSphere(const BoundingSphere& sphere) noexcept
     {
-        const Float32 r = sphere.GetRadius();
-        return BoundingBox(sphere.GetCenter(), Vector3D<Float32>(r, r, r));
+        const Float32 R = sphere.GetRadius();
+        return BoundingBox(sphere.GetCenter(), Vector3D<Float32>(R, R, R));
     }
 
     BoundingBox BoundingBox::CreateFromMinMax(const Vector3D<Float32>& min, const Vector3D<Float32>& max) noexcept

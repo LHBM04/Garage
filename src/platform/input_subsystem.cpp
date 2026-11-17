@@ -1,7 +1,10 @@
 ﻿#include "garage/platform/input_subsystem.hpp"
 
 #include <array>
+#include <memory>
 #include <ranges>
+#include <string_view>
+#include <string>
 
 #include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_mouse.h>
@@ -9,10 +12,14 @@
 
 #include "garage/core/defines.hpp"
 #include "garage/core/engine.hpp"
+#include "garage/core/system_status.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/platform/display.hpp"
+#include "garage/platform/display_events.hpp"
 #include "garage/platform/event_subsystem.hpp"
-
+#include "garage/platform/input_events.hpp"
+#include "garage/platform/input_states.hpp"
 #include "platform/display_impl.hpp"
 
 namespace Garage
@@ -26,105 +33,105 @@ namespace Garage
         };
 
         constexpr std::array KEY_MAPPINGS = {
-                KeyMapping{EKeyCode::BACKSPACE, SDL_SCANCODE_BACKSPACE},
-                KeyMapping{EKeyCode::TAB, SDL_SCANCODE_TAB},
-                KeyMapping{EKeyCode::ENTER, SDL_SCANCODE_RETURN},
-                KeyMapping{EKeyCode::PAUSE, SDL_SCANCODE_PAUSE},
-                KeyMapping{EKeyCode::CAPS_LOCK, SDL_SCANCODE_CAPSLOCK},
-                KeyMapping{EKeyCode::ESCAPE, SDL_SCANCODE_ESCAPE},
-                KeyMapping{EKeyCode::SPACE, SDL_SCANCODE_SPACE},
-                KeyMapping{EKeyCode::PAGE_UP, SDL_SCANCODE_PAGEUP},
-                KeyMapping{EKeyCode::PAGE_DOWN, SDL_SCANCODE_PAGEDOWN},
-                KeyMapping{EKeyCode::END, SDL_SCANCODE_END},
-                KeyMapping{EKeyCode::HOME, SDL_SCANCODE_HOME},
-                KeyMapping{EKeyCode::LEFT, SDL_SCANCODE_LEFT},
-                KeyMapping{EKeyCode::UP, SDL_SCANCODE_UP},
-                KeyMapping{EKeyCode::RIGHT, SDL_SCANCODE_RIGHT},
-                KeyMapping{EKeyCode::DOWN, SDL_SCANCODE_DOWN},
-                KeyMapping{EKeyCode::PRINT_SCREEN, SDL_SCANCODE_PRINTSCREEN},
-                KeyMapping{EKeyCode::INSERT, SDL_SCANCODE_INSERT},
-                KeyMapping{EKeyCode::DELETE_KEY, SDL_SCANCODE_DELETE},
+                KeyMapping{.key = EKeyCode::BACKSPACE, .scancode = SDL_SCANCODE_BACKSPACE},
+                KeyMapping{.key = EKeyCode::TAB, .scancode = SDL_SCANCODE_TAB},
+                KeyMapping{.key = EKeyCode::ENTER, .scancode = SDL_SCANCODE_RETURN},
+                KeyMapping{.key = EKeyCode::PAUSE, .scancode = SDL_SCANCODE_PAUSE},
+                KeyMapping{.key = EKeyCode::CAPS_LOCK, .scancode = SDL_SCANCODE_CAPSLOCK},
+                KeyMapping{.key = EKeyCode::ESCAPE, .scancode = SDL_SCANCODE_ESCAPE},
+                KeyMapping{.key = EKeyCode::SPACE, .scancode = SDL_SCANCODE_SPACE},
+                KeyMapping{.key = EKeyCode::PAGE_UP, .scancode = SDL_SCANCODE_PAGEUP},
+                KeyMapping{.key = EKeyCode::PAGE_DOWN, .scancode = SDL_SCANCODE_PAGEDOWN},
+                KeyMapping{.key = EKeyCode::END, .scancode = SDL_SCANCODE_END},
+                KeyMapping{.key = EKeyCode::HOME, .scancode = SDL_SCANCODE_HOME},
+                KeyMapping{.key = EKeyCode::LEFT, .scancode = SDL_SCANCODE_LEFT},
+                KeyMapping{.key = EKeyCode::UP, .scancode = SDL_SCANCODE_UP},
+                KeyMapping{.key = EKeyCode::RIGHT, .scancode = SDL_SCANCODE_RIGHT},
+                KeyMapping{.key = EKeyCode::DOWN, .scancode = SDL_SCANCODE_DOWN},
+                KeyMapping{.key = EKeyCode::PRINT_SCREEN, .scancode = SDL_SCANCODE_PRINTSCREEN},
+                KeyMapping{.key = EKeyCode::INSERT, .scancode = SDL_SCANCODE_INSERT},
+                KeyMapping{.key = EKeyCode::DELETE_KEY, .scancode = SDL_SCANCODE_DELETE},
 
-                KeyMapping{EKeyCode::D0, SDL_SCANCODE_0},
-                KeyMapping{EKeyCode::D1, SDL_SCANCODE_1},
-                KeyMapping{EKeyCode::D2, SDL_SCANCODE_2},
-                KeyMapping{EKeyCode::D3, SDL_SCANCODE_3},
-                KeyMapping{EKeyCode::D4, SDL_SCANCODE_4},
-                KeyMapping{EKeyCode::D5, SDL_SCANCODE_5},
-                KeyMapping{EKeyCode::D6, SDL_SCANCODE_6},
-                KeyMapping{EKeyCode::D7, SDL_SCANCODE_7},
-                KeyMapping{EKeyCode::D8, SDL_SCANCODE_8},
-                KeyMapping{EKeyCode::D9, SDL_SCANCODE_9},
+                KeyMapping{.key = EKeyCode::D0, .scancode = SDL_SCANCODE_0},
+                KeyMapping{.key = EKeyCode::D1, .scancode = SDL_SCANCODE_1},
+                KeyMapping{.key = EKeyCode::D2, .scancode = SDL_SCANCODE_2},
+                KeyMapping{.key = EKeyCode::D3, .scancode = SDL_SCANCODE_3},
+                KeyMapping{.key = EKeyCode::D4, .scancode = SDL_SCANCODE_4},
+                KeyMapping{.key = EKeyCode::D5, .scancode = SDL_SCANCODE_5},
+                KeyMapping{.key = EKeyCode::D6, .scancode = SDL_SCANCODE_6},
+                KeyMapping{.key = EKeyCode::D7, .scancode = SDL_SCANCODE_7},
+                KeyMapping{.key = EKeyCode::D8, .scancode = SDL_SCANCODE_8},
+                KeyMapping{.key = EKeyCode::D9, .scancode = SDL_SCANCODE_9},
 
-                KeyMapping{EKeyCode::A, SDL_SCANCODE_A},
-                KeyMapping{EKeyCode::B, SDL_SCANCODE_B},
-                KeyMapping{EKeyCode::C, SDL_SCANCODE_C},
-                KeyMapping{EKeyCode::D, SDL_SCANCODE_D},
-                KeyMapping{EKeyCode::E, SDL_SCANCODE_E},
-                KeyMapping{EKeyCode::F, SDL_SCANCODE_F},
-                KeyMapping{EKeyCode::G, SDL_SCANCODE_G},
-                KeyMapping{EKeyCode::H, SDL_SCANCODE_H},
-                KeyMapping{EKeyCode::I, SDL_SCANCODE_I},
-                KeyMapping{EKeyCode::J, SDL_SCANCODE_J},
-                KeyMapping{EKeyCode::K, SDL_SCANCODE_K},
-                KeyMapping{EKeyCode::L, SDL_SCANCODE_L},
-                KeyMapping{EKeyCode::M, SDL_SCANCODE_M},
-                KeyMapping{EKeyCode::N, SDL_SCANCODE_N},
-                KeyMapping{EKeyCode::O, SDL_SCANCODE_O},
-                KeyMapping{EKeyCode::P, SDL_SCANCODE_P},
-                KeyMapping{EKeyCode::Q, SDL_SCANCODE_Q},
-                KeyMapping{EKeyCode::R, SDL_SCANCODE_R},
-                KeyMapping{EKeyCode::S, SDL_SCANCODE_S},
-                KeyMapping{EKeyCode::T, SDL_SCANCODE_T},
-                KeyMapping{EKeyCode::U, SDL_SCANCODE_U},
-                KeyMapping{EKeyCode::V, SDL_SCANCODE_V},
-                KeyMapping{EKeyCode::W, SDL_SCANCODE_W},
-                KeyMapping{EKeyCode::X, SDL_SCANCODE_X},
-                KeyMapping{EKeyCode::Y, SDL_SCANCODE_Y},
-                KeyMapping{EKeyCode::Z, SDL_SCANCODE_Z},
+                KeyMapping{.key = EKeyCode::A, .scancode = SDL_SCANCODE_A},
+                KeyMapping{.key = EKeyCode::B, .scancode = SDL_SCANCODE_B},
+                KeyMapping{.key = EKeyCode::C, .scancode = SDL_SCANCODE_C},
+                KeyMapping{.key = EKeyCode::D, .scancode = SDL_SCANCODE_D},
+                KeyMapping{.key = EKeyCode::E, .scancode = SDL_SCANCODE_E},
+                KeyMapping{.key = EKeyCode::F, .scancode = SDL_SCANCODE_F},
+                KeyMapping{.key = EKeyCode::G, .scancode = SDL_SCANCODE_G},
+                KeyMapping{.key = EKeyCode::H, .scancode = SDL_SCANCODE_H},
+                KeyMapping{.key = EKeyCode::I, .scancode = SDL_SCANCODE_I},
+                KeyMapping{.key = EKeyCode::J, .scancode = SDL_SCANCODE_J},
+                KeyMapping{.key = EKeyCode::K, .scancode = SDL_SCANCODE_K},
+                KeyMapping{.key = EKeyCode::L, .scancode = SDL_SCANCODE_L},
+                KeyMapping{.key = EKeyCode::M, .scancode = SDL_SCANCODE_M},
+                KeyMapping{.key = EKeyCode::N, .scancode = SDL_SCANCODE_N},
+                KeyMapping{.key = EKeyCode::O, .scancode = SDL_SCANCODE_O},
+                KeyMapping{.key = EKeyCode::P, .scancode = SDL_SCANCODE_P},
+                KeyMapping{.key = EKeyCode::Q, .scancode = SDL_SCANCODE_Q},
+                KeyMapping{.key = EKeyCode::R, .scancode = SDL_SCANCODE_R},
+                KeyMapping{.key = EKeyCode::S, .scancode = SDL_SCANCODE_S},
+                KeyMapping{.key = EKeyCode::T, .scancode = SDL_SCANCODE_T},
+                KeyMapping{.key = EKeyCode::U, .scancode = SDL_SCANCODE_U},
+                KeyMapping{.key = EKeyCode::V, .scancode = SDL_SCANCODE_V},
+                KeyMapping{.key = EKeyCode::W, .scancode = SDL_SCANCODE_W},
+                KeyMapping{.key = EKeyCode::X, .scancode = SDL_SCANCODE_X},
+                KeyMapping{.key = EKeyCode::Y, .scancode = SDL_SCANCODE_Y},
+                KeyMapping{.key = EKeyCode::Z, .scancode = SDL_SCANCODE_Z},
 
-                KeyMapping{EKeyCode::LEFT_SUPER, SDL_SCANCODE_LGUI},
-                KeyMapping{EKeyCode::RIGHT_SUPER, SDL_SCANCODE_RGUI},
+                KeyMapping{.key = EKeyCode::LEFT_SUPER, .scancode = SDL_SCANCODE_LGUI},
+                KeyMapping{.key = EKeyCode::RIGHT_SUPER, .scancode = SDL_SCANCODE_RGUI},
 
-                KeyMapping{EKeyCode::NUMPAD0, SDL_SCANCODE_KP_0},
-                KeyMapping{EKeyCode::NUMPAD1, SDL_SCANCODE_KP_1},
-                KeyMapping{EKeyCode::NUMPAD2, SDL_SCANCODE_KP_2},
-                KeyMapping{EKeyCode::NUMPAD3, SDL_SCANCODE_KP_3},
-                KeyMapping{EKeyCode::NUMPAD4, SDL_SCANCODE_KP_4},
-                KeyMapping{EKeyCode::NUMPAD5, SDL_SCANCODE_KP_5},
-                KeyMapping{EKeyCode::NUMPAD6, SDL_SCANCODE_KP_6},
-                KeyMapping{EKeyCode::NUMPAD7, SDL_SCANCODE_KP_7},
-                KeyMapping{EKeyCode::NUMPAD8, SDL_SCANCODE_KP_8},
-                KeyMapping{EKeyCode::NUMPAD9, SDL_SCANCODE_KP_9},
-                KeyMapping{EKeyCode::MULTIPLY, SDL_SCANCODE_KP_MULTIPLY},
-                KeyMapping{EKeyCode::ADD, SDL_SCANCODE_KP_PLUS},
-                KeyMapping{EKeyCode::SEPARATOR, SDL_SCANCODE_SEPARATOR},
-                KeyMapping{EKeyCode::SUBTRACT, SDL_SCANCODE_KP_MINUS},
-                KeyMapping{EKeyCode::DECIMAL, SDL_SCANCODE_KP_PERIOD},
-                KeyMapping{EKeyCode::DIVIDE, SDL_SCANCODE_KP_DIVIDE},
+                KeyMapping{.key = EKeyCode::NUMPAD0, .scancode = SDL_SCANCODE_KP_0},
+                KeyMapping{.key = EKeyCode::NUMPAD1, .scancode = SDL_SCANCODE_KP_1},
+                KeyMapping{.key = EKeyCode::NUMPAD2, .scancode = SDL_SCANCODE_KP_2},
+                KeyMapping{.key = EKeyCode::NUMPAD3, .scancode = SDL_SCANCODE_KP_3},
+                KeyMapping{.key = EKeyCode::NUMPAD4, .scancode = SDL_SCANCODE_KP_4},
+                KeyMapping{.key = EKeyCode::NUMPAD5, .scancode = SDL_SCANCODE_KP_5},
+                KeyMapping{.key = EKeyCode::NUMPAD6, .scancode = SDL_SCANCODE_KP_6},
+                KeyMapping{.key = EKeyCode::NUMPAD7, .scancode = SDL_SCANCODE_KP_7},
+                KeyMapping{.key = EKeyCode::NUMPAD8, .scancode = SDL_SCANCODE_KP_8},
+                KeyMapping{.key = EKeyCode::NUMPAD9, .scancode = SDL_SCANCODE_KP_9},
+                KeyMapping{.key = EKeyCode::MULTIPLY, .scancode = SDL_SCANCODE_KP_MULTIPLY},
+                KeyMapping{.key = EKeyCode::ADD, .scancode = SDL_SCANCODE_KP_PLUS},
+                KeyMapping{.key = EKeyCode::SEPARATOR, .scancode = SDL_SCANCODE_SEPARATOR},
+                KeyMapping{.key = EKeyCode::SUBTRACT, .scancode = SDL_SCANCODE_KP_MINUS},
+                KeyMapping{.key = EKeyCode::DECIMAL, .scancode = SDL_SCANCODE_KP_PERIOD},
+                KeyMapping{.key = EKeyCode::DIVIDE, .scancode = SDL_SCANCODE_KP_DIVIDE},
 
-                KeyMapping{EKeyCode::F1, SDL_SCANCODE_F1},
-                KeyMapping{EKeyCode::F2, SDL_SCANCODE_F2},
-                KeyMapping{EKeyCode::F3, SDL_SCANCODE_F3},
-                KeyMapping{EKeyCode::F4, SDL_SCANCODE_F4},
-                KeyMapping{EKeyCode::F5, SDL_SCANCODE_F5},
-                KeyMapping{EKeyCode::F6, SDL_SCANCODE_F6},
-                KeyMapping{EKeyCode::F7, SDL_SCANCODE_F7},
-                KeyMapping{EKeyCode::F8, SDL_SCANCODE_F8},
-                KeyMapping{EKeyCode::F9, SDL_SCANCODE_F9},
-                KeyMapping{EKeyCode::F10, SDL_SCANCODE_F10},
-                KeyMapping{EKeyCode::F11, SDL_SCANCODE_F11},
-                KeyMapping{EKeyCode::F12, SDL_SCANCODE_F12},
+                KeyMapping{.key = EKeyCode::F1, .scancode = SDL_SCANCODE_F1},
+                KeyMapping{.key = EKeyCode::F2, .scancode = SDL_SCANCODE_F2},
+                KeyMapping{.key = EKeyCode::F3, .scancode = SDL_SCANCODE_F3},
+                KeyMapping{.key = EKeyCode::F4, .scancode = SDL_SCANCODE_F4},
+                KeyMapping{.key = EKeyCode::F5, .scancode = SDL_SCANCODE_F5},
+                KeyMapping{.key = EKeyCode::F6, .scancode = SDL_SCANCODE_F6},
+                KeyMapping{.key = EKeyCode::F7, .scancode = SDL_SCANCODE_F7},
+                KeyMapping{.key = EKeyCode::F8, .scancode = SDL_SCANCODE_F8},
+                KeyMapping{.key = EKeyCode::F9, .scancode = SDL_SCANCODE_F9},
+                KeyMapping{.key = EKeyCode::F10, .scancode = SDL_SCANCODE_F10},
+                KeyMapping{.key = EKeyCode::F11, .scancode = SDL_SCANCODE_F11},
+                KeyMapping{.key = EKeyCode::F12, .scancode = SDL_SCANCODE_F12},
 
-                KeyMapping{EKeyCode::NUM_LOCK, SDL_SCANCODE_NUMLOCKCLEAR},
-                KeyMapping{EKeyCode::SCROLL_LOCK, SDL_SCANCODE_SCROLLLOCK},
+                KeyMapping{.key = EKeyCode::NUM_LOCK, .scancode = SDL_SCANCODE_NUMLOCKCLEAR},
+                KeyMapping{.key = EKeyCode::SCROLL_LOCK, .scancode = SDL_SCANCODE_SCROLLLOCK},
 
-                KeyMapping{EKeyCode::LEFT_SHIFT, SDL_SCANCODE_LSHIFT},
-                KeyMapping{EKeyCode::RIGHT_SHIFT, SDL_SCANCODE_RSHIFT},
-                KeyMapping{EKeyCode::LEFT_CONTROL, SDL_SCANCODE_LCTRL},
-                KeyMapping{EKeyCode::RIGHT_CONTROL, SDL_SCANCODE_RCTRL},
-                KeyMapping{EKeyCode::LEFT_ALT, SDL_SCANCODE_LALT},
-                KeyMapping{EKeyCode::RIGHT_ALT, SDL_SCANCODE_RALT},
+                KeyMapping{.key = EKeyCode::LEFT_SHIFT, .scancode = SDL_SCANCODE_LSHIFT},
+                KeyMapping{.key = EKeyCode::RIGHT_SHIFT, .scancode = SDL_SCANCODE_RSHIFT},
+                KeyMapping{.key = EKeyCode::LEFT_CONTROL, .scancode = SDL_SCANCODE_LCTRL},
+                KeyMapping{.key = EKeyCode::RIGHT_CONTROL, .scancode = SDL_SCANCODE_RCTRL},
+                KeyMapping{.key = EKeyCode::LEFT_ALT, .scancode = SDL_SCANCODE_LALT},
+                KeyMapping{.key = EKeyCode::RIGHT_ALT, .scancode = SDL_SCANCODE_RALT},
         };
 
         static_assert(static_cast<UInt32>(EButtonCode::LEFT) == SDL_BUTTON_LMASK);
@@ -243,11 +250,11 @@ namespace Garage
 
     InputAction* InputSubsystem::AddAction(std::string_view name)
     {
-        const std::string key(name);
-        auto [it, inserted] = actions.try_emplace(key, nullptr);
+        const std::string KEY(name);
+        auto [it, inserted] = actions.try_emplace(KEY, nullptr);
         if (inserted)
         {
-            it->second = std::make_unique<InputAction>(key);
+            it->second = std::make_unique<InputAction>(KEY);
         }
 
         return it->second.get();
@@ -255,24 +262,24 @@ namespace Garage
 
     void InputSubsystem::RemoveAction(std::string_view name) noexcept
     {
-        const auto it = actions.find(std::string(name));
-        if (it != actions.end())
+        const auto IT = actions.find(std::string(name));
+        if (IT != actions.end())
         {
-            it->second->Reset();
-            actions.erase(it);
+            IT->second->Reset();
+            actions.erase(IT);
         }
     }
 
     InputAction* InputSubsystem::GetAction(std::string_view name) noexcept
     {
-        const auto it = actions.find(std::string(name));
-        return it != actions.end() ? it->second.get() : nullptr;
+        const auto IT = actions.find(std::string(name));
+        return IT != actions.end() ? IT->second.get() : nullptr;
     }
 
     const InputAction* InputSubsystem::GetAction(std::string_view name) const noexcept
     {
-        const auto it = actions.find(std::string(name));
-        return it != actions.end() ? it->second.get() : nullptr;
+        const auto IT = actions.find(std::string(name));
+        return IT != actions.end() ? IT->second.get() : nullptr;
     }
 
     void InputSubsystem::OnDisplayCreate(const DisplayCreateEvent& event)
@@ -343,8 +350,8 @@ namespace Garage
 
         for (const KeyMapping& mapping : KEY_MAPPINGS)
         {
-            const int scancodeIndex = static_cast<int>(mapping.scancode);
-            if (scancodeIndex > 0 && scancodeIndex < numKeys && keyboardState[scancodeIndex])
+            const int SCANCODE_INDEX = static_cast<int>(mapping.scancode);
+            if (SCANCODE_INDEX > 0 && SCANCODE_INDEX < numKeys && keyboardState[SCANCODE_INDEX])
             {
                 targetProvider.SetKey(mapping.key, true);
             }
@@ -363,11 +370,11 @@ namespace Garage
 
     void InputSubsystem::PollMouse(InputProvider& targetProvider) noexcept
     {
-        float                      posX        = 0.0f;
-        float                      posY        = 0.0f;
-        const SDL_MouseButtonFlags buttonFlags = SDL_GetMouseState(&posX, &posY);
+        float                      posX         = 0.0f;
+        float                      posY         = 0.0f;
+        const SDL_MouseButtonFlags BUTTON_FLAGS = SDL_GetMouseState(&posX, &posY);
 
-        targetProvider.SetMouseButtons(static_cast<UInt32>(buttonFlags));
+        targetProvider.SetMouseButtons(static_cast<UInt32>(BUTTON_FLAGS));
         targetProvider.SetMousePosition(Vector2DInt{static_cast<Int32>(posX), static_cast<Int32>(posY)});
 
         float relX = 0.0f;
