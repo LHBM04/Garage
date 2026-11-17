@@ -1,4 +1,4 @@
-#include "garage/platform/input_provider.hpp"
+﻿#include "garage/platform/input_provider.hpp"
 
 namespace Garage
 {

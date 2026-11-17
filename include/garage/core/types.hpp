@@ -1,4 +1,4 @@
-#ifndef GARAGE_CORE_TYPES_HPP
+﻿#ifndef GARAGE_CORE_TYPES_HPP
 #define GARAGE_CORE_TYPES_HPP
 
 #include <cstddef>

@@ -1,4 +1,4 @@
-#ifndef GARAGE_MATH_HPP
+﻿#ifndef GARAGE_MATH_HPP
 #define GARAGE_MATH_HPP
 
 #include "math/bounding_box.hpp"

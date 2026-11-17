@@ -1,4 +1,4 @@
-#ifndef GARAGE_MATH_VECTOR2D_HPP
+﻿#ifndef GARAGE_MATH_VECTOR2D_HPP
 #define GARAGE_MATH_VECTOR2D_HPP
 
 #include <array>

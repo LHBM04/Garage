@@ -1,4 +1,4 @@
-#ifndef GARAGE_MATH_MATHF_HPP
+﻿#ifndef GARAGE_MATH_MATHF_HPP
 #define GARAGE_MATH_MATHF_HPP
 
 #include <algorithm>

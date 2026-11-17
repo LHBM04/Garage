@@ -1,4 +1,4 @@
-#ifndef GARAGE_CORE_ENGINE_HPP
+﻿#ifndef GARAGE_CORE_ENGINE_HPP
 #define GARAGE_CORE_ENGINE_HPP
 
 #include <concepts>

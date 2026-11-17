@@ -1,4 +1,4 @@
-#ifndef GARAGE_MATH_COLOR_RGBA_HPP
+﻿#ifndef GARAGE_MATH_COLOR_RGBA_HPP
 #define GARAGE_MATH_COLOR_RGBA_HPP
 
 #include <array>
