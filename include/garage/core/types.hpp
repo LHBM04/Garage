@@ -1,7 +1,6 @@
-﻿#ifndef GARAGE_CORE_TYPES_HPP
+#ifndef GARAGE_CORE_TYPES_HPP
 #define GARAGE_CORE_TYPES_HPP
 
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -25,9 +24,6 @@ namespace Garage
     using ISize = std::ptrdiff_t;
 
     using Byte = std::byte;
-
-    template <class TValue>
-    concept Scalarable = std::same_as<TValue, Int32> || std::same_as<TValue, Float32>;
 
     template <class TResult, class... TArgs>
     using Func = std::function<TResult(TArgs...)>;
