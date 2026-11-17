@@ -16,7 +16,7 @@ namespace Garage
     class ColorRGB;
 
     template <Scalarable TScalar>
-    class GARAGE_API ColorRGBA final
+    class ColorRGBA final
     {
     public:
         using ValueType = TScalar;
@@ -116,8 +116,10 @@ namespace Garage
     using ColorRGBAInt   = ColorRGBA<Int32>;
     using ColorRGBAFloat = ColorRGBA<Float32>;
 
-    extern template class ColorRGBA<Int32>;
-    extern template class ColorRGBA<Float32>;
+#if !defined(Garage_EXPORTS)
+    extern template class GARAGE_API ColorRGBA<Int32>;
+    extern template class GARAGE_API ColorRGBA<Float32>;
+#endif
 } // namespace Garage
 
 #endif // GARAGE_MATH_COLOR_RGBA_HPP

@@ -391,6 +391,6 @@ namespace Garage
                          Mathf::Lerp(start.elements[3], end.elements[3], t));
     }
 
-    template class ColorRGBA<Int32>;
-    template class ColorRGBA<Float32>;
+    template class GARAGE_API ColorRGBA<Int32>;
+    template class GARAGE_API ColorRGBA<Float32>;
 } // namespace Garage

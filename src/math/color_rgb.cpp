@@ -470,6 +470,6 @@ namespace Garage
                         Mathf::LerpUnclamped(a.elements[2], b.elements[2], t));
     }
 
-    template class ColorRGB<Int32>;
-    template class ColorRGB<Float32>;
+    template class GARAGE_API ColorRGB<Int32>;
+    template class GARAGE_API ColorRGB<Float32>;
 } // namespace Garage

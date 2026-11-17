@@ -13,7 +13,7 @@
 namespace Garage
 {
     template <Scalarable TScalar>
-    class GARAGE_API Quaternion final
+    class Quaternion final
     {
     public:
         using ValueType = TScalar;
@@ -154,8 +154,10 @@ namespace Garage
     using QuaternionInt   = Quaternion<Int32>;
     using QuaternionFloat = Quaternion<Float32>;
 
-    extern template class Quaternion<Int32>;
-    extern template class Quaternion<Float32>;
+#if !defined(Garage_EXPORTS)
+    extern template class GARAGE_API Quaternion<Int32>;
+    extern template class GARAGE_API Quaternion<Float32>;
+#endif
 } // namespace Garage
 
 #endif // GARAGE_MATH_QUATERNION_HPP

@@ -616,6 +616,6 @@ namespace Garage
         return SlerpUnclamped(from, to, t);
     }
 
-    template class Quaternion<Int32>;
-    template class Quaternion<Float32>;
+    template class GARAGE_API Quaternion<Int32>;
+    template class GARAGE_API Quaternion<Float32>;
 } // namespace Garage

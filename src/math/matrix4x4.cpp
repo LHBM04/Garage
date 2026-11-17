@@ -677,6 +677,6 @@ namespace Garage
         return input.TryGetInverse(result);
     }
 
-    template class Matrix4x4<Int32>;
-    template class Matrix4x4<Float32>;
+    template class GARAGE_API Matrix4x4<Int32>;
+    template class GARAGE_API Matrix4x4<Float32>;
 } // namespace Garage
