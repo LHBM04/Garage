@@ -3,8 +3,4 @@
 
 #include "garage/utilities.hpp"
 
-namespace Garage
-{
-}
-
 #endif
