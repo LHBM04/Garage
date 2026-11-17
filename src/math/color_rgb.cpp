@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "garage/core/defines.hpp"
+
 #include "garage/math/color_rgba.hpp"
 #include "garage/math/mathf.hpp"
 

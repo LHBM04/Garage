@@ -11,7 +11,8 @@
 #include <utility>
 #include <vector>
 
-#include "garage/utilities/delegate.hpp"
+#include "../utilities/delegate.hpp"
+
 #include "subsystem.hpp"
 #include "system_status.hpp"
 #include "types.hpp"

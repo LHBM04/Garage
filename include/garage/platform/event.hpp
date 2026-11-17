@@ -5,8 +5,8 @@
 #include <type_traits>
 #include <variant>
 
-#include "garage/platform/display_events.hpp"
-#include "garage/platform/input_events.hpp"
+#include "display_events.hpp"
+#include "input_events.hpp"
 
 namespace Garage
 {

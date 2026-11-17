@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "garage/core/defines.hpp"
+
 #include "garage/math/mathf.hpp"
 #include "garage/math/quaternion.hpp"
 

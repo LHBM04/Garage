@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "garage/core/defines.hpp"
+
 #include "garage/math/bounding_box.hpp"
 #include "garage/math/bounding_oriented_box.hpp"
 #include "garage/math/mathf.hpp"

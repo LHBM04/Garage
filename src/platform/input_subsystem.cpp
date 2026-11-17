@@ -9,6 +9,7 @@
 
 #include "garage/core/defines.hpp"
 #include "garage/core/engine.hpp"
+
 #include "garage/platform/display.hpp"
 #include "garage/platform/event_subsystem.hpp"
 

@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "garage/core/defines.hpp"
+
 #include "garage/math/mathf.hpp"
 #include "garage/math/vector2d.hpp"
 #include "garage/math/vector4d.hpp"

@@ -1,8 +1,9 @@
 ﻿#ifndef GARAGE_PLATFORM_DISPLAY_EVENTS_HPP
 #define GARAGE_PLATFORM_DISPLAY_EVENTS_HPP
 
-#include "garage/core/defines.hpp"
-#include "garage/math/vector2d.hpp"
+#include "../core/defines.hpp"
+
+#include "../math/vector2d.hpp"
 
 namespace Garage
 {

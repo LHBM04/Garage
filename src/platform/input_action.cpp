@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "garage/math/mathf.hpp"
+
 #include "garage/platform/input_provider.hpp"
 
 namespace Garage
@@ -82,16 +83,16 @@ namespace Garage
                 case EBindingKind::AXIS_1D:
                 {
                     const Float32 axis = static_cast<Float32>(provider.IsKeyHeld(binding.secondaryKey)) -
-                                         static_cast<Float32>(provider.IsKeyHeld(binding.primaryKey));
+                            static_cast<Float32>(provider.IsKeyHeld(binding.primaryKey));
                     x += axis;
                     break;
                 }
                 case EBindingKind::VECTOR_2D:
                 {
                     const Float32 horizontal = static_cast<Float32>(provider.IsKeyHeld(binding.rightKey)) -
-                                               static_cast<Float32>(provider.IsKeyHeld(binding.leftKey));
+                            static_cast<Float32>(provider.IsKeyHeld(binding.leftKey));
                     const Float32 vertical = static_cast<Float32>(provider.IsKeyHeld(binding.primaryKey)) -
-                                             static_cast<Float32>(provider.IsKeyHeld(binding.secondaryKey));
+                            static_cast<Float32>(provider.IsKeyHeld(binding.secondaryKey));
                     x += horizontal;
                     y += vertical;
                     break;
