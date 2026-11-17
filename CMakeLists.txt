@@ -32,6 +32,7 @@ if(CMAKE_BUILD_TYPE)
 endif()
 
 include(cmake/platform-detection.cmake)
+include(cmake/architecture_detection.cmake)
 include(cmake/compiler-detection.cmake)
 include(cmake/dependencies.cmake)
 
