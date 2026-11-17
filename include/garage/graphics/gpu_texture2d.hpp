@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_TEXTURE2D_HPP
+#ifndef GARAGE_GRAPHICS_GPU_TEXTURE2D_HPP
 #define GARAGE_GRAPHICS_GPU_TEXTURE2D_HPP
 
 #include "../core/defines.hpp"
@@ -8,6 +8,8 @@
 
 namespace Garage
 {
+    class IGPUDevice;
+
     struct GARAGE_API GPUTexture2DCreateInfo final
     {
         EGPUTextureType   type       = EGPUTextureType::TEXTURE_2D;
@@ -19,93 +21,26 @@ namespace Garage
         UInt32            mipLevels  = 1;
     };
 
-    struct GARAGE_API GPUTexture2DHandleInfo final
-    {
-        void*             deviceHandle  = nullptr;
-        void*             textureHandle = nullptr;
-        EGPUTextureType   type          = EGPUTextureType::TEXTURE_2D;
-        EGPUTextureFormat format        = EGPUTextureFormat::R8G8B8A8_UNORM;
-        UInt32            width         = 0;
-        UInt32            height        = 0;
-        UInt32            layerCount    = 1;
-        UInt32            mipLevels     = 1;
-        bool              ownsHandle    = true;
-    };
-
-    class GARAGE_API GPUTexture2D final
+    class GARAGE_API IGPUTexture2D
     {
     public:
-        GPUTexture2D() noexcept = default;
-        explicit GPUTexture2D(const GPUTexture2DHandleInfo& handleInfo) noexcept;
-        ~GPUTexture2D() noexcept;
+        IGPUTexture2D() noexcept          = default;
+        virtual ~IGPUTexture2D() noexcept = default;
 
-        GPUTexture2D(const GPUTexture2D&)            = delete;
-        GPUTexture2D& operator=(const GPUTexture2D&) = delete;
+        IGPUTexture2D(const IGPUTexture2D&)            = delete;
+        IGPUTexture2D& operator=(const IGPUTexture2D&) = delete;
 
-        GPUTexture2D(GPUTexture2D&& other) noexcept;
-        GPUTexture2D& operator=(GPUTexture2D&& other) noexcept;
+        IGPUTexture2D(IGPUTexture2D&&)            = delete;
+        IGPUTexture2D& operator=(IGPUTexture2D&&) = delete;
 
-        void ResetBorrowedHandle(void*             newTextureHandle,
-                                 EGPUTextureFormat newFormat,
-                                 UInt32            newWidth,
-                                 UInt32            newHeight) noexcept;
-
-        [[nodiscard]] UInt32            GetWidth() const noexcept;
-        [[nodiscard]] UInt32            GetHeight() const noexcept;
-        [[nodiscard]] UInt32            GetLayerCount() const noexcept;
-        [[nodiscard]] UInt32            GetMipLevels() const noexcept;
-        [[nodiscard]] EGPUTextureFormat GetFormat() const noexcept;
-        [[nodiscard]] EGPUTextureType   GetType() const noexcept;
-        [[nodiscard]] void*             GetNativeHandle() const noexcept;
-
-    private:
-        void Release() noexcept;
-
-        void*             deviceHandle  = nullptr;
-        void*             textureHandle = nullptr;
-        EGPUTextureType   type          = EGPUTextureType::TEXTURE_2D;
-        EGPUTextureFormat format        = EGPUTextureFormat::UNKNOWN;
-        UInt32            width         = 0;
-        UInt32            height        = 0;
-        UInt32            layerCount    = 1;
-        UInt32            mipLevels     = 1;
-        bool              ownsHandle    = false;
+        [[nodiscard]] virtual const IGPUDevice* GetDevice() const noexcept     = 0;
+        [[nodiscard]] virtual UInt32            GetWidth() const noexcept      = 0;
+        [[nodiscard]] virtual UInt32            GetHeight() const noexcept     = 0;
+        [[nodiscard]] virtual UInt32            GetLayerCount() const noexcept = 0;
+        [[nodiscard]] virtual UInt32            GetMipLevels() const noexcept  = 0;
+        [[nodiscard]] virtual EGPUTextureFormat GetFormat() const noexcept     = 0;
+        [[nodiscard]] virtual EGPUTextureType   GetType() const noexcept       = 0;
     };
-
-    inline UInt32 GPUTexture2D::GetWidth() const noexcept
-    {
-        return width;
-    }
-
-    inline UInt32 GPUTexture2D::GetHeight() const noexcept
-    {
-        return height;
-    }
-
-    inline UInt32 GPUTexture2D::GetLayerCount() const noexcept
-    {
-        return layerCount;
-    }
-
-    inline UInt32 GPUTexture2D::GetMipLevels() const noexcept
-    {
-        return mipLevels;
-    }
-
-    inline EGPUTextureFormat GPUTexture2D::GetFormat() const noexcept
-    {
-        return format;
-    }
-
-    inline EGPUTextureType GPUTexture2D::GetType() const noexcept
-    {
-        return type;
-    }
-
-    inline void* GPUTexture2D::GetNativeHandle() const noexcept
-    {
-        return textureHandle;
-    }
 } // namespace Garage
 
 #endif // GARAGE_GRAPHICS_GPU_TEXTURE2D_HPP

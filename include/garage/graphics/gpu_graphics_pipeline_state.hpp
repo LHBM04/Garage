@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_GRAPHICS_PIPELINE_STATE_HPP
+#ifndef GARAGE_GRAPHICS_GPU_GRAPHICS_PIPELINE_STATE_HPP
 #define GARAGE_GRAPHICS_GPU_GRAPHICS_PIPELINE_STATE_HPP
 
 #include <span>
@@ -10,12 +10,13 @@
 
 namespace Garage
 {
-    class GPUShader;
+    class IGPUDevice;
+    class IGPUShader;
 
     struct GARAGE_API GPUGraphicsPipelineDesc final
     {
-        const GPUShader*                    vertexShader          = nullptr;
-        const GPUShader*                    fragmentShader        = nullptr;
+        const IGPUShader*                   vertexShader          = nullptr;
+        const IGPUShader*                   fragmentShader        = nullptr;
         std::span<const GPUVertexAttribute> vertexAttributes      = {};
         UInt32                              vertexStride          = 0;
         EGPUPrimitiveTopology               primitiveTopology     = EGPUPrimitiveTopology::TRIANGLE_LIST;
@@ -38,31 +39,20 @@ namespace Garage
         bool                                hasDepthStencilTarget = true;
     };
 
-    class GARAGE_API GPUGraphicsPipelineState final
+    class GARAGE_API IGPUGraphicsPipelineState
     {
     public:
-        GPUGraphicsPipelineState(void* deviceHandle, void* pipelineHandle) noexcept;
-        ~GPUGraphicsPipelineState() noexcept;
+        IGPUGraphicsPipelineState() noexcept          = default;
+        virtual ~IGPUGraphicsPipelineState() noexcept = default;
 
-        GPUGraphicsPipelineState(const GPUGraphicsPipelineState&)            = delete;
-        GPUGraphicsPipelineState& operator=(const GPUGraphicsPipelineState&) = delete;
+        IGPUGraphicsPipelineState(const IGPUGraphicsPipelineState&)            = delete;
+        IGPUGraphicsPipelineState& operator=(const IGPUGraphicsPipelineState&) = delete;
 
-        GPUGraphicsPipelineState(GPUGraphicsPipelineState&& other) noexcept;
-        GPUGraphicsPipelineState& operator=(GPUGraphicsPipelineState&& other) noexcept;
+        IGPUGraphicsPipelineState(IGPUGraphicsPipelineState&&)            = delete;
+        IGPUGraphicsPipelineState& operator=(IGPUGraphicsPipelineState&&) = delete;
 
-        [[nodiscard]] void* GetNativeHandle() const noexcept;
-
-    private:
-        void Release() noexcept;
-
-        void* deviceHandle   = nullptr;
-        void* pipelineHandle = nullptr;
+        [[nodiscard]] virtual const IGPUDevice* GetDevice() const noexcept = 0;
     };
-
-    inline void* GPUGraphicsPipelineState::GetNativeHandle() const noexcept
-    {
-        return pipelineHandle;
-    }
 } // namespace Garage
 
 #endif // GARAGE_GRAPHICS_GPU_GRAPHICS_PIPELINE_STATE_HPP

@@ -23,28 +23,32 @@
 
 #include "garage/utilities/logger.hpp"
 
+#include "gpu_device_impl.hpp"
+
 namespace Garage
 {
+    RenderSubsystem::~RenderSubsystem() noexcept = default;
+
     ESystemStatus RenderSubsystem::OnStartup()
     {
         device = CreateDevice();
         if (device == nullptr)
         {
-            LOG_CRITICAL("GPU 디바이스 생성에 실패했습니다.");
             return ESystemStatus::FAILURE;
         }
 
         commandBuffer = device->CreateCommandBuffer();
         if (commandBuffer == nullptr)
         {
-            LOG_ERROR("GPU 명령 버퍼 생성에 실패했습니다.");
+            device.reset();
             return ESystemStatus::FAILURE;
         }
 
         fence = device->CreateFence();
         if (fence == nullptr)
         {
-            LOG_ERROR("GPU 펜스 생성에 실패했습니다.");
+            commandBuffer = nullptr;
+            device.reset();
             return ESystemStatus::FAILURE;
         }
 
@@ -101,7 +105,7 @@ namespace Garage
             return ESystemStatus::FAILURE;
         }
 
-        for (GPUSwapChain* swapChain : swapChains | std::views::values)
+        for (IGPUSwapChain* swapChain : swapChains | std::views::values)
         {
             if (swapChain == nullptr)
             {
@@ -125,7 +129,7 @@ namespace Garage
             return ESystemStatus::FAILURE;
         }
 
-        for (const GPUSwapChain* swapChain : swapChains | std::views::values)
+        for (const IGPUSwapChain* swapChain : swapChains | std::views::values)
         {
             if (swapChain != nullptr)
             {
@@ -174,7 +178,7 @@ namespace Garage
             return;
         }
 
-        GPUSwapChain* swapChain = device->CreateSwapChain(display);
+        IGPUSwapChain* swapChain = device->CreateSwapChain(display);
         if (swapChain == nullptr)
         {
             LOG_ERROR("GPU 스왑체인 생성에 실패했습니다.");
@@ -209,7 +213,7 @@ namespace Garage
         }
     }
 
-    std::unique_ptr<GPUDevice> RenderSubsystem::CreateDevice() const
+    std::unique_ptr<IGPUDevice> RenderSubsystem::CreateDevice() const
     {
         constexpr SDL_GPUShaderFormat SHADER_FORMATS =
                 SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
@@ -259,14 +263,10 @@ namespace Garage
         {
             SDL_ReleaseGPUSampler(sdlDevice, defaultSampler);
             SDL_DestroyGPUDevice(sdlDevice);
-            LOG_ERROR("폴백 GPU 텍스처 생성에 실패했습니다: {}", SDL_GetError());
+            LOG_ERROR("기본 폴백 GPU 텍스처 생성에 실패했습니다: {}", SDL_GetError());
             return nullptr;
         }
 
-        return std::make_unique<GPUDevice>(GPUDeviceCreateInfo{
-                .deviceHandle    = sdlDevice,
-                .defaultSampler  = defaultSampler,
-                .fallbackTexture = fallbackTexture,
-        });
+        return std::make_unique<GPUDeviceImpl>(sdlDevice, defaultSampler, fallbackTexture);
     }
 } // namespace Garage

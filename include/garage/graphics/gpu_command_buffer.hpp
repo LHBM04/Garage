@@ -1,7 +1,6 @@
 #ifndef GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_HPP
 #define GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_HPP
 
-#include <array>
 #include <span>
 #include <type_traits>
 
@@ -14,36 +13,31 @@
 
 namespace Garage
 {
-    class GPUBuffer;
-    class GPUDevice;
-    class GPUFence;
-    class GPUGraphicsPipelineState;
     class GPUTarget;
-    class GPUTexture2D;
+    class IGPUBuffer;
+    class IGPUDevice;
+    class IGPUFence;
+    class IGPUGraphicsPipelineState;
+    class IGPUTexture2D;
 
-    struct GARAGE_API GPUCommandBufferCreateInfo final
-    {
-        const GPUDevice* device = nullptr;
-    };
-
-    class GARAGE_API GPUCommandBuffer final
+    class GARAGE_API IGPUCommandBuffer
     {
     public:
         static constexpr UInt32 TEXTURE_SLOT_COUNT  = 8;
         static constexpr UInt32 ROOT_CONSTANT_SLOT  = 3;
         static constexpr UInt32 ROOT_CONSTANT_COUNT = 4;
 
-        explicit GPUCommandBuffer(const GPUCommandBufferCreateInfo& createInfo) noexcept;
-        ~GPUCommandBuffer() noexcept;
+        IGPUCommandBuffer() noexcept          = default;
+        virtual ~IGPUCommandBuffer() noexcept = default;
 
-        GPUCommandBuffer(const GPUCommandBuffer&)            = delete;
-        GPUCommandBuffer& operator=(const GPUCommandBuffer&) = delete;
+        IGPUCommandBuffer(const IGPUCommandBuffer&)            = delete;
+        IGPUCommandBuffer& operator=(const IGPUCommandBuffer&) = delete;
 
-        GPUCommandBuffer(GPUCommandBuffer&& other) noexcept;
-        GPUCommandBuffer& operator=(GPUCommandBuffer&& other) noexcept;
+        IGPUCommandBuffer(IGPUCommandBuffer&&)            = delete;
+        IGPUCommandBuffer& operator=(IGPUCommandBuffer&&) = delete;
 
-        [[nodiscard]] bool Reset() noexcept;
-        [[nodiscard]] bool Submit(GPUFence* fence = nullptr) noexcept;
+        [[nodiscard]] virtual bool Reset() noexcept                            = 0;
+        [[nodiscard]] virtual bool Submit(IGPUFence* fence = nullptr) noexcept = 0;
 
         template <class T>
         [[nodiscard]] bool SetGraphicsConstants(UInt32 rootSlot, const T& constants) noexcept;
@@ -51,108 +45,61 @@ namespace Garage
         template <class T>
         [[nodiscard]] bool SetGraphicsConstants(const T& constants) noexcept;
 
-        [[nodiscard]] bool SetGraphicsConstants(UInt32 rootSlot, std::span<const Byte> bytes) noexcept;
+        [[nodiscard]] virtual bool SetGraphicsConstants(UInt32 rootSlot, std::span<const Byte> bytes) noexcept = 0;
 
-        void SetGraphicsRootConstants(UInt32 rootSlot, std::span<const Byte> bytes, UInt32 offset = 0) noexcept;
-        void SetGPUGraphicsPipelineState(const GPUGraphicsPipelineState& pipelineState) noexcept;
+        virtual void
+                SetGraphicsRootConstants(UInt32 rootSlot, std::span<const Byte> bytes, UInt32 offset = 0) noexcept = 0;
+        virtual void SetGPUGraphicsPipelineState(const IGPUGraphicsPipelineState& pipelineState) noexcept          = 0;
 
-        [[nodiscard]] bool BindTextures(std::span<const GPUTexture2D* const, TEXTURE_SLOT_COUNT> textures) noexcept;
+        [[nodiscard]] virtual bool
+                BindTextures(std::span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures) noexcept = 0;
 
-        void CopyGPUBuffer(const GPUBuffer& destination,
-                           UInt64           destinationOffset,
-                           const GPUBuffer& source,
-                           UInt64           sourceOffset,
-                           UInt64           sizeInBytes) noexcept;
+        virtual void CopyGPUBuffer(const IGPUBuffer& destination,
+                                   UInt64            destinationOffset,
+                                   const IGPUBuffer& source,
+                                   UInt64            sourceOffset,
+                                   UInt64            sizeInBytes) noexcept = 0;
 
-        void SetPrimitiveTopology(EGPUPrimitiveTopology primitive) noexcept;
+        virtual void SetPrimitiveTopology(EGPUPrimitiveTopology primitive) noexcept = 0;
 
-        void SetViewport(const GPUViewport& viewport) noexcept;
-        void SetScissorRect(const GPURect& scissorRect) noexcept;
+        virtual void SetViewport(const GPUViewport& viewport) noexcept   = 0;
+        virtual void SetScissorRect(const GPURect& scissorRect) noexcept = 0;
 
-        void SetVertexBuffer(UInt32 slot, const GPUVertexBufferView& view) noexcept;
-        void SetIndexBuffer(const GPUIndexBufferView& view) noexcept;
+        virtual void SetVertexBuffer(UInt32 slot, const GPUVertexBufferView& view) noexcept = 0;
+        virtual void SetIndexBuffer(const GPUIndexBufferView& view) noexcept                = 0;
 
-        void Draw(UInt32 vertexCount, UInt32 firstVertex = 0) noexcept;
-        void DrawIndexed(UInt32 indexCount, UInt32 firstIndex = 0, Int32 baseVertex = 0) noexcept;
-        void DrawInstanced(UInt32 vertexCountPerInstance,
-                           UInt32 instanceCount,
-                           UInt32 firstVertex   = 0,
-                           UInt32 firstInstance = 0) noexcept;
-        void DrawIndexedInstanced(UInt32 indexCountPerInstance,
-                                  UInt32 instanceCount,
-                                  UInt32 firstIndex    = 0,
-                                  Int32  baseVertex    = 0,
-                                  UInt32 firstInstance = 0) noexcept;
+        virtual void Draw(UInt32 vertexCount, UInt32 firstVertex = 0) noexcept                            = 0;
+        virtual void DrawIndexed(UInt32 indexCount, UInt32 firstIndex = 0, Int32 baseVertex = 0) noexcept = 0;
+        virtual void DrawInstanced(UInt32 vertexCountPerInstance,
+                                   UInt32 instanceCount,
+                                   UInt32 firstVertex   = 0,
+                                   UInt32 firstInstance = 0) noexcept                                     = 0;
+        virtual void DrawIndexedInstanced(UInt32 indexCountPerInstance,
+                                          UInt32 instanceCount,
+                                          UInt32 firstIndex    = 0,
+                                          Int32  baseVertex    = 0,
+                                          UInt32 firstInstance = 0) noexcept                              = 0;
 
-        void ClearRenderTarget(const ColorRGBAFloat& color) noexcept;
-        void ClearDepthStencil(Float32 depth) noexcept;
-        void SetGPUTarget(const GPUTarget& target) noexcept;
-        void EndRenderPass() noexcept;
+        virtual void ClearRenderTarget(const ColorRGBAFloat& color) noexcept = 0;
+        virtual void ClearDepthStencil(Float32 depth) noexcept               = 0;
+        virtual void SetGPUTarget(const GPUTarget& target) noexcept          = 0;
+        virtual void EndRenderPass() noexcept                                = 0;
 
-        [[nodiscard]] EGPUTextureFormat  GetActiveTargetFormat() const noexcept;
-        [[nodiscard]] const GPURect&     GetActiveTargetBounds() const noexcept;
-        [[nodiscard]] const GPUViewport& GetActiveViewport() const noexcept;
-        [[nodiscard]] void*              GetNativeCommandBuffer() const noexcept;
-        [[nodiscard]] void*              GetActiveRenderPass() const noexcept;
-
-    private:
-        [[nodiscard]] bool EnsureRenderPass() noexcept;
-
-        const GPUDevice* device              = nullptr;
-        void*            commandBufferHandle = nullptr;
-        void*            renderPassHandle    = nullptr;
-
-        const GPUTarget*      activeTarget       = nullptr;
-        EGPUTextureFormat     activeTargetFormat = EGPUTextureFormat::UNKNOWN;
-        GPURect               activeTargetBounds = {};
-        GPUViewport           activeViewport     = {};
-        GPURect               activeScissor      = {};
-        EGPUPrimitiveTopology activeTopology     = EGPUPrimitiveTopology::TRIANGLE_LIST;
-
-        ColorRGBAFloat clearColor         = ColorRGBAFloat::GetBlack();
-        Float32        clearDepth         = 1.0f;
-        bool           shouldClearColor   = false;
-        bool           shouldClearDepth   = false;
-        bool           hasPendingViewport = false;
-        bool           hasPendingScissor  = false;
-
-        std::array<UInt32, ROOT_CONSTANT_COUNT> rootConstants = {};
+        [[nodiscard]] virtual const IGPUDevice*  GetDevice() const noexcept             = 0;
+        [[nodiscard]] virtual EGPUTextureFormat  GetActiveTargetFormat() const noexcept = 0;
+        [[nodiscard]] virtual const GPURect&     GetActiveTargetBounds() const noexcept = 0;
+        [[nodiscard]] virtual const GPUViewport& GetActiveViewport() const noexcept     = 0;
     };
 
-    inline EGPUTextureFormat GPUCommandBuffer::GetActiveTargetFormat() const noexcept
-    {
-        return activeTargetFormat;
-    }
-
-    inline const GPURect& GPUCommandBuffer::GetActiveTargetBounds() const noexcept
-    {
-        return activeTargetBounds;
-    }
-
-    inline const GPUViewport& GPUCommandBuffer::GetActiveViewport() const noexcept
-    {
-        return activeViewport;
-    }
-
-    inline void* GPUCommandBuffer::GetNativeCommandBuffer() const noexcept
-    {
-        return commandBufferHandle;
-    }
-
-    inline void* GPUCommandBuffer::GetActiveRenderPass() const noexcept
-    {
-        return renderPassHandle;
-    }
-
     template <class T>
-    inline bool GPUCommandBuffer::SetGraphicsConstants(UInt32 rootSlot, const T& constants) noexcept
+    inline bool IGPUCommandBuffer::SetGraphicsConstants(UInt32 rootSlot, const T& constants) noexcept
     {
         static_assert(std::is_trivially_copyable_v<T>, "상수 버퍼 타입은 trivially copyable이어야 합니다.");
         return SetGraphicsConstants(rootSlot, std::as_bytes(std::span(&constants, 1)));
     }
 
     template <class T>
-    inline bool GPUCommandBuffer::SetGraphicsConstants(const T& constants) noexcept
+    inline bool IGPUCommandBuffer::SetGraphicsConstants(const T& constants) noexcept
     {
         return SetGraphicsConstants(T::ROOT_SLOT, constants);
     }

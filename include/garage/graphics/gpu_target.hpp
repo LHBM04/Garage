@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_TARGET_HPP
+#ifndef GARAGE_GRAPHICS_GPU_TARGET_HPP
 #define GARAGE_GRAPHICS_GPU_TARGET_HPP
 
 #include "../core/defines.hpp"
@@ -8,13 +8,13 @@
 
 namespace Garage
 {
-    class GPUTexture2D;
+    class IGPUTexture2D;
 
     struct GARAGE_API GPUTargetCreateInfo final
     {
-        const GPUTexture2D* texture             = nullptr;
-        const GPUTexture2D* depthStencilTexture = nullptr;
-        EGPUTextureFormat   format              = EGPUTextureFormat::UNKNOWN;
+        const IGPUTexture2D* texture             = nullptr;
+        const IGPUTexture2D* depthStencilTexture = nullptr;
+        EGPUTextureFormat    format              = EGPUTextureFormat::UNKNOWN;
     };
 
     class GARAGE_API GPUTarget final
@@ -33,14 +33,14 @@ namespace Garage
         GPUTarget(GPUTarget&&) noexcept            = default;
         GPUTarget& operator=(GPUTarget&&) noexcept = default;
 
-        [[nodiscard]] const GPUTexture2D* GetTexture() const noexcept;
-        [[nodiscard]] const GPUTexture2D* GetDepthStencilTexture() const noexcept;
-        [[nodiscard]] EGPUTextureFormat   GetFormat() const noexcept;
+        [[nodiscard]] const IGPUTexture2D* GetTexture() const noexcept;
+        [[nodiscard]] const IGPUTexture2D* GetDepthStencilTexture() const noexcept;
+        [[nodiscard]] EGPUTextureFormat    GetFormat() const noexcept;
 
     private:
-        const GPUTexture2D* texture             = nullptr;
-        const GPUTexture2D* depthStencilTexture = nullptr;
-        EGPUTextureFormat   format              = EGPUTextureFormat::UNKNOWN;
+        const IGPUTexture2D* texture             = nullptr;
+        const IGPUTexture2D* depthStencilTexture = nullptr;
+        EGPUTextureFormat    format              = EGPUTextureFormat::UNKNOWN;
     };
 
     inline GPUTarget::GPUTarget(const GPUTargetCreateInfo& createInfo) noexcept
@@ -51,12 +51,12 @@ namespace Garage
         ASSERT(this->texture != nullptr);
     }
 
-    inline const GPUTexture2D* GPUTarget::GetTexture() const noexcept
+    inline const IGPUTexture2D* GPUTarget::GetTexture() const noexcept
     {
         return texture;
     }
 
-    inline const GPUTexture2D* GPUTarget::GetDepthStencilTexture() const noexcept
+    inline const IGPUTexture2D* GPUTarget::GetDepthStencilTexture() const noexcept
     {
         return depthStencilTexture;
     }

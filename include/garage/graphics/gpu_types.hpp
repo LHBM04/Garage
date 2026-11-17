@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_TYPES_HPP
+#ifndef GARAGE_GRAPHICS_GPU_TYPES_HPP
 #define GARAGE_GRAPHICS_GPU_TYPES_HPP
 
 #include "../core/defines.hpp"
@@ -6,7 +6,7 @@
 
 namespace Garage
 {
-    class GPUBuffer;
+    class IGPUBuffer;
 
     enum class EGPUBufferUsage : UInt8
     {
@@ -174,18 +174,18 @@ namespace Garage
 
     struct GARAGE_API GPUVertexBufferView final
     {
-        const GPUBuffer* buffer        = nullptr;
-        UInt32           offset        = 0;
-        UInt32           sizeInBytes   = 0;
-        UInt32           strideInBytes = 0;
+        const IGPUBuffer* buffer        = nullptr;
+        UInt32            offset        = 0;
+        UInt32            sizeInBytes   = 0;
+        UInt32            strideInBytes = 0;
     };
 
     struct GARAGE_API GPUIndexBufferView final
     {
-        const GPUBuffer* buffer      = nullptr;
-        UInt32           offset      = 0;
-        UInt32           sizeInBytes = 0;
-        EGPUIndexFormat  format      = EGPUIndexFormat::UINT32;
+        const IGPUBuffer* buffer      = nullptr;
+        UInt32            offset      = 0;
+        UInt32            sizeInBytes = 0;
+        EGPUIndexFormat   format      = EGPUIndexFormat::UINT32;
     };
 } // namespace Garage
 

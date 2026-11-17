@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_SHADER_HPP
+#ifndef GARAGE_GRAPHICS_GPU_SHADER_HPP
 #define GARAGE_GRAPHICS_GPU_SHADER_HPP
 
 #include <span>
@@ -11,6 +11,8 @@
 
 namespace Garage
 {
+    class IGPUDevice;
+
     struct GARAGE_API GPUShaderCreateInfo final
     {
         std::span<const Byte> code                = {};
@@ -23,45 +25,22 @@ namespace Garage
         UInt32                uniformBufferCount  = 0;
     };
 
-    class GARAGE_API GPUShader final
+    class GARAGE_API IGPUShader
     {
     public:
-        GPUShader(void* deviceHandle, void* shaderHandle, EGPUShaderStage stage, EGPUShaderFormat format) noexcept;
-        ~GPUShader() noexcept;
+        IGPUShader() noexcept          = default;
+        virtual ~IGPUShader() noexcept = default;
 
-        GPUShader(const GPUShader&)            = delete;
-        GPUShader& operator=(const GPUShader&) = delete;
+        IGPUShader(const IGPUShader&)            = delete;
+        IGPUShader& operator=(const IGPUShader&) = delete;
 
-        GPUShader(GPUShader&& other) noexcept;
-        GPUShader& operator=(GPUShader&& other) noexcept;
+        IGPUShader(IGPUShader&&)            = delete;
+        IGPUShader& operator=(IGPUShader&&) = delete;
 
-        [[nodiscard]] EGPUShaderStage  GetStage() const noexcept;
-        [[nodiscard]] EGPUShaderFormat GetFormat() const noexcept;
-        [[nodiscard]] void*            GetNativeHandle() const noexcept;
-
-    private:
-        void Release() noexcept;
-
-        void*            deviceHandle = nullptr;
-        void*            shaderHandle = nullptr;
-        EGPUShaderStage  stage        = EGPUShaderStage::VERTEX;
-        EGPUShaderFormat format       = EGPUShaderFormat::INVALID;
+        [[nodiscard]] virtual const IGPUDevice* GetDevice() const noexcept = 0;
+        [[nodiscard]] virtual EGPUShaderStage   GetStage() const noexcept  = 0;
+        [[nodiscard]] virtual EGPUShaderFormat  GetFormat() const noexcept = 0;
     };
-
-    inline EGPUShaderStage GPUShader::GetStage() const noexcept
-    {
-        return stage;
-    }
-
-    inline EGPUShaderFormat GPUShader::GetFormat() const noexcept
-    {
-        return format;
-    }
-
-    inline void* GPUShader::GetNativeHandle() const noexcept
-    {
-        return shaderHandle;
-    }
 } // namespace Garage
 
 #endif // GARAGE_GRAPHICS_GPU_SHADER_HPP

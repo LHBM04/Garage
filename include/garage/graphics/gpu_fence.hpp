@@ -1,44 +1,30 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_FENCE_HPP
+#ifndef GARAGE_GRAPHICS_GPU_FENCE_HPP
 #define GARAGE_GRAPHICS_GPU_FENCE_HPP
 
 #include "../core/defines.hpp"
-#include "../core/types.hpp"
 
 namespace Garage
 {
-    class GPUDevice;
+    class IGPUDevice;
 
-    class GARAGE_API GPUFence final
+    class GARAGE_API IGPUFence
     {
     public:
-        explicit GPUFence(void* deviceHandle, void* fenceHandle = nullptr) noexcept;
-        ~GPUFence() noexcept;
+        IGPUFence() noexcept          = default;
+        virtual ~IGPUFence() noexcept = default;
 
-        GPUFence(const GPUFence&)            = delete;
-        GPUFence& operator=(const GPUFence&) = delete;
+        IGPUFence(const IGPUFence&)            = delete;
+        IGPUFence& operator=(const IGPUFence&) = delete;
 
-        GPUFence(GPUFence&& other) noexcept;
-        GPUFence& operator=(GPUFence&& other) noexcept;
+        IGPUFence(IGPUFence&&)            = delete;
+        IGPUFence& operator=(IGPUFence&&) = delete;
 
-        void Wait() const noexcept;
-        void Signal(const GPUDevice& device) noexcept;
-        void BindNativeFence(void* newFenceHandle) noexcept;
+        virtual void Wait() const noexcept                     = 0;
+        virtual void Signal(const IGPUDevice& device) noexcept = 0;
 
-        [[nodiscard]] bool  IsCompleted() const noexcept;
-        [[nodiscard]] void* GetNativeHandle() const noexcept;
-
-    private:
-        void Release() noexcept;
-
-        void*  deviceHandle = nullptr;
-        void*  fenceHandle  = nullptr;
-        UInt64 fenceValue   = 0;
+        [[nodiscard]] virtual const IGPUDevice* GetDevice() const noexcept   = 0;
+        [[nodiscard]] virtual bool              IsCompleted() const noexcept = 0;
     };
-
-    inline void* GPUFence::GetNativeHandle() const noexcept
-    {
-        return fenceHandle;
-    }
 } // namespace Garage
 
 #endif // GARAGE_GRAPHICS_GPU_FENCE_HPP

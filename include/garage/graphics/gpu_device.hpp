@@ -1,115 +1,76 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_DEVICE_HPP
+#ifndef GARAGE_GRAPHICS_GPU_DEVICE_HPP
 #define GARAGE_GRAPHICS_GPU_DEVICE_HPP
 
-#include <memory>
 #include <span>
-#include <vector>
 
 #include "../core/defines.hpp"
 #include "../core/types.hpp"
 
-#include "gpu_buffer.hpp"
-#include "gpu_command_buffer.hpp"
-#include "gpu_fence.hpp"
-#include "gpu_graphics_pipeline_state.hpp"
-#include "gpu_mesh.hpp"
-#include "gpu_shader.hpp"
-#include "gpu_swap_chain.hpp"
-#include "gpu_texture2d.hpp"
 #include "gpu_types.hpp"
 
 namespace Garage
 {
+    struct GPUGraphicsPipelineDesc;
+    struct GPUShaderCreateInfo;
+    struct GPUTexture2DCreateInfo;
+
     class IDisplay;
+    class IGPUBuffer;
+    class IGPUCommandBuffer;
+    class IGPUFence;
+    class IGPUGraphicsPipelineState;
+    class IGPUMesh;
+    class IGPUShader;
+    class IGPUSwapChain;
+    class IGPUTexture2D;
 
-    struct GARAGE_API GPUDeviceCreateInfo final
-    {
-        void* deviceHandle    = nullptr;
-        void* defaultSampler  = nullptr;
-        void* fallbackTexture = nullptr;
-    };
-
-    class GARAGE_API GPUDevice final
+    class GARAGE_API IGPUDevice
     {
     public:
-        explicit GPUDevice(const GPUDeviceCreateInfo& createInfo) noexcept;
-        ~GPUDevice() noexcept;
+        IGPUDevice() noexcept          = default;
+        virtual ~IGPUDevice() noexcept = default;
 
-        GPUDevice(const GPUDevice&)            = delete;
-        GPUDevice& operator=(const GPUDevice&) = delete;
+        IGPUDevice(const IGPUDevice&)            = delete;
+        IGPUDevice& operator=(const IGPUDevice&) = delete;
 
-        GPUDevice(GPUDevice&& other) noexcept;
-        GPUDevice& operator=(GPUDevice&& other) noexcept;
+        IGPUDevice(IGPUDevice&&)            = delete;
+        IGPUDevice& operator=(IGPUDevice&&) = delete;
 
-        [[nodiscard]] GPUBuffer* CreateBuffer(EGPUBufferUsage usage, UInt64 sizeInBytes);
-        [[nodiscard]] GPUBuffer* CreateUploadBuffer(std::span<const Byte> data);
-        void                     DestroyBuffer(GPUBuffer* buffer) noexcept;
+        [[nodiscard]] virtual IGPUBuffer* CreateBuffer(EGPUBufferUsage usage, UInt64 sizeInBytes) = 0;
+        [[nodiscard]] virtual IGPUBuffer* CreateUploadBuffer(std::span<const Byte> data)          = 0;
+        virtual void                      DestroyBuffer(IGPUBuffer* buffer) noexcept              = 0;
 
-        [[nodiscard]] GPUShader* CreateShader(const GPUShaderCreateInfo& createInfo);
-        void                     DestroyShader(GPUShader* shader) noexcept;
+        [[nodiscard]] virtual IGPUShader* CreateShader(const GPUShaderCreateInfo& createInfo) = 0;
+        virtual void                      DestroyShader(IGPUShader* shader) noexcept          = 0;
 
-        [[nodiscard]] GPUTexture2D* CreateTexture2D(const GPUTexture2DCreateInfo& createInfo);
-        void                        DestroyTexture2D(GPUTexture2D* texture) noexcept;
+        [[nodiscard]] virtual IGPUTexture2D* CreateTexture2D(const GPUTexture2DCreateInfo& createInfo) = 0;
+        virtual void                         DestroyTexture2D(IGPUTexture2D* texture) noexcept         = 0;
 
-        [[nodiscard]] GPUCommandBuffer* CreateCommandBuffer();
-        void                            DestroyCommandBuffer(GPUCommandBuffer* commandBuffer) noexcept;
+        [[nodiscard]] virtual IGPUCommandBuffer* CreateCommandBuffer()                                           = 0;
+        virtual void                             DestroyCommandBuffer(IGPUCommandBuffer* commandBuffer) noexcept = 0;
 
-        [[nodiscard]] GPUFence* CreateFence();
-        void                    DestroyFence(GPUFence* fence) noexcept;
+        [[nodiscard]] virtual IGPUFence* CreateFence()                           = 0;
+        virtual void                     DestroyFence(IGPUFence* fence) noexcept = 0;
 
-        [[nodiscard]] GPUSwapChain* CreateSwapChain(const IDisplay* display);
-        void                        DestroySwapChain(GPUSwapChain* swapChain) noexcept;
+        [[nodiscard]] virtual IGPUSwapChain* CreateSwapChain(const IDisplay* display)            = 0;
+        virtual void                         DestroySwapChain(IGPUSwapChain* swapChain) noexcept = 0;
 
-        [[nodiscard]] GPUGraphicsPipelineState* CreateGraphicsPipelineState(const GPUGraphicsPipelineDesc& description);
-        void DestroyGraphicsPipelineState(GPUGraphicsPipelineState* pipelineState) noexcept;
+        [[nodiscard]] virtual IGPUGraphicsPipelineState*
+                     CreateGraphicsPipelineState(const GPUGraphicsPipelineDesc& description)         = 0;
+        virtual void DestroyGraphicsPipelineState(IGPUGraphicsPipelineState* pipelineState) noexcept = 0;
 
-        [[nodiscard]] GPUMesh* CreateMesh(const GPUBuffer*      vertexBuffer,
-                                          UInt32                vertexStride,
-                                          const GPUBuffer*      indexBuffer,
-                                          EGPUIndexFormat       indexFormat,
-                                          EGPUPrimitiveTopology primitive);
-        [[nodiscard]] GPUMesh* CreateMesh(std::span<const Byte> vertexData,
-                                          UInt32                vertexStride,
-                                          std::span<const Byte> indexData,
-                                          EGPUIndexFormat       indexFormat,
-                                          EGPUPrimitiveTopology primitive);
-        void                   DestroyMesh(GPUMesh* mesh) noexcept;
-
-        [[nodiscard]] void* GetNativeDevice() const noexcept;
-        [[nodiscard]] void* GetDefaultSampler() const noexcept;
-        [[nodiscard]] void* GetFallbackTexture() const noexcept;
-
-    private:
-        void Release() noexcept;
-
-        void* deviceHandle    = nullptr;
-        void* defaultSampler  = nullptr;
-        void* fallbackTexture = nullptr;
-
-        std::vector<std::unique_ptr<GPUBuffer>>                buffers        = {};
-        std::vector<std::unique_ptr<GPUShader>>                shaders        = {};
-        std::vector<std::unique_ptr<GPUTexture2D>>             textures       = {};
-        std::vector<std::unique_ptr<GPUCommandBuffer>>         commandBuffers = {};
-        std::vector<std::unique_ptr<GPUFence>>                 fences         = {};
-        std::vector<std::unique_ptr<GPUSwapChain>>             swapChains     = {};
-        std::vector<std::unique_ptr<GPUGraphicsPipelineState>> pipelineStates = {};
-        std::vector<std::unique_ptr<GPUMesh>>                  meshes         = {};
+        [[nodiscard]] virtual IGPUMesh* CreateMesh(const IGPUBuffer*     vertexBuffer,
+                                                   UInt32                vertexStride,
+                                                   const IGPUBuffer*     indexBuffer,
+                                                   EGPUIndexFormat       indexFormat,
+                                                   EGPUPrimitiveTopology primitive) = 0;
+        [[nodiscard]] virtual IGPUMesh* CreateMesh(std::span<const Byte> vertexData,
+                                                   UInt32                vertexStride,
+                                                   std::span<const Byte> indexData,
+                                                   EGPUIndexFormat       indexFormat,
+                                                   EGPUPrimitiveTopology primitive) = 0;
+        virtual void                    DestroyMesh(IGPUMesh* mesh) noexcept        = 0;
     };
-
-    inline void* GPUDevice::GetNativeDevice() const noexcept
-    {
-        return deviceHandle;
-    }
-
-    inline void* GPUDevice::GetDefaultSampler() const noexcept
-    {
-        return defaultSampler;
-    }
-
-    inline void* GPUDevice::GetFallbackTexture() const noexcept
-    {
-        return fallbackTexture;
-    }
 } // namespace Garage
 
 #endif // GARAGE_GRAPHICS_GPU_DEVICE_HPP
