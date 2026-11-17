@@ -39,7 +39,7 @@
 | 멤버 변수, 지역 변수, 매개변수 | `camelCase`를 사용한다. |
 | 매크로 및 모든 상수 | `SCREAMING_SNAKE_CASE`를 사용한다. |
 
-- 파일명에는 `E`·`I` 접두사를 제외하고 `Base` 접미사는 유지한다. (예: `ESystemStatus` → `system_status.hpp`, `IInputProvider` → `input_provider.hpp`, `SubsystemBase` → `subsystem_base.hpp`)
+- 파일명에는 `E`·`I` 접두사와 `Base` 접미사를 제외한다. (예: `ESystemStatus` → `system_status.hpp`, `IInputProvider` → `input_provider.hpp`, `SubsystemBase` → `subsystem.hpp`)
 - 상태나 공통 구현을 가지는 파생용 부모 클래스에는 `~Base` 접미사를 붙이고, 상태 없이 계약만 정의하는 순수 가상 인터페이스에는 `I~` 접두사를 사용한다.
 - 이벤트 핸들러는 `OnDisplayCreate`, `OnDisplayClose`, `OnInputActivation`처럼 `On` + `이벤트 구조체명(접미사 Event 제외)` 형식을 사용한다.
 - 식별자나 조건으로 단일 또는 다중 탐색을 수행하는 함수에는 `FindEntityByName`, `FindEntityByTag`, `FindDisplayByID`, `FindDisplayByHWND`처럼 `By` 전치사를 명시한다.
