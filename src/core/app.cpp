@@ -1,7 +1,9 @@
 #include "garage/core/app.hpp"
 
 #include "garage/core/app_subsystem.hpp"
+#include "garage/core/engine.hpp"
 #include "garage/core/system_status.hpp"
+#include "garage/platform/time_subsystem.hpp"
 
 namespace Garage
 {
@@ -18,9 +20,24 @@ namespace Garage
             return status;
         }
 
-        if (const ESystemStatus status = FixedUpdate(); status != ESystemStatus::CONTINUE)
+        Engine*        engine        = Engine::GetInstance();
+        TimeSubsystem* timeSubsystem = (engine != nullptr) ? engine->GetSubsystem<TimeSubsystem>() : nullptr;
+        if (timeSubsystem != nullptr)
         {
-            return status;
+            while (timeSubsystem->ShouldFixedStep())
+            {
+                if (const ESystemStatus status = FixedUpdate(); status != ESystemStatus::CONTINUE)
+                {
+                    return status;
+                }
+            }
+        }
+        else
+        {
+            if (const ESystemStatus status = FixedUpdate(); status != ESystemStatus::CONTINUE)
+            {
+                return status;
+            }
         }
 
         if (const ESystemStatus status = Update(); status != ESystemStatus::CONTINUE)
