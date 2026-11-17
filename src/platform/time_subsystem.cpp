@@ -91,7 +91,8 @@ namespace Garage
     {
         const UInt64 now = static_cast<UInt64>(SDL_GetPerformanceCounter());
 
-        deltaTime    = (frameCount == 0 || now < previousTime) ? 0.0
+        deltaTime    = (frameCount == 0 || now < previousTime)
+                ? 0.0
                 : static_cast<Float64>(now - previousTime) * secondsPerCount;
         totalTime    = static_cast<Float64>(now - startTime) * secondsPerCount;
         previousTime = now;
