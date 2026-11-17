@@ -1,12 +1,18 @@
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF)
 
+set(GARAGE_FETCHCONTENT_SYSTEM "")
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
+    set(GARAGE_FETCHCONTENT_SYSTEM SYSTEM)
+endif()
+
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG release-3.4.20
     GIT_SHALLOW TRUE
+    ${GARAGE_FETCHCONTENT_SYSTEM}
 )
 
 FetchContent_Declare(
@@ -14,6 +20,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
     GIT_TAG docking
     GIT_SHALLOW TRUE
+    ${GARAGE_FETCHCONTENT_SYSTEM}
 )
 
 FetchContent_Declare(
@@ -21,6 +28,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/CedricGuillemet/ImGuizmo.git
     GIT_TAG master
     GIT_SHALLOW TRUE
+    ${GARAGE_FETCHCONTENT_SYSTEM}
 )
 
 FetchContent_Declare(
@@ -28,6 +36,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/epezent/implot.git
     GIT_TAG v1.1
     GIT_SHALLOW TRUE
+    ${GARAGE_FETCHCONTENT_SYSTEM}
 )
 
 set(FMT_DOC OFF CACHE BOOL "" FORCE)
@@ -37,6 +46,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
     GIT_TAG 12.2.1
     GIT_SHALLOW TRUE
+    ${GARAGE_FETCHCONTENT_SYSTEM}
 )
 
 set(SPDLOG_FMT_EXTERNAL ON CACHE BOOL "" FORCE)
@@ -47,6 +57,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
     GIT_TAG v1.17.0
     GIT_SHALLOW TRUE
+    ${GARAGE_FETCHCONTENT_SYSTEM}
 )
 
 set(NAMEOF_OPT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -56,6 +67,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/Neargye/nameof.git
     GIT_TAG v0.11.0
     GIT_SHALLOW TRUE
+    ${GARAGE_FETCHCONTENT_SYSTEM}
 )
 
 FetchContent_Declare(
@@ -64,6 +76,7 @@ FetchContent_Declare(
     GIT_TAG master
     GIT_SHALLOW TRUE
     SOURCE_SUBDIR cmake_skip
+    ${GARAGE_FETCHCONTENT_SYSTEM}
 )
 
 set(FT_DISABLE_HARFBUZZ ON CACHE BOOL "" FORCE)
@@ -72,6 +85,7 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/freetype/freetype.git
     GIT_TAG VER-2-15-0
     GIT_SHALLOW TRUE
+    ${GARAGE_FETCHCONTENT_SYSTEM}
 )
 
 FetchContent_MakeAvailable(
@@ -94,7 +108,7 @@ add_library(imgui STATIC
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
 )
-target_include_directories(imgui PUBLIC
+target_include_directories(imgui SYSTEM PUBLIC
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
 )
@@ -107,14 +121,14 @@ add_library(implot STATIC
     ${implot_SOURCE_DIR}/implot.cpp
     ${implot_SOURCE_DIR}/implot_items.cpp
 )
-target_include_directories(implot PUBLIC
+target_include_directories(implot SYSTEM PUBLIC
     ${implot_SOURCE_DIR}
 )
 target_link_libraries(implot PUBLIC imgui::imgui)
 add_library(implot::implot ALIAS implot)
 
 add_library(rapidjson INTERFACE)
-target_include_directories(rapidjson INTERFACE
+target_include_directories(rapidjson SYSTEM INTERFACE
     ${rapidjson_SOURCE_DIR}/include
 )
 add_library(rapidjson::rapidjson ALIAS rapidjson)
