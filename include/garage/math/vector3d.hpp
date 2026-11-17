@@ -4,9 +4,10 @@
 #include <array>
 #include <compare>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
-#include "garage/math/mathf.hpp"
+#include "../core/defines.hpp"
+#include "../core/types.hpp"
+
+#include "mathf.hpp"
 
 namespace Garage
 {

@@ -3,11 +3,12 @@
 
 #include <array>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
-#include "garage/math/mathf.hpp"
-#include "garage/math/vector3d.hpp"
-#include "garage/math/vector4d.hpp"
+#include "../core/defines.hpp"
+#include "../core/types.hpp"
+
+#include "mathf.hpp"
+#include "vector3d.hpp"
+#include "vector4d.hpp"
 
 namespace Garage
 {

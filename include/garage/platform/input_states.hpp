@@ -1,7 +1,7 @@
 ﻿#ifndef GARAGE_PLATFORM_INPUT_STATES_HPP
 #define GARAGE_PLATFORM_INPUT_STATES_HPP
 
-#include "garage/core/types.hpp"
+#include "../core/types.hpp"
 
 namespace Garage
 {

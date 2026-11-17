@@ -5,11 +5,14 @@
 #include <string_view>
 #include <vector>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
-#include "garage/math/vector2d.hpp"
-#include "garage/platform/input_states.hpp"
-#include "garage/utilities/delegate.hpp"
+#include "../core/defines.hpp"
+#include "../core/types.hpp"
+
+#include "../math/vector2d.hpp"
+
+#include "../utilities/delegate.hpp"
+
+#include "input_states.hpp"
 
 namespace Garage
 {

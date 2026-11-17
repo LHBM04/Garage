@@ -8,11 +8,14 @@
 #include <SDL3/SDL_init.h>
 
 #include "garage/core/engine.hpp"
+
 #include "garage/math/vector2d.hpp"
+
 #include "garage/platform/display.hpp"
 #include "garage/platform/display_events.hpp"
 #include "garage/platform/display_subsystem.hpp"
 #include "garage/platform/input_events.hpp"
+
 #include "garage/utilities/logger.hpp"
 
 #include "platform/display_impl.hpp"

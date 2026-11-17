@@ -4,7 +4,9 @@
 #include <string_view>
 
 #include "garage/core/types.hpp"
+
 #include "garage/math/vector2d.hpp"
+
 #include "garage/platform/display.hpp"
 
 struct SDL_Window;

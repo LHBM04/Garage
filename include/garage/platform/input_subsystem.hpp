@@ -6,15 +6,18 @@
 #include <string_view>
 #include <unordered_map>
 
-#include "garage/core/app_subsystem.hpp"
-#include "garage/core/defines.hpp"
-#include "garage/core/system_status.hpp"
-#include "garage/math/vector2d.hpp"
-#include "garage/platform/display_events.hpp"
-#include "garage/platform/input_action.hpp"
-#include "garage/platform/input_events.hpp"
-#include "garage/platform/input_provider.hpp"
-#include "garage/utilities/delegate.hpp"
+#include "../core/app_subsystem.hpp"
+#include "../core/defines.hpp"
+#include "../core/system_status.hpp"
+
+#include "../math/vector2d.hpp"
+
+#include "../utilities/delegate.hpp"
+
+#include "display_events.hpp"
+#include "input_action.hpp"
+#include "input_events.hpp"
+#include "input_provider.hpp"
 
 namespace Garage
 {

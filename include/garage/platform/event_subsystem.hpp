@@ -7,12 +7,14 @@
 #include <variant>
 #include <vector>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/engine_subsystem.hpp"
-#include "garage/core/system_status.hpp"
-#include "garage/core/types.hpp"
-#include "garage/platform/event.hpp"
-#include "garage/utilities/delegate.hpp"
+#include "../core/defines.hpp"
+#include "../core/engine_subsystem.hpp"
+#include "../core/system_status.hpp"
+#include "../core/types.hpp"
+
+#include "../utilities/delegate.hpp"
+
+#include "event.hpp"
 
 namespace Garage
 {

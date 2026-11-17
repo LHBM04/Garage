@@ -9,8 +9,10 @@
 
 #include "garage/core/defines.hpp"
 #include "garage/core/engine.hpp"
+
 #include "garage/platform/display_events.hpp"
 #include "garage/platform/event_subsystem.hpp"
+
 #include "garage/utilities/logger.hpp"
 
 #include "platform/display_impl.hpp"

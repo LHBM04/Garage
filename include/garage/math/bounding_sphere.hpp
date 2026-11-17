@@ -4,13 +4,14 @@
 #include <compare>
 #include <span>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
-#include "garage/math/mathf.hpp"
-#include "garage/math/matrix4x4.hpp"
-#include "garage/math/quaternion.hpp"
-#include "garage/math/vector3d.hpp"
-#include "garage/math/vector4d.hpp"
+#include "../core/defines.hpp"
+#include "../core/types.hpp"
+
+#include "mathf.hpp"
+#include "matrix4x4.hpp"
+#include "quaternion.hpp"
+#include "vector3d.hpp"
+#include "vector4d.hpp"
 
 namespace Garage
 {
