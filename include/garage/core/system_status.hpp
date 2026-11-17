@@ -11,6 +11,6 @@ namespace Garage
         FAILURE,
         CONTINUE,
     };
-}
+} // namespace Garage
 
 #endif // GARAGE_CORE_SYSTEM_STATUS_HPP
