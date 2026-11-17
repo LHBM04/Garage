@@ -18,7 +18,7 @@ namespace Garage
     class Vector4D;
 
     template <Scalarable TScalar>
-    class GARAGE_API Vector2D final
+    class Vector2D final
     {
     public:
         using ValueType = TScalar;
@@ -177,8 +177,10 @@ namespace Garage
     using Vector2DInt   = Vector2D<Int32>;
     using Vector2DFloat = Vector2D<Float32>;
 
-    extern template class Vector2D<Int32>;
-    extern template class Vector2D<Float32>;
+#if !defined(Garage_EXPORTS)
+    extern template class GARAGE_API Vector2D<Int32>;
+    extern template class GARAGE_API Vector2D<Float32>;
+#endif
 
     [[nodiscard]] GARAGE_API Vector2D<Int32> operator*(Int32 scalar, const Vector2D<Int32>& vector) noexcept;
     [[nodiscard]] GARAGE_API Vector2D<Float32> operator*(Float32 scalar, const Vector2D<Float32>& vector) noexcept;

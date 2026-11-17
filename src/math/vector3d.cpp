@@ -669,8 +669,8 @@ namespace Garage
         return output;
     }
 
-    template class Vector3D<Int32>;
-    template class Vector3D<Float32>;
+    template class GARAGE_API Vector3D<Int32>;
+    template class GARAGE_API Vector3D<Float32>;
 
     Vector3D<Int32> operator*(Int32 scalar, const Vector3D<Int32>& vector) noexcept
     {

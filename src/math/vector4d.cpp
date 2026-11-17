@@ -551,8 +551,8 @@ namespace Garage
         return current + (delta / distance) * maxDistanceDelta;
     }
 
-    template class Vector4D<Int32>;
-    template class Vector4D<Float32>;
+    template class GARAGE_API Vector4D<Int32>;
+    template class GARAGE_API Vector4D<Float32>;
 
     Vector4D<Int32> operator*(Int32 scalar, const Vector4D<Int32>& vector) noexcept
     {

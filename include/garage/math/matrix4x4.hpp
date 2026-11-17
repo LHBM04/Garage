@@ -17,7 +17,7 @@ namespace Garage
     class Quaternion;
 
     template <Scalarable TScalar>
-    class GARAGE_API Matrix4x4 final
+    class Matrix4x4 final
     {
     public:
         using ValueType = TScalar;
@@ -156,8 +156,10 @@ namespace Garage
     using Matrix4x4Int   = Matrix4x4<Int32>;
     using Matrix4x4Float = Matrix4x4<Float32>;
 
-    extern template class Matrix4x4<Int32>;
-    extern template class Matrix4x4<Float32>;
+#if !defined(Garage_EXPORTS)
+    extern template class GARAGE_API Matrix4x4<Int32>;
+    extern template class GARAGE_API Matrix4x4<Float32>;
+#endif
 } // namespace Garage
 
 #endif // GARAGE_MATH_MATRIX4X4_HPP
