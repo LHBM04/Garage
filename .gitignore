@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,xcode,clion+all,clion+iml,jetbrains,visualstudio,jetbrains+all,jetbrains+iml,visualstudiocode
-# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,clion,cmake,xcode,clion+all,clion+iml,jetbrains,visualstudio,jetbrains+all,jetbrains+iml,visualstudiocode
+# Created by https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,xcode,clion+all,clion+iml,jetbrains,visualstudio,jetbrains+all,jetbrains+iml,visualstudiocode,ninja
+# Edit at https://www.toptal.com/developers/gitignore?templates=c,c++,clion,cmake,xcode,clion+all,clion+iml,jetbrains,visualstudio,jetbrains+all,jetbrains+iml,visualstudiocode,ninja
 
 ### C ###
 # Prerequisites
@@ -504,6 +504,10 @@ CMakeUserPresets.json
 # Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-249601023
 
 
+### Ninja ###
+.ninja_deps
+.ninja_log
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
@@ -931,4 +935,4 @@ FodyWeavers.xsd
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 
-# End of https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,xcode,clion+all,clion+iml,jetbrains,visualstudio,jetbrains+all,jetbrains+iml,visualstudiocode
+# End of https://www.toptal.com/developers/gitignore/api/c,c++,clion,cmake,xcode,clion+all,clion+iml,jetbrains,visualstudio,jetbrains+all,jetbrains+iml,visualstudiocode,ninja
