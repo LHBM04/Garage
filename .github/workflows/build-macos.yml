@@ -32,7 +32,7 @@ jobs:
         run: brew install ninja
 
       - name: Configure
-        run: cmake --preset ${{ matrix.preset }} -G Ninja
+        run: cmake --preset ${{ matrix.preset }}
 
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }} --parallel

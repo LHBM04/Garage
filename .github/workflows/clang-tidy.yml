@@ -54,7 +54,7 @@ jobs:
             libpipewire-0.3-dev
 
       - name: Configure with Clang
-        run: cmake --preset debug -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+        run: cmake --preset debug -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 
       - name: Build (generate PCH and fetched headers)
         run: cmake --build --preset debug --parallel
