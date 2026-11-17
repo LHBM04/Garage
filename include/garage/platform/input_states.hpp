@@ -1,0 +1,126 @@
+﻿#ifndef GARAGE_PLATFORM_INPUT_STATES_HPP
+#define GARAGE_PLATFORM_INPUT_STATES_HPP
+
+#include "garage/core/types.hpp"
+
+namespace Garage
+{
+    enum class EKeyCode : UInt8
+    {
+        NONE = 0,
+        BACKSPACE,
+        TAB,
+        ENTER,
+        SHIFT,
+        CONTROL,
+        ALT,
+        PAUSE,
+        CAPS_LOCK,
+        ESCAPE,
+        SPACE,
+        PAGE_UP,
+        PAGE_DOWN,
+        END,
+        HOME,
+        LEFT,
+        UP,
+        RIGHT,
+        DOWN,
+        PRINT_SCREEN,
+        INSERT,
+        DELETE_KEY,
+
+        D0,
+        D1,
+        D2,
+        D3,
+        D4,
+        D5,
+        D6,
+        D7,
+        D8,
+        D9,
+
+        A,
+        B,
+        C,
+        D,
+        E,
+        F,
+        G,
+        H,
+        I,
+        J,
+        K,
+        L,
+        M,
+        N,
+        O,
+        P,
+        Q,
+        R,
+        S,
+        T,
+        U,
+        V,
+        W,
+        X,
+        Y,
+        Z,
+
+        LEFT_SUPER,
+        RIGHT_SUPER,
+
+        NUMPAD0,
+        NUMPAD1,
+        NUMPAD2,
+        NUMPAD3,
+        NUMPAD4,
+        NUMPAD5,
+        NUMPAD6,
+        NUMPAD7,
+        NUMPAD8,
+        NUMPAD9,
+        MULTIPLY,
+        ADD,
+        SEPARATOR,
+        SUBTRACT,
+        DECIMAL,
+        DIVIDE,
+
+        F1,
+        F2,
+        F3,
+        F4,
+        F5,
+        F6,
+        F7,
+        F8,
+        F9,
+        F10,
+        F11,
+        F12,
+
+        NUM_LOCK,
+        SCROLL_LOCK,
+
+        LEFT_SHIFT,
+        RIGHT_SHIFT,
+        LEFT_CONTROL,
+        RIGHT_CONTROL,
+        LEFT_ALT,
+        RIGHT_ALT,
+    };
+
+    enum class EButtonCode : UInt32
+    {
+        NONE   = 0,
+        LEFT   = 1U << 0,
+        MIDDLE = 1U << 1,
+        RIGHT  = 1U << 2,
+        X1     = 1U << 3,
+        X2     = 1U << 4,
+    };
+} // namespace Garage
+
+#endif // GARAGE_PLATFORM_INPUT_STATES_HPP

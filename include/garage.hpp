@@ -3,6 +3,7 @@
 
 #include "garage/core.hpp"
 #include "garage/math.hpp"
+#include "garage/platform.hpp"
 #include "garage/utilities.hpp"
 
 #endif // GARAGE_GARAGE_HPP
