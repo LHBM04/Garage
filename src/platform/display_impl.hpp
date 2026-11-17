@@ -28,7 +28,7 @@ namespace Garage
         [[nodiscard]] SDL_Window* GetSDLWindow() const noexcept;
         [[nodiscard]] UInt32      GetSDLWindowID() const noexcept;
 
-        [[nodiscard]] ID GetID() const noexcept override;
+        [[nodiscard]] EId GetID() const noexcept override;
 
         [[nodiscard]] std::string_view GetCaption() const noexcept override;
         void                           SetCaption(std::string_view value) noexcept override;
@@ -55,11 +55,11 @@ namespace Garage
         [[nodiscard]] UInt64 GetFlags() const noexcept override;
 
     private:
-        inline static ID nextId = static_cast<ID>(0);
+        inline static EId nextId = static_cast<EId>(0);
 
         SDL_Window* window      = nullptr;
         bool        shouldClose = false;
-        ID          id          = static_cast<ID>(0);
+        EId         id          = static_cast<EId>(0);
     };
 } // namespace Garage
 

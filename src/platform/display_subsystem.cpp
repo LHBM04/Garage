@@ -1,21 +1,26 @@
 ﻿#include "garage/platform/display_subsystem.hpp"
 
 #include <algorithm>
+#include <memory>
+#include <utility>
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_properties.h>
+#include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_video.h>
 
 #include "garage/core/defines.hpp"
 #include "garage/core/engine.hpp"
+#include "garage/core/system_status.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/platform/display_events.hpp"
+#include "garage/platform/display_options.hpp"
 #include "garage/platform/event_subsystem.hpp"
+#include "platform/display_impl.hpp"
 
 #include "garage/utilities/logger.hpp"
-
-#include "platform/display_impl.hpp"
 
 namespace Garage
 {
@@ -53,13 +58,13 @@ namespace Garage
             }
         }
 
-        const USize removed = std::erase_if(displays,
+        const USize REMOVED = std::erase_if(displays,
                                             [](const std::unique_ptr<IDisplay>& display)
                                             {
                                                 return display->ShouldClose();
                                             });
 
-        if (removed != 0 && displays.empty())
+        if (REMOVED != 0 && displays.empty())
         {
             return ESystemStatus::SUCCESS;
         }
@@ -75,8 +80,8 @@ namespace Garage
 
     IDisplay* DisplaySubsystem::CreateDisplay(const DisplayOptions& options) noexcept
     {
-        const SDL_PropertiesID properties = SDL_CreateProperties();
-        if (properties == 0)
+        const SDL_PropertiesID PROPERTIES = SDL_CreateProperties();
+        if (PROPERTIES == 0)
         {
             LOG_ERROR("SDL 윈도우 속성 생성에 실패했습니다: {}", SDL_GetError());
             return nullptr;
@@ -88,18 +93,18 @@ namespace Garage
             windowFlags |= SDL_WINDOW_HIDDEN;
         }
 
-        const Int32 posX = options.centered ? SDL_WINDOWPOS_CENTERED : options.position.GetX();
-        const Int32 posY = options.centered ? SDL_WINDOWPOS_CENTERED : options.position.GetY();
+        const Int32 POS_X = options.centered ? SDL_WINDOWPOS_CENTERED : options.position.GetX();
+        const Int32 POS_Y = options.centered ? SDL_WINDOWPOS_CENTERED : options.position.GetY();
 
-        SDL_SetStringProperty(properties, SDL_PROP_WINDOW_CREATE_TITLE_STRING, options.title.c_str());
-        SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_X_NUMBER, posX);
-        SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_Y_NUMBER, posY);
-        SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, options.size.GetX());
-        SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, options.size.GetY());
-        SDL_SetNumberProperty(properties, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, static_cast<Sint64>(windowFlags));
+        SDL_SetStringProperty(PROPERTIES, SDL_PROP_WINDOW_CREATE_TITLE_STRING, options.title.c_str());
+        SDL_SetNumberProperty(PROPERTIES, SDL_PROP_WINDOW_CREATE_X_NUMBER, POS_X);
+        SDL_SetNumberProperty(PROPERTIES, SDL_PROP_WINDOW_CREATE_Y_NUMBER, POS_Y);
+        SDL_SetNumberProperty(PROPERTIES, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, options.size.GetX());
+        SDL_SetNumberProperty(PROPERTIES, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, options.size.GetY());
+        SDL_SetNumberProperty(PROPERTIES, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, static_cast<Sint64>(windowFlags));
 
-        SDL_Window* sdlWindow = SDL_CreateWindowWithProperties(properties);
-        SDL_DestroyProperties(properties);
+        SDL_Window* sdlWindow = SDL_CreateWindowWithProperties(PROPERTIES);
+        SDL_DestroyProperties(PROPERTIES);
 
         if (sdlWindow == nullptr)
         {
@@ -158,24 +163,24 @@ namespace Garage
         return index < displays.size() ? displays[index].get() : nullptr;
     }
 
-    IDisplay* DisplaySubsystem::FindDisplayByID(IDisplay::ID id) noexcept
+    IDisplay* DisplaySubsystem::FindDisplayByID(IDisplay::EId id) noexcept
     {
-        const auto result = std::ranges::find_if(displays,
+        const auto RESULT = std::ranges::find_if(displays,
                                                  [id](const auto& display)
                                                  {
                                                      return display->GetID() == id;
                                                  });
-        return result != displays.end() ? result->get() : nullptr;
+        return RESULT != displays.end() ? RESULT->get() : nullptr;
     }
 
-    const IDisplay* DisplaySubsystem::FindDisplayByID(IDisplay::ID id) const noexcept
+    const IDisplay* DisplaySubsystem::FindDisplayByID(IDisplay::EId id) const noexcept
     {
-        const auto result = std::ranges::find_if(displays,
+        const auto RESULT = std::ranges::find_if(displays,
                                                  [id](const auto& display)
                                                  {
                                                      return display->GetID() == id;
                                                  });
-        return result != displays.end() ? result->get() : nullptr;
+        return RESULT != displays.end() ? RESULT->get() : nullptr;
     }
 
     bool DisplaySubsystem::IsDisplayValid(const IDisplay* display) const noexcept
@@ -192,7 +197,7 @@ namespace Garage
                                    });
     }
 
-    bool DisplaySubsystem::IsDisplayValid(IDisplay::ID id) const noexcept
+    bool DisplaySubsystem::IsDisplayValid(IDisplay::EId id) const noexcept
     {
         return FindDisplayByID(id) != nullptr;
     }

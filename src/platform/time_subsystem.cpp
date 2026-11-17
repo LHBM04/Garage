@@ -4,6 +4,10 @@
 
 #include <SDL3/SDL_timer.h>
 
+#include "garage/core/engine_subsystem.hpp"
+#include "garage/core/system_status.hpp"
+#include "garage/core/types.hpp"
+
 #include "garage/utilities/logger.hpp"
 
 namespace Garage
@@ -65,14 +69,14 @@ namespace Garage
 
     ESystemStatus TimeSubsystem::OnStartup() noexcept
     {
-        const UInt64 frequency = static_cast<UInt64>(SDL_GetPerformanceFrequency());
-        if (frequency == 0)
+        const UInt64 FREQUENCY = static_cast<UInt64>(SDL_GetPerformanceFrequency());
+        if (FREQUENCY == 0)
         {
             LOG_ERROR("SDL 고해상도 타이머 주기를 조회하지 못했습니다.");
             return ESystemStatus::FAILURE;
         }
 
-        secondsPerCount = 1.0 / static_cast<Float64>(frequency);
+        secondsPerCount = 1.0 / static_cast<Float64>(FREQUENCY);
         startTime       = static_cast<UInt64>(SDL_GetPerformanceCounter());
         previousTime    = startTime;
 
@@ -89,13 +93,13 @@ namespace Garage
 
     ESystemStatus TimeSubsystem::OnPreTick() noexcept
     {
-        const UInt64 now = static_cast<UInt64>(SDL_GetPerformanceCounter());
+        const UInt64 NOW = static_cast<UInt64>(SDL_GetPerformanceCounter());
 
-        deltaTime    = (frameCount == 0 || now < previousTime)
+        deltaTime    = (frameCount == 0 || NOW < previousTime)
                 ? 0.0
-                : static_cast<Float64>(now - previousTime) * secondsPerCount;
-        totalTime    = static_cast<Float64>(now - startTime) * secondsPerCount;
-        previousTime = now;
+                : static_cast<Float64>(NOW - previousTime) * secondsPerCount;
+        totalTime    = static_cast<Float64>(NOW - startTime) * secondsPerCount;
+        previousTime = NOW;
 
         ++frameCount;
 

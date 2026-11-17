@@ -114,21 +114,21 @@ namespace Garage
         for (const SubsystemOwner& subsystem : subsystems | std::views::reverse)
         {
             SubsystemPtr          pointer = subsystem.get();
-            const std::type_index type(typeid(*pointer));
-            if (const auto result = onSubsystemRemoved.find(type); result != onSubsystemRemoved.end())
+            const std::type_index TYPE(typeid(*pointer));
+            if (const auto RESULT = onSubsystemRemoved.find(TYPE); RESULT != onSubsystemRemoved.end())
             {
-                result->second.Broadcast(pointer);
+                RESULT->second.Broadcast(pointer);
             }
             pointer->OnShutdown();
         }
 
-        for (auto& [type, delegate] : onSubsystemAdded)
+        for (auto& entry : onSubsystemAdded)
         {
-            delegate.Clear();
+            entry.second.Clear();
         }
-        for (auto& [type, delegate] : onSubsystemRemoved)
+        for (auto& entry : onSubsystemRemoved)
         {
-            delegate.Clear();
+            entry.second.Clear();
         }
         onSubsystemAdded.clear();
         onSubsystemRemoved.clear();
@@ -140,21 +140,21 @@ namespace Garage
     template <std::derived_from<TSubsystem> TResult>
     TResult* SystemBase<TSubsystem>::AddSubsystem()
     {
-        const std::type_index type(typeid(TResult));
-        const auto            result = subsystemsByType.find(type);
-        if (result != subsystemsByType.end())
+        const std::type_index TYPE(typeid(TResult));
+        const auto            RESULT = subsystemsByType.find(TYPE);
+        if (RESULT != subsystemsByType.end())
         {
-            return static_cast<TResult*>(result->second);
+            return static_cast<TResult*>(RESULT->second);
         }
 
         auto  subsystem = std::make_unique<TResult>();
         auto* pointer   = subsystem.get();
         subsystems.push_back(std::move(subsystem));
-        subsystemsByType.emplace(type, pointer);
+        subsystemsByType.emplace(TYPE, pointer);
 
-        if (const auto found = onSubsystemAdded.find(type); found != onSubsystemAdded.end())
+        if (const auto FOUND = onSubsystemAdded.find(TYPE); FOUND != onSubsystemAdded.end())
         {
-            found->second.Broadcast(pointer);
+            FOUND->second.Broadcast(pointer);
         }
         return pointer;
     }
@@ -163,21 +163,21 @@ namespace Garage
     template <std::derived_from<TSubsystem> TResult>
     void SystemBase<TSubsystem>::RemoveSubsystem()
     {
-        const std::type_index type(typeid(TResult));
-        const auto            result = subsystemsByType.find(type);
-        if (result == subsystemsByType.end())
+        const std::type_index TYPE(typeid(TResult));
+        const auto            RESULT = subsystemsByType.find(TYPE);
+        if (RESULT == subsystemsByType.end())
         {
             return;
         }
 
-        SubsystemPtr pointer = result->second;
-        if (const auto found = onSubsystemRemoved.find(type); found != onSubsystemRemoved.end())
+        SubsystemPtr pointer = RESULT->second;
+        if (const auto FOUND = onSubsystemRemoved.find(TYPE); FOUND != onSubsystemRemoved.end())
         {
-            found->second.Broadcast(pointer);
+            FOUND->second.Broadcast(pointer);
         }
         pointer->OnShutdown();
 
-        subsystemsByType.erase(result);
+        subsystemsByType.erase(RESULT);
         std::erase_if(subsystems,
                       [pointer](const SubsystemOwner& subsystem)
                       {
@@ -189,10 +189,10 @@ namespace Garage
     template <std::derived_from<TSubsystem> TResult>
     TResult* SystemBase<TSubsystem>::GetSubsystem() noexcept
     {
-        const auto result = subsystemsByType.find(std::type_index(typeid(TResult)));
-        if (result != subsystemsByType.end())
+        const auto RESULT = subsystemsByType.find(std::type_index(typeid(TResult)));
+        if (RESULT != subsystemsByType.end())
         {
-            return static_cast<TResult*>(result->second);
+            return static_cast<TResult*>(RESULT->second);
         }
 
         return nullptr;
@@ -202,10 +202,10 @@ namespace Garage
     template <std::derived_from<TSubsystem> TResult>
     const TResult* SystemBase<TSubsystem>::GetSubsystem() const noexcept
     {
-        const auto result = subsystemsByType.find(std::type_index(typeid(TResult)));
-        if (result != subsystemsByType.end())
+        const auto RESULT = subsystemsByType.find(std::type_index(typeid(TResult)));
+        if (RESULT != subsystemsByType.end())
         {
-            return static_cast<const TResult*>(result->second);
+            return static_cast<const TResult*>(RESULT->second);
         }
 
         return nullptr;

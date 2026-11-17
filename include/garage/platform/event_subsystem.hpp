@@ -96,8 +96,8 @@ namespace Garage
     template <Eventable TEvent, class... TArgs>
     void EventSubsystem::DispatchEvent(TArgs&&... args)
     {
-        const TEvent event{std::forward<TArgs>(args)...};
-        std::get<Delegate<const TEvent&>>(listeners).Broadcast(event);
+        const TEvent EVENT{std::forward<TArgs>(args)...};
+        std::get<Delegate<const TEvent&>>(listeners).Broadcast(EVENT);
     }
 
     template <Eventable TEvent>

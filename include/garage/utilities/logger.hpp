@@ -1,32 +1,16 @@
 ﻿#ifndef GARAGE_UTILITIES_LOGGER_HPP
 #define GARAGE_UTILITIES_LOGGER_HPP
 
+#include <concepts>
 #include <cstdint>
 #include <source_location>
 #include <string_view>
 #include <type_traits>
-#include <utility>
 
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 
-#if !defined(GARAGE_API)
-#    if defined(GARAGE_DYNAMIC)
-#        if defined(_WIN32)
-#            if defined(Garage_EXPORTS)
-#                define GARAGE_API __declspec(dllexport)
-#            else
-#                define GARAGE_API __declspec(dllimport)
-#            endif
-#        elif defined(__GNUC__) || defined(__clang__)
-#            define GARAGE_API __attribute__((visibility("default")))
-#        else
-#            define GARAGE_API
-#        endif
-#    else
-#        define GARAGE_API
-#    endif
-#endif
+#include "../core/defines.hpp"
 
 namespace Garage::Logger
 {

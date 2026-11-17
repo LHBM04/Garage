@@ -1,12 +1,16 @@
 ﻿#include "garage/math/matrix4x4.hpp"
 
-#include <algorithm>
+#include <array>
 #include <cmath>
+#include <compare>
 
 #include "garage/core/defines.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/math/mathf.hpp"
 #include "garage/math/quaternion.hpp"
+#include "garage/math/vector3d.hpp"
+#include "garage/math/vector4d.hpp"
 
 namespace Garage
 {
@@ -60,10 +64,10 @@ namespace Garage
                 return false;
             }
 
-            const Float32 invDet = 1.0f / detOut;
+            const Float32 INV_DET = 1.0f / detOut;
             for (USize i = 0; i < 16; ++i)
             {
-                invOut[i] = inv[i] * invDet;
+                invOut[i] = inv[i] * INV_DET;
                 if (!std::isfinite(invOut[i]))
                 {
                     return false;
@@ -192,9 +196,9 @@ namespace Garage
     {
         for (USize index = 0; index < 16; ++index)
         {
-            if (const auto order = elements[index] <=> other.elements[index]; order != 0)
+            if (const auto ORDER = elements[index] <=> other.elements[index]; ORDER != 0)
             {
-                return order;
+                return ORDER;
             }
         }
         return std::partial_ordering::equivalent;
@@ -204,8 +208,8 @@ namespace Garage
     Vector4D<TScalar> Matrix4x4<TScalar>::GetRow(USize index) const noexcept
     {
         ASSERT(index < 4);
-        const USize base = index * 4;
-        return Vector4D<TScalar>(elements[base], elements[base + 1], elements[base + 2], elements[base + 3]);
+        const USize BASE = index * 4;
+        return Vector4D<TScalar>(elements[BASE], elements[BASE + 1], elements[BASE + 2], elements[BASE + 3]);
     }
 
     template <Scalarable TScalar>
@@ -264,8 +268,8 @@ namespace Garage
         requires Floatable<TScalar>
     {
         Matrix4x4  result{};
-        const bool ok = TryGetInverse(result);
-        ASSERT(ok);
+        const bool OK = TryGetInverse(result);
+        ASSERT(OK);
         return result;
     }
 
@@ -293,10 +297,10 @@ namespace Garage
     Vector3D<Float32> Matrix4x4<TScalar>::GetScale() const noexcept
         requires Floatable<TScalar>
     {
-        const Vector3D<Float32> xAxis(elements[0], elements[1], elements[2]);
-        const Vector3D<Float32> yAxis(elements[4], elements[5], elements[6]);
-        const Vector3D<Float32> zAxis(elements[8], elements[9], elements[10]);
-        return Vector3D<Float32>(xAxis.GetMagnitude(), yAxis.GetMagnitude(), zAxis.GetMagnitude());
+        const Vector3D<Float32> X_AXIS(elements[0], elements[1], elements[2]);
+        const Vector3D<Float32> Y_AXIS(elements[4], elements[5], elements[6]);
+        const Vector3D<Float32> Z_AXIS(elements[8], elements[9], elements[10]);
+        return Vector3D<Float32>(X_AXIS.GetMagnitude(), Y_AXIS.GetMagnitude(), Z_AXIS.GetMagnitude());
     }
 
     template <Scalarable TScalar>
@@ -349,20 +353,20 @@ namespace Garage
     Vector3D<Float32> Matrix4x4<TScalar>::MultiplyPoint(const Vector3D<Float32>& point) const noexcept
         requires Floatable<TScalar>
     {
-        const Float32 x =
+        const Float32 X =
                 point.GetX() * elements[0] + point.GetY() * elements[4] + point.GetZ() * elements[8] + elements[12];
-        const Float32 y =
+        const Float32 Y =
                 point.GetX() * elements[1] + point.GetY() * elements[5] + point.GetZ() * elements[9] + elements[13];
-        const Float32 z =
+        const Float32 Z =
                 point.GetX() * elements[2] + point.GetY() * elements[6] + point.GetZ() * elements[10] + elements[14];
-        const Float32 w =
+        const Float32 W =
                 point.GetX() * elements[3] + point.GetY() * elements[7] + point.GetZ() * elements[11] + elements[15];
 
-        if (std::abs(w) <= Mathf::EPSILON)
+        if (std::abs(W) <= Mathf::EPSILON)
         {
-            return Vector3D<Float32>(x, y, z);
+            return Vector3D<Float32>(X, Y, Z);
         }
-        return Vector3D<Float32>(x / w, y / w, z / w);
+        return Vector3D<Float32>(X / W, Y / W, Z / W);
     }
 
     template <Scalarable TScalar>
@@ -403,12 +407,12 @@ namespace Garage
             return false;
         }
 
-        const Vector3D<Float32> r0 = Vector3D<Float32>(elements[0], elements[1], elements[2]) / scale.GetX();
-        const Vector3D<Float32> r1 = Vector3D<Float32>(elements[4], elements[5], elements[6]) / scale.GetY();
-        const Vector3D<Float32> r2 = Vector3D<Float32>(elements[8], elements[9], elements[10]) / scale.GetZ();
+        const Vector3D<Float32> R0 = Vector3D<Float32>(elements[0], elements[1], elements[2]) / scale.GetX();
+        const Vector3D<Float32> R1 = Vector3D<Float32>(elements[4], elements[5], elements[6]) / scale.GetY();
+        const Vector3D<Float32> R2 = Vector3D<Float32>(elements[8], elements[9], elements[10]) / scale.GetZ();
 
-        rotation = Quaternion<TScalar>::LookRotation(r2, r1);
-        (void)r0;
+        rotation = Quaternion<TScalar>::LookRotation(R2, R1);
+        (void)R0;
         return true;
     }
 
@@ -483,28 +487,28 @@ namespace Garage
     Matrix4x4<TScalar> Matrix4x4<TScalar>::Rotate(const Quaternion<TScalar>& rotation) noexcept
         requires Floatable<TScalar>
     {
-        const Quaternion<TScalar> q  = Quaternion<TScalar>::Normalize(rotation);
-        const Float32             xx = q.GetX() * q.GetX();
-        const Float32             yy = q.GetY() * q.GetY();
-        const Float32             zz = q.GetZ() * q.GetZ();
-        const Float32             xy = q.GetX() * q.GetY();
-        const Float32             xz = q.GetX() * q.GetZ();
-        const Float32             yz = q.GetY() * q.GetZ();
-        const Float32             wx = q.GetW() * q.GetX();
-        const Float32             wy = q.GetW() * q.GetY();
-        const Float32             wz = q.GetW() * q.GetZ();
+        const Quaternion<TScalar> Q  = Quaternion<TScalar>::Normalize(rotation);
+        const Float32             XX = Q.GetX() * Q.GetX();
+        const Float32             YY = Q.GetY() * Q.GetY();
+        const Float32             ZZ = Q.GetZ() * Q.GetZ();
+        const Float32             XY = Q.GetX() * Q.GetY();
+        const Float32             XZ = Q.GetX() * Q.GetZ();
+        const Float32             YZ = Q.GetY() * Q.GetZ();
+        const Float32             WX = Q.GetW() * Q.GetX();
+        const Float32             WY = Q.GetW() * Q.GetY();
+        const Float32             WZ = Q.GetW() * Q.GetZ();
 
-        return Matrix4x4(1.0f - 2.0f * (yy + zz),
-                         2.0f * (xy + wz),
-                         2.0f * (xz - wy),
+        return Matrix4x4(1.0f - 2.0f * (YY + ZZ),
+                         2.0f * (XY + WZ),
+                         2.0f * (XZ - WY),
                          0.0f,
-                         2.0f * (xy - wz),
-                         1.0f - 2.0f * (xx + zz),
-                         2.0f * (yz + wx),
+                         2.0f * (XY - WZ),
+                         1.0f - 2.0f * (XX + ZZ),
+                         2.0f * (YZ + WX),
                          0.0f,
-                         2.0f * (xz + wy),
-                         2.0f * (yz - wx),
-                         1.0f - 2.0f * (xx + yy),
+                         2.0f * (XZ + WY),
+                         2.0f * (YZ - WX),
+                         1.0f - 2.0f * (XX + YY),
                          0.0f,
                          0.0f,
                          0.0f,
@@ -537,25 +541,25 @@ namespace Garage
                                                   const Vector3D<Float32>& up) noexcept
         requires Floatable<TScalar>
     {
-        const Vector3D<Float32> zAxis = Vector3D<Float32>::Normalize(to - from);
-        const Vector3D<Float32> xAxis = Vector3D<Float32>::Normalize(Vector3D<Float32>::Cross(up, zAxis));
-        const Vector3D<Float32> yAxis = Vector3D<Float32>::Cross(zAxis, xAxis);
+        const Vector3D<Float32> Z_AXIS = Vector3D<Float32>::Normalize(to - from);
+        const Vector3D<Float32> X_AXIS = Vector3D<Float32>::Normalize(Vector3D<Float32>::Cross(up, Z_AXIS));
+        const Vector3D<Float32> Y_AXIS = Vector3D<Float32>::Cross(Z_AXIS, X_AXIS);
 
-        return Matrix4x4(xAxis.GetX(),
-                         yAxis.GetX(),
-                         zAxis.GetX(),
+        return Matrix4x4(X_AXIS.GetX(),
+                         Y_AXIS.GetX(),
+                         Z_AXIS.GetX(),
                          0.0f,
-                         xAxis.GetY(),
-                         yAxis.GetY(),
-                         zAxis.GetY(),
+                         X_AXIS.GetY(),
+                         Y_AXIS.GetY(),
+                         Z_AXIS.GetY(),
                          0.0f,
-                         xAxis.GetZ(),
-                         yAxis.GetZ(),
-                         zAxis.GetZ(),
+                         X_AXIS.GetZ(),
+                         Y_AXIS.GetZ(),
+                         Z_AXIS.GetZ(),
                          0.0f,
-                         -Vector3D<Float32>::Dot(xAxis, from),
-                         -Vector3D<Float32>::Dot(yAxis, from),
-                         -Vector3D<Float32>::Dot(zAxis, from),
+                         -Vector3D<Float32>::Dot(X_AXIS, from),
+                         -Vector3D<Float32>::Dot(Y_AXIS, from),
+                         -Vector3D<Float32>::Dot(Z_AXIS, from),
                          1.0f);
     }
 
@@ -564,26 +568,26 @@ namespace Garage
             Matrix4x4<TScalar>::Perspective(Float32 fovYDegrees, Float32 aspect, Float32 nearZ, Float32 farZ) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 halfFov = (fovYDegrees * Mathf::DEG_TO_RAD) * 0.5f;
-        const Float32 height  = 1.0f / std::tan(halfFov);
-        const Float32 width   = height / aspect;
-        const Float32 range   = farZ / (farZ - nearZ);
+        const Float32 HALF_FOV = (fovYDegrees * Mathf::DEG_TO_RAD) * 0.5f;
+        const Float32 HEIGHT   = 1.0f / std::tan(HALF_FOV);
+        const Float32 WIDTH    = HEIGHT / aspect;
+        const Float32 RANGE    = farZ / (farZ - nearZ);
 
-        return Matrix4x4(width,
+        return Matrix4x4(WIDTH,
                          0.0f,
                          0.0f,
                          0.0f,
                          0.0f,
-                         height,
+                         HEIGHT,
                          0.0f,
                          0.0f,
                          0.0f,
                          0.0f,
-                         range,
+                         RANGE,
                          1.0f,
                          0.0f,
                          0.0f,
-                         -range * nearZ,
+                         -RANGE * nearZ,
                          0.0f);
     }
 
@@ -592,25 +596,25 @@ namespace Garage
             Float32 left, Float32 right, Float32 bottom, Float32 top, Float32 nearZ, Float32 farZ) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 rcpWidth  = 1.0f / (right - left);
-        const Float32 rcpHeight = 1.0f / (top - bottom);
-        const Float32 range     = farZ / (farZ - nearZ);
+        const Float32 RCP_WIDTH  = 1.0f / (right - left);
+        const Float32 RCP_HEIGHT = 1.0f / (top - bottom);
+        const Float32 RANGE      = farZ / (farZ - nearZ);
 
-        return Matrix4x4(2.0f * nearZ * rcpWidth,
+        return Matrix4x4(2.0f * nearZ * RCP_WIDTH,
                          0.0f,
                          0.0f,
                          0.0f,
                          0.0f,
-                         2.0f * nearZ * rcpHeight,
+                         2.0f * nearZ * RCP_HEIGHT,
                          0.0f,
                          0.0f,
-                         -(left + right) * rcpWidth,
-                         -(top + bottom) * rcpHeight,
-                         range,
+                         -(left + right) * RCP_WIDTH,
+                         -(top + bottom) * RCP_HEIGHT,
+                         RANGE,
                          1.0f,
                          0.0f,
                          0.0f,
-                         -range * nearZ,
+                         -RANGE * nearZ,
                          0.0f);
     }
 
@@ -619,25 +623,25 @@ namespace Garage
             Float32 left, Float32 right, Float32 bottom, Float32 top, Float32 nearZ, Float32 farZ) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 rcpWidth  = 1.0f / (right - left);
-        const Float32 rcpHeight = 1.0f / (top - bottom);
-        const Float32 range     = 1.0f / (farZ - nearZ);
+        const Float32 RCP_WIDTH  = 1.0f / (right - left);
+        const Float32 RCP_HEIGHT = 1.0f / (top - bottom);
+        const Float32 RANGE      = 1.0f / (farZ - nearZ);
 
-        return Matrix4x4(2.0f * rcpWidth,
+        return Matrix4x4(2.0f * RCP_WIDTH,
                          0.0f,
                          0.0f,
                          0.0f,
                          0.0f,
-                         2.0f * rcpHeight,
+                         2.0f * RCP_HEIGHT,
                          0.0f,
                          0.0f,
                          0.0f,
                          0.0f,
-                         range,
+                         RANGE,
                          0.0f,
-                         -(left + right) * rcpWidth,
-                         -(top + bottom) * rcpHeight,
-                         -range * nearZ,
+                         -(left + right) * RCP_WIDTH,
+                         -(top + bottom) * RCP_HEIGHT,
+                         -RANGE * nearZ,
                          1.0f);
     }
 
@@ -645,7 +649,7 @@ namespace Garage
     Matrix4x4<TScalar> Matrix4x4<TScalar>::Ortho(Float32 width, Float32 height, Float32 nearZ, Float32 farZ) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 range = 1.0f / (farZ - nearZ);
+        const Float32 RANGE = 1.0f / (farZ - nearZ);
 
         return Matrix4x4(2.0f / width,
                          0.0f,
@@ -657,11 +661,11 @@ namespace Garage
                          0.0f,
                          0.0f,
                          0.0f,
-                         range,
+                         RANGE,
                          0.0f,
                          0.0f,
                          0.0f,
-                         -range * nearZ,
+                         -RANGE * nearZ,
                          1.0f);
     }
 

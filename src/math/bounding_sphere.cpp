@@ -3,12 +3,18 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <compare>
 
 #include "garage/core/defines.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/math/bounding_box.hpp"
 #include "garage/math/bounding_oriented_box.hpp"
 #include "garage/math/mathf.hpp"
+#include "garage/math/matrix4x4.hpp"
+#include "garage/math/quaternion.hpp"
+#include "garage/math/vector3d.hpp"
+#include "garage/math/vector4d.hpp"
 
 namespace Garage
 {
@@ -19,69 +25,69 @@ namespace Garage
                                                                const Vector3D<Float32>& b,
                                                                const Vector3D<Float32>& c) noexcept
         {
-            const Vector3D<Float32> ab = b - a;
-            const Vector3D<Float32> ac = c - a;
-            const Vector3D<Float32> ap = p - a;
+            const Vector3D<Float32> AB = b - a;
+            const Vector3D<Float32> AC = c - a;
+            const Vector3D<Float32> AP = p - a;
 
-            const Float32 d1 = Vector3D<Float32>::Dot(ab, ap);
-            const Float32 d2 = Vector3D<Float32>::Dot(ac, ap);
-            if (d1 <= 0.0f && d2 <= 0.0f)
+            const Float32 D1 = Vector3D<Float32>::Dot(AB, AP);
+            const Float32 D2 = Vector3D<Float32>::Dot(AC, AP);
+            if (D1 <= 0.0f && D2 <= 0.0f)
             {
                 return a;
             }
 
-            const Vector3D<Float32> bp = p - b;
-            const Float32           d3 = Vector3D<Float32>::Dot(ab, bp);
-            const Float32           d4 = Vector3D<Float32>::Dot(ac, bp);
-            if (d3 >= 0.0f && d4 <= d3)
+            const Vector3D<Float32> BP = p - b;
+            const Float32           D3 = Vector3D<Float32>::Dot(AB, BP);
+            const Float32           D4 = Vector3D<Float32>::Dot(AC, BP);
+            if (D3 >= 0.0f && D4 <= D3)
             {
                 return b;
             }
 
-            const Float32 vc = d1 * d4 - d3 * d2;
-            if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f)
+            const Float32 VC = D1 * D4 - D3 * D2;
+            if (VC <= 0.0f && D1 >= 0.0f && D3 <= 0.0f)
             {
-                const Float32 v = d1 / (d1 - d3);
-                return a + ab * v;
+                const Float32 V = D1 / (D1 - D3);
+                return a + AB * V;
             }
 
-            const Vector3D<Float32> cp = p - c;
-            const Float32           d5 = Vector3D<Float32>::Dot(ab, cp);
-            const Float32           d6 = Vector3D<Float32>::Dot(ac, cp);
-            if (d6 >= 0.0f && d5 <= d6)
+            const Vector3D<Float32> CP = p - c;
+            const Float32           D5 = Vector3D<Float32>::Dot(AB, CP);
+            const Float32           D6 = Vector3D<Float32>::Dot(AC, CP);
+            if (D6 >= 0.0f && D5 <= D6)
             {
                 return c;
             }
 
-            const Float32 vb = d5 * d2 - d1 * d6;
-            if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f)
+            const Float32 VB = D5 * D2 - D1 * D6;
+            if (VB <= 0.0f && D2 >= 0.0f && D6 <= 0.0f)
             {
-                const Float32 w = d2 / (d2 - d6);
-                return a + ac * w;
+                const Float32 W = D2 / (D2 - D6);
+                return a + AC * W;
             }
 
-            const Float32 va = d3 * d6 - d5 * d4;
-            if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f)
+            const Float32 VA = D3 * D6 - D5 * D4;
+            if (VA <= 0.0f && (D4 - D3) >= 0.0f && (D5 - D6) >= 0.0f)
             {
-                const Float32 w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
-                return b + (c - b) * w;
+                const Float32 W = (D4 - D3) / ((D4 - D3) + (D5 - D6));
+                return b + (c - b) * W;
             }
 
-            const Float32 denom = 1.0f / (va + vb + vc);
-            const Float32 v     = vb * denom;
-            const Float32 w     = vc * denom;
-            return a + ab * v + ac * w;
+            const Float32 DENOM = 1.0f / (VA + VB + VC);
+            const Float32 V     = VB * DENOM;
+            const Float32 W     = VC * DENOM;
+            return a + AB * V + AC * W;
         }
 
         [[nodiscard]] Vector4D<Float32> NormalizePlane(const Vector4D<Float32>& plane) noexcept
         {
-            const Vector3D<Float32> normal(plane.GetX(), plane.GetY(), plane.GetZ());
+            const Vector3D<Float32> NORMAL(plane.GetX(), plane.GetY(), plane.GetZ());
             ASSERT(plane.IsFinite());
-            const Float32 lenSq = normal.GetSqrMagnitude();
-            ASSERT(lenSq > Mathf::EPSILON);
+            const Float32 LEN_SQ = NORMAL.GetSqrMagnitude();
+            ASSERT(LEN_SQ > Mathf::EPSILON);
 
-            const Float32 invLen = 1.0f / std::sqrt(lenSq);
-            return plane * invLen;
+            const Float32 INV_LEN = 1.0f / std::sqrt(LEN_SQ);
+            return plane * INV_LEN;
         }
 
         [[nodiscard]] Vector3D<Float32> NormalizeDirection(const Vector3D<Float32>& direction) noexcept
@@ -104,8 +110,8 @@ namespace Garage
                                          const Vector3D<Float32>& v1,
                                          const Vector3D<Float32>& v2) noexcept
         {
-            const Vector3D<Float32> normal = Vector3D<Float32>::Cross(v1 - v0, v2 - v0);
-            ASSERT(normal.GetSqrMagnitude() > 0.0f);
+            const Vector3D<Float32> NORMAL = Vector3D<Float32>::Cross(v1 - v0, v2 - v0);
+            ASSERT(NORMAL.GetSqrMagnitude() > 0.0f);
         }
 
         [[nodiscard]] Float32 PlaneSignedDistance(const Vector4D<Float32>& normalizedPlane,
@@ -136,9 +142,9 @@ namespace Garage
 
     std::partial_ordering BoundingSphere::operator<=>(const BoundingSphere& other) const noexcept
     {
-        if (const auto cmp = center <=> other.center; cmp != 0)
+        if (const auto CMP = center <=> other.center; CMP != 0)
         {
-            return cmp;
+            return CMP;
         }
         return radius <=> other.radius;
     }
@@ -209,11 +215,11 @@ namespace Garage
 
     void BoundingSphere::Transform(BoundingSphere& out, const Matrix4x4<Float32>& matrix) const noexcept
     {
-        const Vector3D<Float32> newCenter = matrix.MultiplyPoint3x4(center);
-        const Vector3D<Float32> scl       = matrix.GetScale();
-        const Float32           maxScale  = std::max(scl.GetX(), std::max(scl.GetY(), scl.GetZ()));
-        out.center                        = newCenter;
-        out.radius                        = radius * maxScale;
+        const Vector3D<Float32> NEW_CENTER = matrix.MultiplyPoint3x4(center);
+        const Vector3D<Float32> SCL        = matrix.GetScale();
+        const Float32           MAX_SCALE  = std::max(SCL.GetX(), std::max(SCL.GetY(), SCL.GetZ()));
+        out.center                         = NEW_CENTER;
+        out.radius                         = radius * MAX_SCALE;
     }
 
     void BoundingSphere::Transform(BoundingSphere&            out,
@@ -221,15 +227,15 @@ namespace Garage
                                    const Quaternion<Float32>& rotation,
                                    const Vector3D<Float32>&   translation) const noexcept
     {
-        const Quaternion<Float32> normRot = NormalizeRotation(rotation);
-        out.center                        = (normRot * (center * scale)) + translation;
-        out.radius                        = radius * std::abs(scale);
+        const Quaternion<Float32> NORM_ROT = NormalizeRotation(rotation);
+        out.center                         = (NORM_ROT * (center * scale)) + translation;
+        out.radius                         = radius * std::abs(scale);
     }
 
     bool BoundingSphere::Contains(const Vector3D<Float32>& point) const noexcept
     {
-        const Float32 distSq = (point - center).GetSqrMagnitude();
-        return distSq <= radius * radius;
+        const Float32 DIST_SQ = (point - center).GetSqrMagnitude();
+        return DIST_SQ <= radius * radius;
     }
 
     bool BoundingSphere::Contains(const Vector3D<Float32>& v0,
@@ -242,14 +248,14 @@ namespace Garage
 
     bool BoundingSphere::Contains(const BoundingSphere& sphere) const noexcept
     {
-        const Float32 dist = Vector3D<Float32>::Distance(center, sphere.center);
-        return dist + sphere.radius <= radius;
+        const Float32 DIST = Vector3D<Float32>::Distance(center, sphere.center);
+        return DIST + sphere.radius <= radius;
     }
 
     bool BoundingSphere::Contains(const BoundingBox& box) const noexcept
     {
-        const BoundingBox::CornerArray corners = box.GetCorners();
-        for (const Vector3D<Float32>& corner : corners)
+        const BoundingBox::CornerArray CORNERS = box.GetCorners();
+        for (const Vector3D<Float32>& corner : CORNERS)
         {
             if (!Contains(corner))
             {
@@ -261,8 +267,8 @@ namespace Garage
 
     bool BoundingSphere::Contains(const BoundingOrientedBox& box) const noexcept
     {
-        const BoundingOrientedBox::CornerArray corners = box.GetCorners();
-        for (const Vector3D<Float32>& corner : corners)
+        const BoundingOrientedBox::CornerArray CORNERS = box.GetCorners();
+        for (const Vector3D<Float32>& corner : CORNERS)
         {
             if (!Contains(corner))
             {
@@ -274,9 +280,9 @@ namespace Garage
 
     bool BoundingSphere::Intersects(const BoundingSphere& sphere) const noexcept
     {
-        const Float32 distSq = (sphere.center - center).GetSqrMagnitude();
-        const Float32 rSum   = radius + sphere.radius;
-        return distSq <= rSum * rSum;
+        const Float32 DIST_SQ = (sphere.center - center).GetSqrMagnitude();
+        const Float32 R_SUM   = radius + sphere.radius;
+        return DIST_SQ <= R_SUM * R_SUM;
     }
 
     bool BoundingSphere::Intersects(const BoundingBox& box) const noexcept
@@ -294,38 +300,38 @@ namespace Garage
                                     const Vector3D<Float32>& v2) const noexcept
     {
         AssertNonDegenerateTriangle(v0, v1, v2);
-        const Vector3D<Float32> closest = ClosestPointOnTriangle(center, v0, v1, v2);
-        return (closest - center).GetSqrMagnitude() <= radius * radius;
+        const Vector3D<Float32> CLOSEST = ClosestPointOnTriangle(center, v0, v1, v2);
+        return (CLOSEST - center).GetSqrMagnitude() <= radius * radius;
     }
 
     bool BoundingSphere::Intersects(const Vector4D<Float32>& plane) const noexcept
     {
-        const Vector4D<Float32> p    = NormalizePlane(plane);
-        const Float32           dist = PlaneSignedDistance(p, center);
-        return std::abs(dist) <= radius;
+        const Vector4D<Float32> P    = NormalizePlane(plane);
+        const Float32           DIST = PlaneSignedDistance(P, center);
+        return std::abs(DIST) <= radius;
     }
 
     bool BoundingSphere::Intersects(const Vector3D<Float32>& origin,
                                     const Vector3D<Float32>& direction,
                                     Float32&                 distance) const noexcept
     {
-        const Vector3D<Float32> dir = NormalizeDirection(direction);
-        const Vector3D<Float32> m   = origin - center;
-        const Float32           b   = Vector3D<Float32>::Dot(m, dir);
-        const Float32           c   = Vector3D<Float32>::Dot(m, m) - radius * radius;
+        const Vector3D<Float32> DIR = NormalizeDirection(direction);
+        const Vector3D<Float32> M   = origin - center;
+        const Float32           B   = Vector3D<Float32>::Dot(M, DIR);
+        const Float32           C   = Vector3D<Float32>::Dot(M, M) - radius * radius;
 
-        if (c > 0.0f && b > 0.0f)
+        if (C > 0.0f && B > 0.0f)
         {
             return false;
         }
 
-        const Float32 discr = b * b - c;
-        if (discr < 0.0f)
+        const Float32 DISCR = B * B - C;
+        if (DISCR < 0.0f)
         {
             return false;
         }
 
-        Float32 t = -b - std::sqrt(discr);
+        Float32 t = -B - std::sqrt(DISCR);
         if (t < 0.0f)
         {
             t = 0.0f;
@@ -341,12 +347,12 @@ namespace Garage
                                      const Vector4D<Float32>& plane4,
                                      const Vector4D<Float32>& plane5) const noexcept
     {
-        const std::array<Vector4D<Float32>, 6> planes = {plane0, plane1, plane2, plane3, plane4, plane5};
-        for (const Vector4D<Float32>& plane : planes)
+        const std::array<Vector4D<Float32>, 6> PLANES = {plane0, plane1, plane2, plane3, plane4, plane5};
+        for (const Vector4D<Float32>& plane : PLANES)
         {
-            const Vector4D<Float32> p    = NormalizePlane(plane);
-            const Float32           dist = PlaneSignedDistance(p, center);
-            if (dist > -radius)
+            const Vector4D<Float32> P    = NormalizePlane(plane);
+            const Float32           DIST = PlaneSignedDistance(P, center);
+            if (DIST > -radius)
             {
                 return false;
             }
@@ -362,22 +368,22 @@ namespace Garage
 
     BoundingSphere BoundingSphere::CreateMerged(const BoundingSphere& s1, const BoundingSphere& s2) noexcept
     {
-        const Vector3D<Float32> diff = s2.center - s1.center;
-        const Float32           dist = diff.GetMagnitude();
+        const Vector3D<Float32> DIFF = s2.center - s1.center;
+        const Float32           DIST = DIFF.GetMagnitude();
 
-        if (dist + s2.radius <= s1.radius)
+        if (DIST + s2.radius <= s1.radius)
         {
             return s1;
         }
-        if (dist + s1.radius <= s2.radius)
+        if (DIST + s1.radius <= s2.radius)
         {
             return s2;
         }
 
-        const Float32           newRadius = (s1.radius + s2.radius + dist) * 0.5f;
-        const Vector3D<Float32> dir       = (dist > Mathf::EPSILON) ? (diff / dist) : Vector3D<Float32>::GetZero();
-        const Vector3D<Float32> newC      = s1.center + dir * (newRadius - s1.radius);
-        return BoundingSphere(newC, newRadius);
+        const Float32           NEW_RADIUS = (s1.radius + s2.radius + DIST) * 0.5f;
+        const Vector3D<Float32> DIR        = (DIST > Mathf::EPSILON) ? (DIFF / DIST) : Vector3D<Float32>::GetZero();
+        const Vector3D<Float32> NEW_C      = s1.center + DIR * (NEW_RADIUS - s1.radius);
+        return BoundingSphere(NEW_C, NEW_RADIUS);
     }
 
     BoundingSphere BoundingSphere::CreateFromBoundingBox(const BoundingBox& box) noexcept

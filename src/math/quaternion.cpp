@@ -2,11 +2,14 @@
 
 #include <algorithm>
 #include <cmath>
+#include <compare>
 
 #include "garage/core/defines.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/math/mathf.hpp"
 #include "garage/math/matrix4x4.hpp"
+#include "garage/math/vector3d.hpp"
 
 namespace Garage
 {
@@ -16,39 +19,39 @@ namespace Garage
                                                               const Vector3D<Float32>& r1,
                                                               const Vector3D<Float32>& r2) noexcept
         {
-            const Float32 m00   = r0.GetX();
-            const Float32 m01   = r0.GetY();
-            const Float32 m02   = r0.GetZ();
-            const Float32 m10   = r1.GetX();
-            const Float32 m11   = r1.GetY();
-            const Float32 m12   = r1.GetZ();
-            const Float32 m20   = r2.GetX();
-            const Float32 m21   = r2.GetY();
-            const Float32 m22   = r2.GetZ();
-            const Float32 trace = m00 + m11 + m22;
+            const Float32 M00   = r0.GetX();
+            const Float32 M01   = r0.GetY();
+            const Float32 M02   = r0.GetZ();
+            const Float32 M10   = r1.GetX();
+            const Float32 M11   = r1.GetY();
+            const Float32 M12   = r1.GetZ();
+            const Float32 M20   = r2.GetX();
+            const Float32 M21   = r2.GetY();
+            const Float32 M22   = r2.GetZ();
+            const Float32 TRACE = M00 + M11 + M22;
 
-            if (trace > 0.0f)
+            if (TRACE > 0.0f)
             {
-                const Float32 s = std::sqrt(trace + 1.0f) * 2.0f;
+                const Float32 S = std::sqrt(TRACE + 1.0f) * 2.0f;
                 return Quaternion<Float32>::Normalize(
-                        Quaternion<Float32>((m12 - m21) / s, (m20 - m02) / s, (m01 - m10) / s, 0.25f * s));
+                        Quaternion<Float32>((M12 - M21) / S, (M20 - M02) / S, (M01 - M10) / S, 0.25f * S));
             }
-            if (m00 > m11 && m00 > m22)
+            if (M00 > M11 && M00 > M22)
             {
-                const Float32 s = std::sqrt(1.0f + m00 - m11 - m22) * 2.0f;
+                const Float32 S = std::sqrt(1.0f + M00 - M11 - M22) * 2.0f;
                 return Quaternion<Float32>::Normalize(
-                        Quaternion<Float32>(0.25f * s, (m01 + m10) / s, (m20 + m02) / s, (m12 - m21) / s));
+                        Quaternion<Float32>(0.25f * S, (M01 + M10) / S, (M20 + M02) / S, (M12 - M21) / S));
             }
-            if (m11 > m22)
+            if (M11 > M22)
             {
-                const Float32 s = std::sqrt(1.0f + m11 - m00 - m22) * 2.0f;
+                const Float32 S = std::sqrt(1.0f + M11 - M00 - M22) * 2.0f;
                 return Quaternion<Float32>::Normalize(
-                        Quaternion<Float32>((m01 + m10) / s, 0.25f * s, (m12 + m21) / s, (m20 - m02) / s));
+                        Quaternion<Float32>((M01 + M10) / S, 0.25f * S, (M12 + M21) / S, (M20 - M02) / S));
             }
 
-            const Float32 s = std::sqrt(1.0f + m22 - m00 - m11) * 2.0f;
+            const Float32 S = std::sqrt(1.0f + M22 - M00 - M11) * 2.0f;
             return Quaternion<Float32>::Normalize(
-                    Quaternion<Float32>((m20 + m02) / s, (m12 + m21) / s, 0.25f * s, (m01 - m10) / s));
+                    Quaternion<Float32>((M20 + M02) / S, (M12 + M21) / S, 0.25f * S, (M01 - M10) / S));
         }
     } // namespace
 
@@ -148,9 +151,9 @@ namespace Garage
     Vector3D<Float32> Quaternion<TScalar>::operator*(const Vector3D<Float32>& vector) const noexcept
         requires Floatable<TScalar>
     {
-        const Vector3D<Float32> qVec(elements[0], elements[1], elements[2]);
-        const Vector3D<Float32> t = Vector3D<Float32>::Cross(qVec, vector) * 2.0f;
-        return vector + t * elements[3] + Vector3D<Float32>::Cross(qVec, t);
+        const Vector3D<Float32> Q_VEC(elements[0], elements[1], elements[2]);
+        const Vector3D<Float32> T = Vector3D<Float32>::Cross(Q_VEC, vector) * 2.0f;
+        return vector + T * elements[3] + Vector3D<Float32>::Cross(Q_VEC, T);
     }
 
     template <Scalarable TScalar>
@@ -196,17 +199,17 @@ namespace Garage
     template <Scalarable TScalar>
     std::partial_ordering Quaternion<TScalar>::operator<=>(const Quaternion& other) const noexcept
     {
-        if (const auto order = elements[0] <=> other.elements[0]; order != 0)
+        if (const auto ORDER = elements[0] <=> other.elements[0]; ORDER != 0)
         {
-            return order;
+            return ORDER;
         }
-        if (const auto order = elements[1] <=> other.elements[1]; order != 0)
+        if (const auto ORDER = elements[1] <=> other.elements[1]; ORDER != 0)
         {
-            return order;
+            return ORDER;
         }
-        if (const auto order = elements[2] <=> other.elements[2]; order != 0)
+        if (const auto ORDER = elements[2] <=> other.elements[2]; ORDER != 0)
         {
-            return order;
+            return ORDER;
         }
         return elements[3] <=> other.elements[3];
     }
@@ -272,21 +275,21 @@ namespace Garage
     Vector3D<Float32> Quaternion<TScalar>::GetEulerAngles() const noexcept
         requires Floatable<TScalar>
     {
-        const Matrix4x4<Float32> matrix = Matrix4x4<Float32>::Rotate(Normalize(*this));
-        const Float32            pitch  = std::asin(std::clamp(-matrix[9], -1.0f, 1.0f));
+        const Matrix4x4<Float32> MATRIX = Matrix4x4<Float32>::Rotate(Normalize(*this));
+        const Float32            PITCH  = std::asin(std::clamp(-MATRIX[9], -1.0f, 1.0f));
         Float32                  yaw    = 0.0f;
         Float32                  roll   = 0.0f;
-        if (std::abs(std::cos(pitch)) > 0.00001f)
+        if (std::abs(std::cos(PITCH)) > 0.00001f)
         {
-            yaw  = std::atan2(matrix[8], matrix[10]);
-            roll = std::atan2(matrix[1], matrix[5]);
+            yaw  = std::atan2(MATRIX[8], MATRIX[10]);
+            roll = std::atan2(MATRIX[1], MATRIX[5]);
         }
         else
         {
-            yaw  = std::atan2(-matrix[2], matrix[0]);
+            yaw  = std::atan2(-MATRIX[2], MATRIX[0]);
             roll = 0.0f;
         }
-        return Vector3D<Float32>(pitch, yaw, roll) * Mathf::RAD_TO_DEG;
+        return Vector3D<Float32>(PITCH, yaw, roll) * Mathf::RAD_TO_DEG;
     }
 
     template <Scalarable TScalar>
@@ -370,33 +373,33 @@ namespace Garage
     void Quaternion<TScalar>::ToAngleAxis(Float32& angleDegrees, Vector3D<Float32>& axis) const noexcept
         requires Floatable<TScalar>
     {
-        const Quaternion q         = Normalize(*this);
-        const Float32    clampedW  = std::clamp(q.elements[3], -1.0f, 1.0f);
-        const Float32    angleRad  = 2.0f * std::acos(clampedW);
-        const Float32    sinHalfSq = 1.0f - clampedW * clampedW;
-        if (sinHalfSq <= Mathf::EPSILON)
+        const Quaternion Q           = Normalize(*this);
+        const Float32    CLAMPED_W   = std::clamp(Q.elements[3], -1.0f, 1.0f);
+        const Float32    ANGLE_RAD   = 2.0f * std::acos(CLAMPED_W);
+        const Float32    SIN_HALF_SQ = 1.0f - CLAMPED_W * CLAMPED_W;
+        if (SIN_HALF_SQ <= Mathf::EPSILON)
         {
             axis = Vector3D<Float32>::GetRight();
         }
         else
         {
-            const Float32 invSinHalf = 1.0f / std::sqrt(sinHalfSq);
-            axis                     = Vector3D<Float32>(
-                    q.elements[0] * invSinHalf, q.elements[1] * invSinHalf, q.elements[2] * invSinHalf);
+            const Float32 INV_SIN_HALF = 1.0f / std::sqrt(SIN_HALF_SQ);
+            axis                       = Vector3D<Float32>(
+                    Q.elements[0] * INV_SIN_HALF, Q.elements[1] * INV_SIN_HALF, Q.elements[2] * INV_SIN_HALF);
         }
-        angleDegrees = angleRad * Mathf::RAD_TO_DEG;
+        angleDegrees = ANGLE_RAD * Mathf::RAD_TO_DEG;
     }
 
     template <Scalarable TScalar>
     Quaternion<TScalar> Quaternion<TScalar>::Normalize(const Quaternion& rotation) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 mag = rotation.GetMagnitude();
-        if (mag <= Mathf::EPSILON)
+        const Float32 MAG = rotation.GetMagnitude();
+        if (MAG <= Mathf::EPSILON)
         {
             return GetIdentity();
         }
-        return rotation / mag;
+        return rotation / MAG;
     }
 
     template <Scalarable TScalar>
@@ -416,40 +419,40 @@ namespace Garage
     Float32 Quaternion<TScalar>::Angle(const Quaternion& a, const Quaternion& b) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 d = std::clamp(std::abs(Dot(a, b)), 0.0f, 1.0f);
-        return (2.0f * std::acos(d)) * Mathf::RAD_TO_DEG;
+        const Float32 D = std::clamp(std::abs(Dot(a, b)), 0.0f, 1.0f);
+        return (2.0f * std::acos(D)) * Mathf::RAD_TO_DEG;
     }
 
     template <Scalarable TScalar>
     Quaternion<TScalar> Quaternion<TScalar>::AngleAxis(Float32 angleDegrees, Vector3D<Float32> axis) noexcept
         requires Floatable<TScalar>
     {
-        const Vector3D<Float32> normAxis = Vector3D<Float32>::Normalize(axis);
-        const Float32           halfRad  = (angleDegrees * Mathf::DEG_TO_RAD) * 0.5f;
-        const Float32           s        = std::sin(halfRad);
-        const Float32           c        = std::cos(halfRad);
-        return Quaternion(normAxis.GetX() * s, normAxis.GetY() * s, normAxis.GetZ() * s, c);
+        const Vector3D<Float32> NORM_AXIS = Vector3D<Float32>::Normalize(axis);
+        const Float32           HALF_RAD  = (angleDegrees * Mathf::DEG_TO_RAD) * 0.5f;
+        const Float32           S         = std::sin(HALF_RAD);
+        const Float32           C         = std::cos(HALF_RAD);
+        return Quaternion(NORM_AXIS.GetX() * S, NORM_AXIS.GetY() * S, NORM_AXIS.GetZ() * S, C);
     }
 
     template <Scalarable TScalar>
     Quaternion<TScalar> Quaternion<TScalar>::Euler(Float32 xDegrees, Float32 yDegrees, Float32 zDegrees) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 halfPitch = (xDegrees * Mathf::DEG_TO_RAD) * 0.5f;
-        const Float32 halfYaw   = (yDegrees * Mathf::DEG_TO_RAD) * 0.5f;
-        const Float32 halfRoll  = (zDegrees * Mathf::DEG_TO_RAD) * 0.5f;
+        const Float32 HALF_PITCH = (xDegrees * Mathf::DEG_TO_RAD) * 0.5f;
+        const Float32 HALF_YAW   = (yDegrees * Mathf::DEG_TO_RAD) * 0.5f;
+        const Float32 HALF_ROLL  = (zDegrees * Mathf::DEG_TO_RAD) * 0.5f;
 
-        const Float32 sp = std::sin(halfPitch);
-        const Float32 cp = std::cos(halfPitch);
-        const Float32 sy = std::sin(halfYaw);
-        const Float32 cy = std::cos(halfYaw);
-        const Float32 sr = std::sin(halfRoll);
-        const Float32 cr = std::cos(halfRoll);
+        const Float32 SP = std::sin(HALF_PITCH);
+        const Float32 CP = std::cos(HALF_PITCH);
+        const Float32 SY = std::sin(HALF_YAW);
+        const Float32 CY = std::cos(HALF_YAW);
+        const Float32 SR = std::sin(HALF_ROLL);
+        const Float32 CR = std::cos(HALF_ROLL);
 
-        return Quaternion(cy * sp * cr + sy * cp * sr,
-                          sy * cp * cr - cy * sp * sr,
-                          cy * cp * sr - sy * sp * cr,
-                          cy * cp * cr + sy * sp * sr);
+        return Quaternion(CY * SP * CR + SY * CP * SR,
+                          SY * CP * CR - CY * SP * SR,
+                          CY * CP * SR - SY * SP * CR,
+                          CY * CP * CR + SY * SP * SR);
     }
 
     template <Scalarable TScalar>
@@ -463,12 +466,12 @@ namespace Garage
     Quaternion<TScalar> Quaternion<TScalar>::Inverse(const Quaternion& rotation) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 lenSq = rotation.GetSqrMagnitude();
-        if (lenSq <= Mathf::EPSILON)
+        const Float32 LEN_SQ = rotation.GetSqrMagnitude();
+        if (LEN_SQ <= Mathf::EPSILON)
         {
             return Quaternion(0.0f, 0.0f, 0.0f, 0.0f);
         }
-        return Conjugate(rotation) / lenSq;
+        return Conjugate(rotation) / LEN_SQ;
     }
 
     template <Scalarable TScalar>
@@ -532,11 +535,11 @@ namespace Garage
         }
         else
         {
-            const Float32 sinOmega = std::sqrt(1.0f - cosOmega * cosOmega);
-            const Float32 omega    = std::atan2(sinOmega, cosOmega);
-            const Float32 invSin   = 1.0f / sinOmega;
-            k0                     = std::sin((1.0f - t) * omega) * invSin;
-            k1                     = std::sin(t * omega) * invSin;
+            const Float32 SIN_OMEGA = std::sqrt(1.0f - cosOmega * cosOmega);
+            const Float32 OMEGA     = std::atan2(SIN_OMEGA, cosOmega);
+            const Float32 INV_SIN   = 1.0f / SIN_OMEGA;
+            k0                      = std::sin((1.0f - t) * OMEGA) * INV_SIN;
+            k1                      = std::sin(t * OMEGA) * INV_SIN;
         }
 
         return Quaternion(a.elements[0] * k0 + end.elements[0] * k1,
@@ -550,28 +553,28 @@ namespace Garage
                                                             const Vector3D<Float32>& toDirection) noexcept
         requires Floatable<TScalar>
     {
-        const Vector3D<Float32> from = Vector3D<Float32>::Normalize(fromDirection);
-        const Vector3D<Float32> to   = Vector3D<Float32>::Normalize(toDirection);
-        const Float32           dot  = std::clamp(Vector3D<Float32>::Dot(from, to), -1.0f, 1.0f);
+        const Vector3D<Float32> FROM = Vector3D<Float32>::Normalize(fromDirection);
+        const Vector3D<Float32> TO   = Vector3D<Float32>::Normalize(toDirection);
+        const Float32           DOT  = std::clamp(Vector3D<Float32>::Dot(FROM, TO), -1.0f, 1.0f);
 
-        if (dot > 1.0f - Mathf::EPSILON)
+        if (DOT > 1.0f - Mathf::EPSILON)
         {
             return GetIdentity();
         }
 
-        if (dot < -1.0f + Mathf::EPSILON)
+        if (DOT < -1.0f + Mathf::EPSILON)
         {
-            Vector3D<Float32> axis = Vector3D<Float32>::Cross(Vector3D<Float32>::GetRight(), from);
+            Vector3D<Float32> axis = Vector3D<Float32>::Cross(Vector3D<Float32>::GetRight(), FROM);
             if (axis.GetSqrMagnitude() <= Mathf::EPSILON)
             {
-                axis = Vector3D<Float32>::Cross(Vector3D<Float32>::GetUp(), from);
+                axis = Vector3D<Float32>::Cross(Vector3D<Float32>::GetUp(), FROM);
             }
             return AngleAxis(180.0f, axis);
         }
 
-        const Vector3D<Float32> axis         = Vector3D<Float32>::Cross(from, to);
-        const Float32           angleDegrees = std::acos(dot) * Mathf::RAD_TO_DEG;
-        return AngleAxis(angleDegrees, axis);
+        const Vector3D<Float32> AXIS          = Vector3D<Float32>::Cross(FROM, TO);
+        const Float32           ANGLE_DEGREES = std::acos(DOT) * Mathf::RAD_TO_DEG;
+        return AngleAxis(ANGLE_DEGREES, AXIS);
     }
 
     template <Scalarable TScalar>
@@ -579,25 +582,25 @@ namespace Garage
                                                           const Vector3D<Float32>& up) noexcept
         requires Floatable<TScalar>
     {
-        const Vector3D<Float32> normForward = Vector3D<Float32>::Normalize(forward);
-        if (normForward.GetSqrMagnitude() <= Mathf::EPSILON)
+        const Vector3D<Float32> NORM_FORWARD = Vector3D<Float32>::Normalize(forward);
+        if (NORM_FORWARD.GetSqrMagnitude() <= Mathf::EPSILON)
         {
             return GetIdentity();
         }
 
-        Vector3D<Float32> right = Vector3D<Float32>::Normalize(Vector3D<Float32>::Cross(up, normForward));
+        Vector3D<Float32> right = Vector3D<Float32>::Normalize(Vector3D<Float32>::Cross(up, NORM_FORWARD));
         if (right.GetSqrMagnitude() <= Mathf::EPSILON)
         {
-            right = Vector3D<Float32>::Normalize(Vector3D<Float32>::Cross(Vector3D<Float32>::GetUp(), normForward));
+            right = Vector3D<Float32>::Normalize(Vector3D<Float32>::Cross(Vector3D<Float32>::GetUp(), NORM_FORWARD));
             if (right.GetSqrMagnitude() <= Mathf::EPSILON)
             {
                 right = Vector3D<Float32>::Normalize(
-                        Vector3D<Float32>::Cross(Vector3D<Float32>::GetRight(), normForward));
+                        Vector3D<Float32>::Cross(Vector3D<Float32>::GetRight(), NORM_FORWARD));
             }
         }
 
-        const Vector3D<Float32> orthoUp = Vector3D<Float32>::Cross(normForward, right);
-        return QuaternionFromBasis(right, orthoUp, normForward);
+        const Vector3D<Float32> ORTHO_UP = Vector3D<Float32>::Cross(NORM_FORWARD, right);
+        return QuaternionFromBasis(right, ORTHO_UP, NORM_FORWARD);
     }
 
     template <Scalarable TScalar>
@@ -606,14 +609,14 @@ namespace Garage
                                                            Float32           maxDegreesDelta) noexcept
         requires Floatable<TScalar>
     {
-        const Float32 angleDegrees = Angle(from, to);
-        if (angleDegrees <= Mathf::EPSILON)
+        const Float32 ANGLE_DEGREES = Angle(from, to);
+        if (ANGLE_DEGREES <= Mathf::EPSILON)
         {
             return to;
         }
 
-        const Float32 t = std::min(1.0f, maxDegreesDelta / angleDegrees);
-        return SlerpUnclamped(from, to, t);
+        const Float32 T = std::min(1.0f, maxDegreesDelta / ANGLE_DEGREES);
+        return SlerpUnclamped(from, to, T);
     }
 
     template class GARAGE_API Quaternion<Int32>;
