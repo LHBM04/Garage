@@ -43,6 +43,8 @@ Garage is designed around a modular 2D & 3D game framework and editor architectu
 
 ## Getting Started
 
+Building requires **CMake 3.22+**, **Ninja**, and a **C++20 compiler** (on Windows, run from an MSVC Developer Command Prompt / environment).
+
 Configure and build using the presets defined in [`CMakePresets.json`](../CMakePresets.json) (`debug`, `debug-static`, `release`, `release-static`):
 
 ```bash

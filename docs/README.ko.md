@@ -43,6 +43,8 @@ Garage는 모듈식 2D 및 3D 게임 프레임워크와 에디터 아키텍처�
 
 ## 시작하기
 
+빌드에는 **CMake 3.22 이상**, **Ninja**, **C++20 지원 컴파일러**(Windows에서는 MSVC 개발자 환경)가 필요합니다.
+
 [`CMakePresets.json`](../CMakePresets.json)에 정의된 프리셋(`debug`, `debug-static`, `release`, `release-static`)을 사용해 구성 및 빌드할 수 있습니다:
 
 ```bash
