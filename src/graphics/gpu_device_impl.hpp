@@ -12,20 +12,21 @@
 #include "garage/graphics/gpu_device.hpp"
 #include "garage/graphics/gpu_types.hpp"
 
+#include "gpu_buffer_impl.hpp"
+#include "gpu_command_buffer_impl.hpp"
+#include "gpu_fence_impl.hpp"
+#include "gpu_graphics_pipeline_state_impl.hpp"
+#include "gpu_mesh_impl.hpp"
+#include "gpu_shader_impl.hpp"
+#include "gpu_swap_chain_impl.hpp"
+#include "gpu_texture2d_impl.hpp"
+
 namespace Garage
 {
     struct GPUGraphicsPipelineDesc;
     struct GPUShaderCreateInfo;
     struct GPUTexture2DCreateInfo;
 
-    class GPUBufferImpl;
-    class GPUCommandBufferImpl;
-    class GPUFenceImpl;
-    class GPUGraphicsPipelineStateImpl;
-    class GPUMeshImpl;
-    class GPUShaderImpl;
-    class GPUSwapChainImpl;
-    class GPUTexture2DImpl;
     class IDisplay;
     class IGPUBuffer;
     class IGPUCommandBuffer;
