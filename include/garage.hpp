@@ -1,8 +1,6 @@
 #ifndef GARAGE_GARAGE
 #define GARAGE_GARAGE
 
-namespace Garage
-{
-}
+#include "garage/utilities.hpp"
 
 #endif
