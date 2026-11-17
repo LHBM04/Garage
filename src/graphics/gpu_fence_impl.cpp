@@ -21,7 +21,7 @@ namespace Garage
         Release();
     }
 
-    void GPUFenceImpl::Wait() const noexcept
+    void GPUFenceImpl::Wait() noexcept
     {
         if (fence == nullptr || device == nullptr || device->GetSDLDevice() == nullptr)
         {

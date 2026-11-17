@@ -19,7 +19,7 @@ namespace Garage
         IGPUFence(IGPUFence&&)            = delete;
         IGPUFence& operator=(IGPUFence&&) = delete;
 
-        virtual void Wait() const noexcept                     = 0;
+        virtual void Wait() noexcept                           = 0;
         virtual void Signal(const IGPUDevice& device) noexcept = 0;
 
         [[nodiscard]] virtual const IGPUDevice* GetDevice() const noexcept   = 0;

@@ -15,7 +15,7 @@ namespace Garage
         explicit GPUFenceImpl(const GPUDeviceImpl* device) noexcept;
         ~GPUFenceImpl() noexcept override;
 
-        void Wait() const noexcept override;
+        void Wait() noexcept override;
         void Signal(const IGPUDevice& targetDevice) noexcept override;
 
         void SetSDLFence(SDL_GPUFence* newFence) noexcept;
@@ -26,8 +26,8 @@ namespace Garage
         [[nodiscard]] SDL_GPUFence*     GetSDLFence() const noexcept;
 
     private:
-        const GPUDeviceImpl*  device = nullptr;
-        mutable SDL_GPUFence* fence  = nullptr;
+        const GPUDeviceImpl* device = nullptr;
+        SDL_GPUFence*        fence  = nullptr;
     };
 
     inline SDL_GPUFence* GPUFenceImpl::GetSDLFence() const noexcept
