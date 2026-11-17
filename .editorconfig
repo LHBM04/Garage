@@ -1,0 +1,26 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{c,cc,cxx,cpp,h,hh,hpp,hxx}]
+charset = utf-8-bom
+indent_style = space
+indent_size = 4
+
+[*.{yml,yaml,json}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{bat,cmd,ps1}]
+end_of_line = crlf
+
+[*.sh]
+end_of_line = lf

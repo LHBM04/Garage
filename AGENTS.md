@@ -30,10 +30,17 @@
 
 | 대상 | 규칙 |
 | --- | --- |
-| 클래스, 구조체, 열거형 | PascalCase를 사용한다. |
-| 멤버 변수, 지역 변수, 매개변수 | camelCase를 사용한다. |
-| 매크로 및 모든 상수 | SCREAMING_SNAKE_CASE를 사용한다. |
+| 파일명 | `lower_snake_case`를 사용한다. |
+| 네임스페이스, 클래스, 구조체, 공용체, 타입 별칭 | `PascalCase`를 사용한다. |
+| 열거형 (`enum`) | `E` 접두사를 붙인 `PascalCase`를 사용한다. (예: `ESystemStatus`) |
+| 인터페이스 | `I` 접두사를 붙인 `PascalCase`를 사용한다. (예: `IInputProvider`) |
+| 베이스 클래스 | `Base` 접미사를 붙인 `PascalCase`를 사용한다. (예: `SubsystemBase`) |
+| 함수, 메서드 | `PascalCase`를 사용한다. |
+| 멤버 변수, 지역 변수, 매개변수 | `camelCase`를 사용한다. |
+| 매크로 및 모든 상수 | `SCREAMING_SNAKE_CASE`를 사용한다. |
 
+- 파일명에는 `E`·`I` 접두사를 제외하고 `Base` 접미사는 유지한다. (예: `ESystemStatus` → `system_status.hpp`, `IInputProvider` → `input_provider.hpp`, `SubsystemBase` → `subsystem_base.hpp`)
+- 상태나 공통 구현을 가지는 파생용 부모 클래스에는 `~Base` 접미사를 붙이고, 상태 없이 계약만 정의하는 순수 가상 인터페이스에는 `I~` 접두사를 사용한다.
 - 이벤트 핸들러는 `OnDisplayCreate`, `OnDisplayClose`, `OnInputActivation`처럼 `On` + `이벤트 구조체명(접미사 Event 제외)` 형식을 사용한다.
 - 식별자나 조건으로 단일 또는 다중 탐색을 수행하는 함수에는 `FindEntityByName`, `FindEntityByTag`, `FindDisplayByID`, `FindDisplayByHWND`처럼 `By` 전치사를 명시한다.
 
@@ -47,15 +54,22 @@
 ### 모던 C++와 함수 구현
 
 - `= default`로 표현할 수 있는 특수 멤버 함수는 적극적으로 사용한다.
+- `using`(필요 시 `typedef`) 타입 별칭을 적극적으로 활용하여 함수 시그니처와 의도를 명확히 드러내고, 공개 API를 간결하게 유지한다. (모던 C++에서는 가독성과 템플릿 별칭 지원을 위해 `using` 사용을 우선한다.)
 - 인라인 함수 정의는 클래스 또는 구조체 본문 안에 작성하지 않고, 선언부 아래에 선언 순서대로 별도 배치한다.
 - `[[nodiscard]]`, `[[maybe_unused]]` 같은 표준 어트리뷰트를 적극적으로 사용한다.
 - `throw`와 `try-catch`를 사용하지 않는다. 오류와 불변식 검증에는 `ASSERT`와 `ABORT` 사용을 우선한다.
 - 생성자, 소멸자, 연산자 오버로딩, Getter와 Setter에는 반드시 `noexcept`를 명시한다.
+- 파생 클래스의 재정의 메서드에는 반드시 `override`(또는 `final`)를 명시하고 `virtual`을 중복 표기하지 않는다. `~Base`·`I~` 다형성 부모 클래스는 가상 소멸자(`virtual ~ClassName() noexcept = default;`)를 두고 복사/이동 생성자 및 대입 연산자를 `= delete`로 차단해 객체 슬라이싱을 방지한다.
+- 단일 인자(또는 기본 인자로 1개 인자 호출이 가능한) 생성자와 변환 연산자에는 암시적 변환을 막기 위해 `explicit`을 기본으로 사용한다.
+- 열거형은 이름 충돌과 암시적 정수 변환을 방지하기 위해 비범위 `enum` 대신 `enum class`(필요 시 기저 타입 명시)를 사용한다.
+- 상태를 변경하지 않는 멤버 함수, 지역 변수, 참조/포인터 매개변수는 `const`를 기본으로 사용하고, 상수 및 컴파일 타임 유틸리티는 매크로 대신 `constexpr`·`consteval`을 우선한다. (매크로는 `GARAGE_API`, `ASSERT` 등 전처리기 제어가 필요한 경우로 제한한다.)
+- 멤버 변수는 선언부에서 중괄호 초기화(`= nullptr`, `= 0`, `{}`)로 기본값을 명시하고, 단일 소유권(`std::unique_ptr`)을 기본으로 사용한다.
+- C 스타일 캐스트 대신 `static_cast`, `reinterpret_cast`, `const_cast`를 명시적으로 사용한다.
 
 ### 객체 참조 및 매개변수/반환값 규칙 (언리얼 엔진 스타일)
 
-- **엔진 생명주기 관리 객체**: `App`, `Subsystem`, `World`, `Entity`, `Component` 파생, `Asset` 파생, `Display`, `InputProvider` 등 힙에 할당되어 프레임워크가 생명주기를 관리하거나 `nullptr` 상태가 유효한 객체는 입출력/조회/소유자 참조 모두 원시 포인터(`T*` / `const T*`)를 기본으로 사용한다. `std::reference_wrapper`는 사용하지 않는다.
-- **값 타입 및 RHI 실행 컨텍스트**: `Vector*`, `Quaternion`, `Matrix4x4`, `Color*`, 옵션 구조체, `Event` 파생 구조체, `std::string_view`, `std::filesystem::path` 등 복사 비용이 있거나 불변인 값 타입은 `const T&`(또는 경량 기본 타입은 값)로 전달한다. 렌더링 프레임 내 유효성이 상시 보장되는 GPU 실행 컨텍스트(`GPUCommandBuffer&` 등)는 참조자를 사용한다.
+- **엔진 생명주기 관리 객체**: `App`, `SubsystemBase` 파생, `World`, `Entity`, `ComponentBase` 파생, `AssetBase` 파생, `Display`, `IInputProvider` 등 힙에 할당되어 프레임워크가 생명주기를 관리하거나 `nullptr` 상태가 유효한 객체는 입출력/조회/소유자 참조 모두 원시 포인터(`T*` / `const T*`)를 기본으로 사용한다. `std::reference_wrapper`는 사용하지 않는다.
+- **값 타입 및 RHI 실행 컨텍스트**: `Vector*`, `Quaternion`, `Matrix4x4`, `Color*`, 옵션 구조체, `Event` 파생 구조체, `std::string_view`, `std::span<const T>`, `std::filesystem::path` 등 복사 비용이 있거나 불변인 값 타입은 `const T&`(또는 뷰·경량 기본 타입은 값)로 전달한다. 읽기 전용 연속 버퍼는 `const std::vector<T>&` 대신 `std::span<const T>`를 우선 사용한다. 렌더링 프레임 내 유효성이 상시 보장되는 GPU 실행 컨텍스트(`GPUCommandBuffer&` 등)는 참조자를 사용한다.
 
 ### 컨테이너 및 컬렉션 조회 규칙
 
@@ -64,8 +78,10 @@
 
 ### 헤더 인클루드
 
-- 표준 헤더 → 외부 라이브러리 헤더 → 사용자 정의 헤더 순서로 작성하고, 각 그룹을 빈 줄로 구분한다.
-- 외부 라이브러리 및 사용자 정의 헤더는 Win32 API, DirectX 12 핵심, DirectXMath/Collision 등의 범주별로 그룹화하고 빈 줄로 구분한다.
+- `.cpp` 파일에서는 자기 자신과 대응하는 `.hpp` 헤더를 가장 첫 줄에 포함해 헤더 의존성 누락을 즉시 검출한다.
+- 대응 헤더 → C++ 표준 헤더 → 외부 라이브러리 헤더 → 프로젝트 내부 헤더 순서로 작성하고, 각 그룹을 빈 줄로 구분한다.
+- 외부 라이브러리 및 프로젝트 내부 헤더는 `SDL3`, `ImGui`, 로깅/유틸리티(`spdlog`/`fmt`), 엔진 모듈 등의 범주별로 그룹화하고 빈 줄로 구분한다.
+- 모든 헤더(`.hpp`)는 PCH에 의존하지 않고 단독 `#include`만으로 컴파일되도록 자기 완결적으로 작성하며, 포인터·참조만 사용하는 경우에는 `#include` 대신 전방 선언을 우선 사용한다.
 
 ### 파일 인코딩 및 한글 보존 규칙
 
