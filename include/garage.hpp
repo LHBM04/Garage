@@ -2,6 +2,7 @@
 #define GARAGE_GARAGE_HPP
 
 #include "garage/core.hpp"
+#include "garage/graphics.hpp"
 #include "garage/math.hpp"
 #include "garage/platform.hpp"
 #include "garage/utilities.hpp"

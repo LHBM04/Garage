@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_PRECOMPILED_HPP
+#ifndef GARAGE_PRECOMPILED_HPP
 #define GARAGE_PRECOMPILED_HPP
 
 #include <algorithm>
@@ -36,5 +36,7 @@
 #include <utility>
 #include <variant>
 #include <vector>
+
+#include <SDL3/SDL.h>
 
 #endif // GARAGE_PRECOMPILED_HPP
