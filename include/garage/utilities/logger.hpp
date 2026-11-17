@@ -72,61 +72,61 @@ namespace Garage::Logger
     template <class... TArgs>
     void LogTrace(FormatAscii<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::TRACE, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::TRACE, fmt::vformat(fmt.text.get(), fmt::make_format_args(args...)), fmt.location);
     }
 
     template <class... TArgs>
     void LogTrace(FormatWide<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::TRACE, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::TRACE, fmt::vformat(fmt.text.get(), fmt::make_wformat_args(args...)), fmt.location);
     }
 
     template <class... TArgs>
     void LogInfo(FormatAscii<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::INFO, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::INFO, fmt::vformat(fmt.text.get(), fmt::make_format_args(args...)), fmt.location);
     }
 
     template <class... TArgs>
     void LogInfo(FormatWide<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::INFO, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::INFO, fmt::vformat(fmt.text.get(), fmt::make_wformat_args(args...)), fmt.location);
     }
 
     template <class... TArgs>
     void LogWarning(FormatAscii<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::WARNING, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::WARNING, fmt::vformat(fmt.text.get(), fmt::make_format_args(args...)), fmt.location);
     }
 
     template <class... TArgs>
     void LogWarning(FormatWide<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::WARNING, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::WARNING, fmt::vformat(fmt.text.get(), fmt::make_wformat_args(args...)), fmt.location);
     }
 
     template <class... TArgs>
     void LogError(FormatAscii<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::ERROR_LEVEL, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::ERROR_LEVEL, fmt::vformat(fmt.text.get(), fmt::make_format_args(args...)), fmt.location);
     }
 
     template <class... TArgs>
     void LogError(FormatWide<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::ERROR_LEVEL, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::ERROR_LEVEL, fmt::vformat(fmt.text.get(), fmt::make_wformat_args(args...)), fmt.location);
     }
 
     template <class... TArgs>
     void LogCritical(FormatAscii<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::CRITICAL, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::CRITICAL, fmt::vformat(fmt.text.get(), fmt::make_format_args(args...)), fmt.location);
     }
 
     template <class... TArgs>
     void LogCritical(FormatWide<TArgs...> fmt, TArgs&&... args)
     {
-        Log(ECategory::CRITICAL, fmt::format(fmt.text, std::forward<TArgs>(args)...), fmt.location);
+        Log(ECategory::CRITICAL, fmt::vformat(fmt.text.get(), fmt::make_wformat_args(args...)), fmt.location);
     }
 } // namespace Garage::Logger
 
