@@ -1,4 +1,4 @@
-#ifndef GARAGE_CORE_APP_SUBSYSTEM_HPP
+﻿#ifndef GARAGE_CORE_APP_SUBSYSTEM_HPP
 #define GARAGE_CORE_APP_SUBSYSTEM_HPP
 
 #include "defines.hpp"

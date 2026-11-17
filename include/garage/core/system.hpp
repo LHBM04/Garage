@@ -1,4 +1,4 @@
-#ifndef GARAGE_CORE_SYSTEM_HPP
+﻿#ifndef GARAGE_CORE_SYSTEM_HPP
 #define GARAGE_CORE_SYSTEM_HPP
 
 #include <algorithm>

@@ -1,4 +1,4 @@
-#ifndef GARAGE_MATH_MATRIX4X4_HPP
+﻿#ifndef GARAGE_MATH_MATRIX4X4_HPP
 #define GARAGE_MATH_MATRIX4X4_HPP
 
 #include <array>

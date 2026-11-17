@@ -1,4 +1,4 @@
-#include "garage/math/quaternion.hpp"
+﻿#include "garage/math/quaternion.hpp"
 
 #include <algorithm>
 #include <cmath>

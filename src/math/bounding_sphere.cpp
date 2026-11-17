@@ -1,4 +1,4 @@
-#include "garage/math/bounding_sphere.hpp"
+﻿#include "garage/math/bounding_sphere.hpp"
 
 #include <algorithm>
 #include <array>

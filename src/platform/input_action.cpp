@@ -1,4 +1,4 @@
-#include "garage/platform/input_action.hpp"
+﻿#include "garage/platform/input_action.hpp"
 
 #include <algorithm>
 #include <cmath>

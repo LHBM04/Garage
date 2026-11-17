@@ -1,4 +1,4 @@
-#ifndef GARAGE_UTILITIES_HPP
+﻿#ifndef GARAGE_UTILITIES_HPP
 #define GARAGE_UTILITIES_HPP
 
 #include "utilities/delegate.hpp"

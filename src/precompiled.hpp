@@ -1,4 +1,4 @@
-#ifndef GARAGE_PRECOMPILED_HPP
+﻿#ifndef GARAGE_PRECOMPILED_HPP
 #define GARAGE_PRECOMPILED_HPP
 
 #include <algorithm>
