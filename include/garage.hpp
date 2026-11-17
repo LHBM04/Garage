@@ -1,6 +1,7 @@
 #ifndef GARAGE_GARAGE
 #define GARAGE_GARAGE
 
-#include "core.hpp"
+#include "garage/core.hpp"
+#include "garage/utilities.hpp"
 
 #endif
