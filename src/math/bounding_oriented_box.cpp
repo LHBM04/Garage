@@ -147,19 +147,22 @@ namespace Garage
 
     void BoundingOrientedBox::GetCorners(CornerSpan corners) const noexcept
     {
-        static constexpr std::array<Vector3D<Float32>, CORNER_COUNT> OFFSETS = {Vector3D<Float32>(-1.0f, -1.0f, 1.0f),
-                                                                                Vector3D<Float32>(1.0f, -1.0f, 1.0f),
-                                                                                Vector3D<Float32>(1.0f, 1.0f, 1.0f),
-                                                                                Vector3D<Float32>(-1.0f, 1.0f, 1.0f),
-                                                                                Vector3D<Float32>(-1.0f, -1.0f, -1.0f),
-                                                                                Vector3D<Float32>(1.0f, -1.0f, -1.0f),
-                                                                                Vector3D<Float32>(1.0f, 1.0f, -1.0f),
-                                                                                Vector3D<Float32>(-1.0f, 1.0f, -1.0f)};
+        static constexpr std::array<std::array<Float32, 3>, CORNER_COUNT> OFFSETS = {
+                std::array<Float32, 3>{-1.0f, -1.0f, 1.0f},
+                std::array<Float32, 3>{1.0f, -1.0f, 1.0f},
+                std::array<Float32, 3>{1.0f, 1.0f, 1.0f},
+                std::array<Float32, 3>{-1.0f, 1.0f, 1.0f},
+                std::array<Float32, 3>{-1.0f, -1.0f, -1.0f},
+                std::array<Float32, 3>{1.0f, -1.0f, -1.0f},
+                std::array<Float32, 3>{1.0f, 1.0f, -1.0f},
+                std::array<Float32, 3>{-1.0f, 1.0f, -1.0f},
+        };
 
         const Quaternion<Float32> normRot = NormalizeRotation(orientation);
         for (USize i = 0; i < CORNER_COUNT; ++i)
         {
-            corners[i] = center + (normRot * Vector3D<Float32>::Scale(extents, OFFSETS[i]));
+            const Vector3D<Float32> offset(OFFSETS[i][0], OFFSETS[i][1], OFFSETS[i][2]);
+            corners[i] = center + (normRot * Vector3D<Float32>::Scale(extents, offset));
         }
     }
 

@@ -3,9 +3,22 @@
 
 #include <algorithm>
 #include <cmath>
+#include <concepts>
 #include <limits>
 
 #include "garage/core/types.hpp"
+
+namespace Garage
+{
+    template <class TValue>
+    concept Integral = std::same_as<TValue, Int32>;
+
+    template <class TValue>
+    concept Floatable = std::same_as<TValue, Float32>;
+
+    template <class TValue>
+    concept Scalarable = Integral<TValue> || Floatable<TValue>;
+} // namespace Garage
 
 namespace Garage::Mathf
 {

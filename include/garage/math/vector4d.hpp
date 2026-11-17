@@ -6,7 +6,6 @@
 
 #include "garage/core/defines.hpp"
 #include "garage/core/types.hpp"
-#include "garage/math/concepts.hpp"
 #include "garage/math/mathf.hpp"
 
 namespace Garage

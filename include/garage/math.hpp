@@ -6,7 +6,6 @@
 #include "math/bounding_sphere.hpp"
 #include "math/color_rgb.hpp"
 #include "math/color_rgba.hpp"
-#include "math/concepts.hpp"
 #include "math/mathf.hpp"
 #include "math/matrix4x4.hpp"
 #include "math/quaternion.hpp"
