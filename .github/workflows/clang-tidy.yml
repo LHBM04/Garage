@@ -1,0 +1,69 @@
+name: Static Analysis (clang-tidy)
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  clang-tidy:
+    name: clang-tidy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Clang, clang-tidy, Ninja, and SDL3 dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            clang-tidy \
+            ninja-build \
+            pkg-config \
+            libx11-dev \
+            libxext-dev \
+            libxrandr-dev \
+            libxcursor-dev \
+            libxfixes-dev \
+            libxi-dev \
+            libxss-dev \
+            libxtst-dev \
+            libwayland-dev \
+            libxkbcommon-dev \
+            libdrm-dev \
+            libgbm-dev \
+            libgl1-mesa-dev \
+            libgles2-mesa-dev \
+            libegl1-mesa-dev \
+            libdbus-1-dev \
+            libudev-dev \
+            libasound2-dev \
+            libpulse-dev \
+            libpipewire-0.3-dev
+
+      - name: Configure with Clang
+        run: cmake --preset debug -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Build (generate PCH and fetched headers)
+        run: cmake --build --preset debug --parallel
+
+      - name: Run clang-tidy on project sources
+        run: |
+          mapfile -t files < <(find src -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp' \))
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No C/C++ source files found to analyze."
+            exit 0
+          fi
+          clang-tidy -p out/debug --header-filter="^${{ github.workspace }}/(include|src)/.*" "${files[@]}"

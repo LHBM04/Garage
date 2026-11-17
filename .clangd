@@ -1,0 +1,18 @@
+CompileFlags:
+  Add:
+    - -std=c++20
+    - -I../include
+    - -I../src
+    - -I../out/debug/_deps/sdl3-src/include
+    - -I../out/debug/_deps/imgui-src
+    - -I../out/debug/_deps/imgui-src/backends
+    - -I../out/debug/_deps/imguizmo-src/src
+    - -I../out/debug/_deps/implot-src
+    - -I../out/debug/_deps/spdlog-src/include
+    - -I../out/debug/_deps/fmt-src/include
+    - -I../out/debug/_deps/nameof-src/include
+    - -I../out/debug/_deps/rapidjson-src/include
+    - -I../out/debug/_deps/freetype-src/include
+    - -DGARAGE_DEBUG
+    - -DGARAGE_DYNAMIC
+    - -DSPDLOG_FMT_EXTERNAL

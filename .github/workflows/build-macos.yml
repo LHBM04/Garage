@@ -1,0 +1,38 @@
+name: Build (macOS)
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build (${{ matrix.preset }})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [debug, debug-static, release, release-static]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Ninja
+        run: brew install ninja
+
+      - name: Configure (x64)
+        run: cmake --preset ${{ matrix.preset }} -G Ninja -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_SYSTEM_PROCESSOR=x86_64
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }} --parallel
