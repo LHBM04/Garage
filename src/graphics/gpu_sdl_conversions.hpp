@@ -1,8 +1,16 @@
 ﻿#ifndef GARAGE_GRAPHICS_GPU_SDL_CONVERSIONS_HPP
 #define GARAGE_GRAPHICS_GPU_SDL_CONVERSIONS_HPP
 
+#include <iterator>
+#include <string>
+#include <string_view>
+#include <utility>
+
+#include <fmt/format.h>
+
 #include <SDL3/SDL_gpu.h>
 
+#include "garage/core/allocator.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_types.hpp"
@@ -398,6 +406,19 @@ namespace Garage::GraphicsDetail
                 return SDL_GPU_BLENDOP_ADD;
             }
         }
+    }
+
+    [[nodiscard]] inline std::pmr::string MakeError(std::string_view message)
+    {
+        return Allocator::MakeString(message);
+    }
+
+    template <class... TArgs>
+    [[nodiscard]] inline std::pmr::string FormatError(fmt::format_string<TArgs...> format, TArgs&&... args)
+    {
+        std::pmr::string message(Allocator::GetMemoryResource());
+        fmt::format_to(std::back_inserter(message), format, std::forward<TArgs>(args)...);
+        return message;
     }
 } // namespace Garage::GraphicsDetail
 

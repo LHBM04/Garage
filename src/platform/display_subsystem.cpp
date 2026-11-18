@@ -1,7 +1,6 @@
 ﻿#include "garage/platform/display_subsystem.hpp"
 
 #include <algorithm>
-#include <memory>
 #include <utility>
 
 #include <SDL3/SDL_error.h>
@@ -10,6 +9,7 @@
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_video.h>
 
+#include "garage/core/allocator.hpp"
 #include "garage/core/defines.hpp"
 #include "garage/core/engine.hpp"
 #include "garage/core/system_status.hpp"
@@ -50,7 +50,7 @@ namespace Garage
         Engine*         engine         = Engine::GetInstance();
         EventSubsystem* eventSubsystem = (engine != nullptr) ? engine->GetSubsystem<EventSubsystem>() : nullptr;
 
-        for (const std::unique_ptr<IDisplay>& display : displays)
+        for (const Allocator::UniquePtr<IDisplay>& display : displays)
         {
             if (display->ShouldClose() && eventSubsystem != nullptr)
             {
@@ -59,7 +59,7 @@ namespace Garage
         }
 
         const USize REMOVED = std::erase_if(displays,
-                                            [](const std::unique_ptr<IDisplay>& display)
+                                            [](const Allocator::UniquePtr<IDisplay>& display)
                                             {
                                                 return display->ShouldClose();
                                             });
@@ -112,7 +112,7 @@ namespace Garage
             return nullptr;
         }
 
-        auto      newDisplay = std::make_unique<DisplayImpl>(sdlWindow);
+        auto      newDisplay = Allocator::MakeUnique<DisplayImpl>(sdlWindow);
         IDisplay* pointer    = newDisplay.get();
         displays.push_back(std::move(newDisplay));
 
@@ -142,7 +142,7 @@ namespace Garage
         }
 
         std::erase_if(displays,
-                      [display](const std::unique_ptr<IDisplay>& item)
+                      [display](const Allocator::UniquePtr<IDisplay>& item)
                       {
                           return item.get() == display;
                       });

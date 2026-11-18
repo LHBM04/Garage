@@ -1,4 +1,4 @@
-#ifndef GARAGE_GRAPHICS_GPU_SWAP_CHAIN_HPP
+﻿#ifndef GARAGE_GRAPHICS_GPU_SWAP_CHAIN_HPP
 #define GARAGE_GRAPHICS_GPU_SWAP_CHAIN_HPP
 
 #include <string>
@@ -29,7 +29,7 @@ namespace Garage
 
         virtual void Present() const noexcept = 0;
 
-        [[nodiscard]] virtual Result<const GPUTarget*, std::string>
+        [[nodiscard]] virtual Result<const GPUTarget*, std::pmr::string>
                                                 AcquireBackBufferTarget(IGPUCommandBuffer& commandBuffer) = 0;
         [[nodiscard]] virtual const GPUTarget*  GetCurrentBackBufferTarget() const noexcept               = 0;
         [[nodiscard]] virtual const IGPUDevice* GetDevice() const noexcept                                = 0;

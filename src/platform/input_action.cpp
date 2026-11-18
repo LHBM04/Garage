@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <string_view>
 
+#include "garage/core/allocator.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/math/mathf.hpp"
@@ -14,7 +16,7 @@
 namespace Garage
 {
     InputAction::InputAction(std::string_view name) noexcept
-        : name(name)
+        : name(name, Allocator::GetMemoryResource())
     {
     }
 
@@ -138,7 +140,7 @@ namespace Garage
         }
     }
 
-    const std::string& InputAction::GetName() const noexcept
+    const std::pmr::string& InputAction::GetName() const noexcept
     {
         return name;
     }

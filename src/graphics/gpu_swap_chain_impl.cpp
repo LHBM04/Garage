@@ -1,15 +1,13 @@
-#include "gpu_swap_chain_impl.hpp"
+﻿#include "gpu_swap_chain_impl.hpp"
 
-#include <memory>
 #include <string>
 #include <utility>
-
-#include <fmt/format.h>
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
+#include "garage/core/allocator.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -83,27 +81,29 @@ namespace Garage
         device                     = nullptr;
     }
 
-    Result<const GPUTarget*, std::string> GPUSwapChainImpl::AcquireBackBufferTarget(IGPUCommandBuffer& commandBuffer)
+    Result<const GPUTarget*, std::pmr::string>
+            GPUSwapChainImpl::AcquireBackBufferTarget(IGPUCommandBuffer& commandBuffer)
     {
         if (device == nullptr || device->GetSDLDevice() == nullptr || display == nullptr)
         {
-            return Result<const GPUTarget*, std::string>::Err(
-                    "스왑체인의 GPU 디바이스 또는 디스플레이가 유효하지 않습니다.");
+            return Result<const GPUTarget*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("스왑체인의 GPU 디바이스 또는 디스플레이가 유효하지 않습니다."));
         }
 
         const auto* displayImpl = static_cast<const DisplayImpl*>(display);
         SDL_Window* sdlWindow   = displayImpl->GetSDLWindow();
         if (sdlWindow == nullptr)
         {
-            return Result<const GPUTarget*, std::string>::Err("스왑체인의 SDL 윈도우 핸들이 유효하지 않습니다.");
+            return Result<const GPUTarget*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("스왑체인의 SDL 윈도우 핸들이 유효하지 않습니다."));
         }
 
         auto&                 commandBufferImpl = static_cast<GPUCommandBufferImpl&>(commandBuffer);
         SDL_GPUCommandBuffer* sdlCommandBuffer  = commandBufferImpl.GetSDLCommandBuffer();
         if (sdlCommandBuffer == nullptr)
         {
-            return Result<const GPUTarget*, std::string>::Err(
-                    "스왑체인 텍스처 획득에 필요한 명령 버퍼가 유효하지 않습니다.");
+            return Result<const GPUTarget*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("스왑체인 텍스처 획득에 필요한 명령 버퍼가 유효하지 않습니다."));
         }
 
         SDL_GPUTexture* swapchainTexture = nullptr;
@@ -113,14 +113,14 @@ namespace Garage
         if (!SDL_WaitAndAcquireGPUSwapchainTexture(sdlCommandBuffer, sdlWindow, &swapchainTexture, &width, &height))
         {
             hasCurrentBackBufferTarget = false;
-            return Result<const GPUTarget*, std::string>::Err(
-                    fmt::format("SDL_GPU 스왑체인 텍스처 획득에 실패했습니다: {}", SDL_GetError()));
+            return Result<const GPUTarget*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("SDL_GPU 스왑체인 텍스처 획득에 실패했습니다: {}", SDL_GetError()));
         }
 
         if (swapchainTexture == nullptr || width == 0 || height == 0)
         {
             hasCurrentBackBufferTarget = false;
-            return Result<const GPUTarget*, std::string>::Ok(nullptr);
+            return Result<const GPUTarget*, std::pmr::string>::Ok(nullptr);
         }
 
         backBufferFormat = GraphicsDetail::FromSDLTextureFormat(
@@ -128,15 +128,15 @@ namespace Garage
 
         if (backBufferTexture == nullptr)
         {
-            backBufferTexture = std::make_unique<GPUTexture2DImpl>(device,
-                                                                   swapchainTexture,
-                                                                   width,
-                                                                   height,
-                                                                   1u,
-                                                                   1u,
-                                                                   backBufferFormat,
-                                                                   EGPUTextureType::TEXTURE_2D,
-                                                                   false);
+            backBufferTexture = Allocator::MakeUnique<GPUTexture2DImpl>(device,
+                                                                        swapchainTexture,
+                                                                        width,
+                                                                        height,
+                                                                        1u,
+                                                                        1u,
+                                                                        backBufferFormat,
+                                                                        EGPUTextureType::TEXTURE_2D,
+                                                                        false);
         }
         else
         {
@@ -165,7 +165,7 @@ namespace Garage
             if (!depthResult)
             {
                 hasCurrentBackBufferTarget = false;
-                return Result<const GPUTarget*, std::string>::Err(std::move(depthResult).GetError());
+                return Result<const GPUTarget*, std::pmr::string>::Err(std::move(depthResult).GetError());
             }
 
             depthStencilTexture = depthResult.GetValue();
@@ -178,7 +178,7 @@ namespace Garage
         });
         hasCurrentBackBufferTarget = true;
 
-        return Result<const GPUTarget*, std::string>::Ok(&currentBackBufferTarget);
+        return Result<const GPUTarget*, std::pmr::string>::Ok(&currentBackBufferTarget);
     }
 
     const IGPUDevice* GPUSwapChainImpl::GetDevice() const noexcept

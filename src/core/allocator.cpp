@@ -2,19 +2,19 @@
 
 #include <atomic>
 #include <bit>
+#include <cstddef>
 #include <cstring>
 #include <memory_resource>
 
 #include <SDL3/SDL_stdinc.h>
 
 #include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
 
 namespace Garage::Allocator
 {
     namespace
     {
-        std::atomic<USize> activeAllocationCount{0};
+        std::atomic<std::size_t> activeAllocationCount{0};
 
         class AllocatorMemoryResource final : public std::pmr::memory_resource
         {
@@ -29,23 +29,23 @@ namespace Garage::Allocator
             AllocatorMemoryResource& operator=(AllocatorMemoryResource&&) = delete;
 
         private:
-            [[nodiscard]] void* do_allocate(USize bytes, USize alignment) override;
-            void                do_deallocate(void* pointer, USize bytes, USize alignment) override;
+            [[nodiscard]] void* do_allocate(std::size_t bytes, std::size_t alignment) override;
+            void                do_deallocate(void* pointer, std::size_t bytes, std::size_t alignment) override;
             [[nodiscard]] bool  do_is_equal(const std::pmr::memory_resource& other) const noexcept override;
         };
 
-        void* AllocatorMemoryResource::do_allocate(USize bytes, USize alignment)
+        void* AllocatorMemoryResource::do_allocate(std::size_t bytes, std::size_t alignment)
         {
-            const USize VALID_ALIGNMENT = std::has_single_bit(alignment) ? alignment : DEFAULT_ALIGNMENT;
-            const USize ALLOC_SIZE      = (bytes == 0) ? 1 : bytes;
-            void*       memory          = Allocate(ALLOC_SIZE, VALID_ALIGNMENT);
+            const std::size_t VALID_ALIGNMENT = std::has_single_bit(alignment) ? alignment : DEFAULT_ALIGNMENT;
+            const std::size_t ALLOC_SIZE      = (bytes == 0) ? 1 : bytes;
+            void*             memory          = Allocate(ALLOC_SIZE, VALID_ALIGNMENT);
             ASSERT(memory != nullptr);
             return memory;
         }
 
-        void AllocatorMemoryResource::do_deallocate(void*                  pointer,
-                                                    [[maybe_unused]] USize bytes,
-                                                    [[maybe_unused]] USize alignment)
+        void AllocatorMemoryResource::do_deallocate(void*                        pointer,
+                                                    [[maybe_unused]] std::size_t bytes,
+                                                    [[maybe_unused]] std::size_t alignment)
         {
             Deallocate(pointer);
         }
@@ -56,7 +56,7 @@ namespace Garage::Allocator
         }
     } // namespace
 
-    void* Allocate(USize size, USize alignment) noexcept
+    void* Allocate(std::size_t size, std::size_t alignment) noexcept
     {
         if (size == 0)
         {
@@ -74,7 +74,7 @@ namespace Garage::Allocator
         return pointer;
     }
 
-    void* AllocateZeroed(USize size, USize alignment) noexcept
+    void* AllocateZeroed(std::size_t size, std::size_t alignment) noexcept
     {
         void* pointer = Allocate(size, alignment);
         if (pointer != nullptr)
@@ -85,7 +85,7 @@ namespace Garage::Allocator
         return pointer;
     }
 
-    void* Reallocate(void* pointer, USize oldSize, USize newSize, USize alignment) noexcept
+    void* Reallocate(void* pointer, std::size_t oldSize, std::size_t newSize, std::size_t alignment) noexcept
     {
         if (pointer == nullptr)
         {
@@ -104,7 +104,7 @@ namespace Garage::Allocator
             return nullptr;
         }
 
-        const USize COPY_SIZE = (oldSize < newSize) ? oldSize : newSize;
+        const std::size_t COPY_SIZE = (oldSize < newSize) ? oldSize : newSize;
         if (COPY_SIZE > 0)
         {
             std::memcpy(newPointer, pointer, COPY_SIZE);
@@ -125,7 +125,7 @@ namespace Garage::Allocator
         SDL_aligned_free(pointer);
     }
 
-    USize GetActiveAllocationCount() noexcept
+    std::size_t GetActiveAllocationCount() noexcept
     {
         return activeAllocationCount.load(std::memory_order_relaxed);
     }

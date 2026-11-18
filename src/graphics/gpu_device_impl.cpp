@@ -1,18 +1,17 @@
-#include "gpu_device_impl.hpp"
+﻿#include "gpu_device_impl.hpp"
 
 #include <limits>
-#include <memory>
+#include <memory_resource>
 #include <span>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <fmt/format.h>
-
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
+#include "garage/core/allocator.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_buffer.hpp"
@@ -45,7 +44,8 @@ namespace Garage
     namespace
     {
         template <typename TImpl, typename TInterface>
-        void DestroyOwnedResource(std::vector<std::unique_ptr<TImpl>>& resources, const TInterface* target) noexcept
+        void DestroyOwnedResource(std::pmr::vector<Allocator::UniquePtr<TImpl>>& resources,
+                                  const TInterface*                              target) noexcept
         {
             if (target == nullptr)
             {
@@ -53,7 +53,7 @@ namespace Garage
             }
 
             std::erase_if(resources,
-                          [target](const std::unique_ptr<TImpl>& item) noexcept
+                          [target](const Allocator::UniquePtr<TImpl>& item) noexcept
                           {
                               return item.get() == target;
                           });
@@ -74,16 +74,18 @@ namespace Garage
         Release();
     }
 
-    Result<IGPUBuffer*, std::string> GPUDeviceImpl::CreateBuffer(EGPUBufferUsage usage, UInt64 sizeInBytes)
+    Result<IGPUBuffer*, std::pmr::string> GPUDeviceImpl::CreateBuffer(EGPUBufferUsage usage, UInt64 sizeInBytes)
     {
         if (device == nullptr)
         {
-            return Result<IGPUBuffer*, std::string>::Err("유효한 SDL_GPU 디바이스가 필요합니다.");
+            return Result<IGPUBuffer*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("유효한 SDL_GPU 디바이스가 필요합니다."));
         }
 
         if (sizeInBytes == 0 || sizeInBytes > std::numeric_limits<UInt32>::max())
         {
-            return Result<IGPUBuffer*, std::string>::Err("GPU 버퍼 크기가 유효하지 않습니다.");
+            return Result<IGPUBuffer*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("GPU 버퍼 크기가 유효하지 않습니다."));
         }
 
         const UInt32 SIZE_U32 = static_cast<UInt32>(sizeInBytes);
@@ -98,14 +100,14 @@ namespace Garage
             SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
             if (transferBuffer == nullptr)
             {
-                return Result<IGPUBuffer*, std::string>::Err(
-                        fmt::format("SDL_GPU 전송 버퍼 생성에 실패했습니다: {}", SDL_GetError()));
+                return Result<IGPUBuffer*, std::pmr::string>::Err(
+                        GraphicsDetail::FormatError("SDL_GPU 전송 버퍼 생성에 실패했습니다: {}", SDL_GetError()));
             }
 
-            auto bufferImpl       = std::make_unique<GPUBufferImpl>(this, usage, sizeInBytes, nullptr, transferBuffer);
+            auto bufferImpl = Allocator::MakeUnique<GPUBufferImpl>(this, usage, sizeInBytes, nullptr, transferBuffer);
             GPUBufferImpl* result = bufferImpl.get();
             buffers.push_back(std::move(bufferImpl));
-            return Result<IGPUBuffer*, std::string>::Ok(result);
+            return Result<IGPUBuffer*, std::pmr::string>::Ok(result);
         }
 
         SDL_GPUBufferCreateInfo bufferInfo{};
@@ -115,37 +117,38 @@ namespace Garage
         SDL_GPUBuffer* sdlBuffer = SDL_CreateGPUBuffer(device, &bufferInfo);
         if (sdlBuffer == nullptr)
         {
-            return Result<IGPUBuffer*, std::string>::Err(
-                    fmt::format("SDL_GPU 버퍼 생성에 실패했습니다: {}", SDL_GetError()));
+            return Result<IGPUBuffer*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("SDL_GPU 버퍼 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
-        auto           bufferImpl = std::make_unique<GPUBufferImpl>(this, usage, sizeInBytes, sdlBuffer, nullptr);
+        auto           bufferImpl = Allocator::MakeUnique<GPUBufferImpl>(this, usage, sizeInBytes, sdlBuffer, nullptr);
         GPUBufferImpl* result     = bufferImpl.get();
         buffers.push_back(std::move(bufferImpl));
-        return Result<IGPUBuffer*, std::string>::Ok(result);
+        return Result<IGPUBuffer*, std::pmr::string>::Ok(result);
     }
 
-    Result<IGPUBuffer*, std::string> GPUDeviceImpl::CreateUploadBuffer(std::span<const Byte> data)
+    Result<IGPUBuffer*, std::pmr::string> GPUDeviceImpl::CreateUploadBuffer(std::span<const Byte> data)
     {
         if (data.empty())
         {
-            return Result<IGPUBuffer*, std::string>::Err("업로드 버퍼에 기록할 데이터가 비어 있습니다.");
+            return Result<IGPUBuffer*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("업로드 버퍼에 기록할 데이터가 비어 있습니다."));
         }
 
         auto bufferResult = CreateBuffer(EGPUBufferUsage::UPLOAD, data.size());
         if (!bufferResult)
         {
-            return Result<IGPUBuffer*, std::string>::Err(std::move(bufferResult).GetError());
+            return Result<IGPUBuffer*, std::pmr::string>::Err(std::move(bufferResult).GetError());
         }
 
         IGPUBuffer* uploadBuffer = bufferResult.GetValue();
         if (auto writeResult = uploadBuffer->Write(data, 0); !writeResult)
         {
             DestroyBuffer(uploadBuffer);
-            return Result<IGPUBuffer*, std::string>::Err(std::move(writeResult).GetError());
+            return Result<IGPUBuffer*, std::pmr::string>::Err(std::move(writeResult).GetError());
         }
 
-        return Result<IGPUBuffer*, std::string>::Ok(uploadBuffer);
+        return Result<IGPUBuffer*, std::pmr::string>::Ok(uploadBuffer);
     }
 
     void GPUDeviceImpl::DestroyBuffer(IGPUBuffer* buffer) noexcept
@@ -153,19 +156,21 @@ namespace Garage
         DestroyOwnedResource(buffers, buffer);
     }
 
-    Result<IGPUShader*, std::string> GPUDeviceImpl::CreateShader(const GPUShaderCreateInfo& createInfo)
+    Result<IGPUShader*, std::pmr::string> GPUDeviceImpl::CreateShader(const GPUShaderCreateInfo& createInfo)
     {
         if (device == nullptr)
         {
-            return Result<IGPUShader*, std::string>::Err("유효한 SDL_GPU 디바이스가 필요합니다.");
+            return Result<IGPUShader*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("유효한 SDL_GPU 디바이스가 필요합니다."));
         }
 
         if (createInfo.code.empty() || createInfo.format == EGPUShaderFormat::INVALID)
         {
-            return Result<IGPUShader*, std::string>::Err("셰이더 바이트코드 또는 형식이 유효하지 않습니다.");
+            return Result<IGPUShader*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("셰이더 바이트코드 또는 형식이 유효하지 않습니다."));
         }
 
-        const std::string ENTRY_POINT(createInfo.entryPoint);
+        const std::pmr::string ENTRY_POINT(createInfo.entryPoint, Allocator::GetMemoryResource());
 
         SDL_GPUShaderCreateInfo sdlInfo{};
         sdlInfo.code                 = reinterpret_cast<const UInt8*>(createInfo.code.data());
@@ -181,14 +186,14 @@ namespace Garage
         SDL_GPUShader* sdlShader = SDL_CreateGPUShader(device, &sdlInfo);
         if (sdlShader == nullptr)
         {
-            return Result<IGPUShader*, std::string>::Err(
-                    fmt::format("SDL_GPU 셰이더 생성에 실패했습니다: {}", SDL_GetError()));
+            return Result<IGPUShader*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("SDL_GPU 셰이더 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
-        auto shaderImpl       = std::make_unique<GPUShaderImpl>(this, sdlShader, createInfo.stage, createInfo.format);
+        auto shaderImpl = Allocator::MakeUnique<GPUShaderImpl>(this, sdlShader, createInfo.stage, createInfo.format);
         GPUShaderImpl* result = shaderImpl.get();
         shaders.push_back(std::move(shaderImpl));
-        return Result<IGPUShader*, std::string>::Ok(result);
+        return Result<IGPUShader*, std::pmr::string>::Ok(result);
     }
 
     void GPUDeviceImpl::DestroyShader(IGPUShader* shader) noexcept
@@ -196,16 +201,18 @@ namespace Garage
         DestroyOwnedResource(shaders, shader);
     }
 
-    Result<IGPUTexture2D*, std::string> GPUDeviceImpl::CreateTexture2D(const GPUTexture2DCreateInfo& createInfo)
+    Result<IGPUTexture2D*, std::pmr::string> GPUDeviceImpl::CreateTexture2D(const GPUTexture2DCreateInfo& createInfo)
     {
         if (device == nullptr)
         {
-            return Result<IGPUTexture2D*, std::string>::Err("유효한 SDL_GPU 디바이스가 필요합니다.");
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("유효한 SDL_GPU 디바이스가 필요합니다."));
         }
 
         if (createInfo.width == 0 || createInfo.height == 0)
         {
-            return Result<IGPUTexture2D*, std::string>::Err("텍스처 가로·세로 크기는 0보다 커야 합니다.");
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("텍스처 가로·세로 크기는 0보다 커야 합니다."));
         }
 
         SDL_GPUTextureUsageFlags sdlUsage = 0;
@@ -235,22 +242,22 @@ namespace Garage
         SDL_GPUTexture* sdlTexture = SDL_CreateGPUTexture(device, &sdlInfo);
         if (sdlTexture == nullptr)
         {
-            return Result<IGPUTexture2D*, std::string>::Err(
-                    fmt::format("SDL_GPU 텍스처 생성에 실패했습니다: {}", SDL_GetError()));
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("SDL_GPU 텍스처 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
-        auto              textureImpl = std::make_unique<GPUTexture2DImpl>(this,
-                                                                           sdlTexture,
-                                                                           createInfo.width,
-                                                                           createInfo.height,
-                                                                           createInfo.layerCount,
-                                                                           createInfo.mipLevels,
-                                                                           createInfo.format,
-                                                                           createInfo.type,
-                                                                           true);
+        auto              textureImpl = Allocator::MakeUnique<GPUTexture2DImpl>(this,
+                                                                                sdlTexture,
+                                                                                createInfo.width,
+                                                                                createInfo.height,
+                                                                                createInfo.layerCount,
+                                                                                createInfo.mipLevels,
+                                                                                createInfo.format,
+                                                                                createInfo.type,
+                                                                                true);
         GPUTexture2DImpl* result      = textureImpl.get();
         textures.push_back(std::move(textureImpl));
-        return Result<IGPUTexture2D*, std::string>::Ok(result);
+        return Result<IGPUTexture2D*, std::pmr::string>::Ok(result);
     }
 
     void GPUDeviceImpl::DestroyTexture2D(IGPUTexture2D* texture) noexcept
@@ -258,17 +265,18 @@ namespace Garage
         DestroyOwnedResource(textures, texture);
     }
 
-    Result<IGPUCommandBuffer*, std::string> GPUDeviceImpl::CreateCommandBuffer()
+    Result<IGPUCommandBuffer*, std::pmr::string> GPUDeviceImpl::CreateCommandBuffer()
     {
         if (device == nullptr)
         {
-            return Result<IGPUCommandBuffer*, std::string>::Err("유효한 SDL_GPU 디바이스가 필요합니다.");
+            return Result<IGPUCommandBuffer*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("유효한 SDL_GPU 디바이스가 필요합니다."));
         }
 
-        auto                  commandBufferImpl = std::make_unique<GPUCommandBufferImpl>(this);
+        auto                  commandBufferImpl = Allocator::MakeUnique<GPUCommandBufferImpl>(this);
         GPUCommandBufferImpl* result            = commandBufferImpl.get();
         commandBuffers.push_back(std::move(commandBufferImpl));
-        return Result<IGPUCommandBuffer*, std::string>::Ok(result);
+        return Result<IGPUCommandBuffer*, std::pmr::string>::Ok(result);
     }
 
     void GPUDeviceImpl::DestroyCommandBuffer(IGPUCommandBuffer* commandBuffer) noexcept
@@ -276,17 +284,18 @@ namespace Garage
         DestroyOwnedResource(commandBuffers, commandBuffer);
     }
 
-    Result<IGPUFence*, std::string> GPUDeviceImpl::CreateFence()
+    Result<IGPUFence*, std::pmr::string> GPUDeviceImpl::CreateFence()
     {
         if (device == nullptr)
         {
-            return Result<IGPUFence*, std::string>::Err("유효한 SDL_GPU 디바이스가 필요합니다.");
+            return Result<IGPUFence*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("유효한 SDL_GPU 디바이스가 필요합니다."));
         }
 
-        auto          fenceImpl = std::make_unique<GPUFenceImpl>(this);
+        auto          fenceImpl = Allocator::MakeUnique<GPUFenceImpl>(this);
         GPUFenceImpl* result    = fenceImpl.get();
         fences.push_back(std::move(fenceImpl));
-        return Result<IGPUFence*, std::string>::Ok(result);
+        return Result<IGPUFence*, std::pmr::string>::Ok(result);
     }
 
     void GPUDeviceImpl::DestroyFence(IGPUFence* fence) noexcept
@@ -294,31 +303,32 @@ namespace Garage
         DestroyOwnedResource(fences, fence);
     }
 
-    Result<IGPUSwapChain*, std::string> GPUDeviceImpl::CreateSwapChain(const IDisplay* display)
+    Result<IGPUSwapChain*, std::pmr::string> GPUDeviceImpl::CreateSwapChain(const IDisplay* display)
     {
         if (device == nullptr || display == nullptr)
         {
-            return Result<IGPUSwapChain*, std::string>::Err(
-                    "스왑체인 생성에 필요한 GPU 디바이스 또는 디스플레이가 없습니다.");
+            return Result<IGPUSwapChain*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("스왑체인 생성에 필요한 GPU 디바이스 또는 디스플레이가 없습니다."));
         }
 
         const auto* displayImpl = static_cast<const DisplayImpl*>(display);
         SDL_Window* sdlWindow   = displayImpl->GetSDLWindow();
         if (sdlWindow == nullptr)
         {
-            return Result<IGPUSwapChain*, std::string>::Err("디스플레이의 SDL 윈도우 핸들이 유효하지 않습니다.");
+            return Result<IGPUSwapChain*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("디스플레이의 SDL 윈도우 핸들이 유효하지 않습니다."));
         }
 
         if (!SDL_ClaimWindowForGPUDevice(device, sdlWindow))
         {
-            return Result<IGPUSwapChain*, std::string>::Err(
-                    fmt::format("SDL_GPU 디바이스에 윈도우 연결을 실패했습니다: {}", SDL_GetError()));
+            return Result<IGPUSwapChain*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("SDL_GPU 디바이스에 윈도우 연결을 실패했습니다: {}", SDL_GetError()));
         }
 
-        auto              swapChainImpl = std::make_unique<GPUSwapChainImpl>(this, display);
+        auto              swapChainImpl = Allocator::MakeUnique<GPUSwapChainImpl>(this, display);
         GPUSwapChainImpl* result        = swapChainImpl.get();
         swapChains.push_back(std::move(swapChainImpl));
-        return Result<IGPUSwapChain*, std::string>::Ok(result);
+        return Result<IGPUSwapChain*, std::pmr::string>::Ok(result);
     }
 
     void GPUDeviceImpl::DestroySwapChain(IGPUSwapChain* swapChain) noexcept
@@ -326,18 +336,19 @@ namespace Garage
         DestroyOwnedResource(swapChains, swapChain);
     }
 
-    Result<IGPUGraphicsPipelineState*, std::string>
+    Result<IGPUGraphicsPipelineState*, std::pmr::string>
             GPUDeviceImpl::CreateGraphicsPipelineState(const GPUGraphicsPipelineDesc& description)
     {
         if (device == nullptr)
         {
-            return Result<IGPUGraphicsPipelineState*, std::string>::Err("유효한 SDL_GPU 디바이스가 필요합니다.");
+            return Result<IGPUGraphicsPipelineState*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("유효한 SDL_GPU 디바이스가 필요합니다."));
         }
 
         if (description.vertexShader == nullptr || description.fragmentShader == nullptr)
         {
-            return Result<IGPUGraphicsPipelineState*, std::string>::Err(
-                    "그래픽스 파이프라인 생성에는 정점 셰이더와 프래그먼트 셰이더가 필요합니다.");
+            return Result<IGPUGraphicsPipelineState*, std::pmr::string>::Err(GraphicsDetail::MakeError(
+                    "그래픽스 파이프라인 생성에는 정점 셰이더와 프래그먼트 셰이더가 필요합니다."));
         }
 
         const auto*    vertexShaderImpl   = static_cast<const GPUShaderImpl*>(description.vertexShader);
@@ -346,10 +357,11 @@ namespace Garage
         SDL_GPUShader* sdlFragmentShader  = fragmentShaderImpl->GetSDLShader();
         if (sdlVertexShader == nullptr || sdlFragmentShader == nullptr)
         {
-            return Result<IGPUGraphicsPipelineState*, std::string>::Err("셰이더의 SDL_GPU 핸들이 유효하지 않습니다.");
+            return Result<IGPUGraphicsPipelineState*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("셰이더의 SDL_GPU 핸들이 유효하지 않습니다."));
         }
 
-        std::vector<SDL_GPUVertexAttribute> sdlAttributes;
+        std::pmr::vector<SDL_GPUVertexAttribute> sdlAttributes(Allocator::GetMemoryResource());
         sdlAttributes.reserve(description.vertexAttributes.size());
         for (const GPUVertexAttribute& attribute : description.vertexAttributes)
         {
@@ -415,14 +427,14 @@ namespace Garage
         SDL_GPUGraphicsPipeline* sdlPipeline = SDL_CreateGPUGraphicsPipeline(device, &pipelineInfo);
         if (sdlPipeline == nullptr)
         {
-            return Result<IGPUGraphicsPipelineState*, std::string>::Err(
-                    fmt::format("SDL_GPU 그래픽스 파이프라인 생성에 실패했습니다: {}", SDL_GetError()));
+            return Result<IGPUGraphicsPipelineState*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("SDL_GPU 그래픽스 파이프라인 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
-        auto                          pipelineImpl = std::make_unique<GPUGraphicsPipelineStateImpl>(this, sdlPipeline);
-        GPUGraphicsPipelineStateImpl* result       = pipelineImpl.get();
+        auto pipelineImpl                    = Allocator::MakeUnique<GPUGraphicsPipelineStateImpl>(this, sdlPipeline);
+        GPUGraphicsPipelineStateImpl* result = pipelineImpl.get();
         pipelineStates.push_back(std::move(pipelineImpl));
-        return Result<IGPUGraphicsPipelineState*, std::string>::Ok(result);
+        return Result<IGPUGraphicsPipelineState*, std::pmr::string>::Ok(result);
     }
 
     void GPUDeviceImpl::DestroyGraphicsPipelineState(IGPUGraphicsPipelineState* pipelineState) noexcept
@@ -430,45 +442,48 @@ namespace Garage
         DestroyOwnedResource(pipelineStates, pipelineState);
     }
 
-    Result<IGPUMesh*, std::string> GPUDeviceImpl::CreateMesh(const IGPUBuffer*     vertexBuffer,
-                                                             UInt32                vertexStride,
-                                                             const IGPUBuffer*     indexBuffer,
-                                                             EGPUIndexFormat       indexFormat,
-                                                             EGPUPrimitiveTopology primitive)
+    Result<IGPUMesh*, std::pmr::string> GPUDeviceImpl::CreateMesh(const IGPUBuffer*     vertexBuffer,
+                                                                  UInt32                vertexStride,
+                                                                  const IGPUBuffer*     indexBuffer,
+                                                                  EGPUIndexFormat       indexFormat,
+                                                                  EGPUPrimitiveTopology primitive)
     {
         if (vertexBuffer == nullptr || vertexStride == 0)
         {
-            return Result<IGPUMesh*, std::string>::Err("정점 버퍼 크기 또는 스트라이드가 유효하지 않습니다.");
+            return Result<IGPUMesh*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("정점 버퍼 크기 또는 스트라이드가 유효하지 않습니다."));
         }
 
-        auto meshImpl = std::make_unique<GPUMeshImpl>(vertexBuffer, vertexStride, indexBuffer, indexFormat, primitive);
+        auto meshImpl =
+                Allocator::MakeUnique<GPUMeshImpl>(vertexBuffer, vertexStride, indexBuffer, indexFormat, primitive);
         GPUMeshImpl* result = meshImpl.get();
         meshes.push_back(std::move(meshImpl));
-        return Result<IGPUMesh*, std::string>::Ok(result);
+        return Result<IGPUMesh*, std::pmr::string>::Ok(result);
     }
 
-    Result<IGPUMesh*, std::string> GPUDeviceImpl::CreateMesh(std::span<const Byte> vertexData,
-                                                             UInt32                vertexStride,
-                                                             std::span<const Byte> indexData,
-                                                             EGPUIndexFormat       indexFormat,
-                                                             EGPUPrimitiveTopology primitive)
+    Result<IGPUMesh*, std::pmr::string> GPUDeviceImpl::CreateMesh(std::span<const Byte> vertexData,
+                                                                  UInt32                vertexStride,
+                                                                  std::span<const Byte> indexData,
+                                                                  EGPUIndexFormat       indexFormat,
+                                                                  EGPUPrimitiveTopology primitive)
     {
         if (vertexData.empty() || vertexStride == 0)
         {
-            return Result<IGPUMesh*, std::string>::Err("메시 정점 데이터 또는 스트라이드가 유효하지 않습니다.");
+            return Result<IGPUMesh*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("메시 정점 데이터 또는 스트라이드가 유효하지 않습니다."));
         }
 
         auto vertexBufferResult = CreateBuffer(EGPUBufferUsage::VERTEX, vertexData.size());
         if (!vertexBufferResult)
         {
-            return Result<IGPUMesh*, std::string>::Err(std::move(vertexBufferResult).GetError());
+            return Result<IGPUMesh*, std::pmr::string>::Err(std::move(vertexBufferResult).GetError());
         }
 
         IGPUBuffer* vertexBuffer = vertexBufferResult.GetValue();
         if (auto writeResult = vertexBuffer->Write(vertexData, 0); !writeResult)
         {
             DestroyBuffer(vertexBuffer);
-            return Result<IGPUMesh*, std::string>::Err(std::move(writeResult).GetError());
+            return Result<IGPUMesh*, std::pmr::string>::Err(std::move(writeResult).GetError());
         }
 
         IGPUBuffer* indexBuffer = nullptr;
@@ -478,7 +493,7 @@ namespace Garage
             if (!indexBufferResult)
             {
                 DestroyBuffer(vertexBuffer);
-                return Result<IGPUMesh*, std::string>::Err(std::move(indexBufferResult).GetError());
+                return Result<IGPUMesh*, std::pmr::string>::Err(std::move(indexBufferResult).GetError());
             }
 
             indexBuffer = indexBufferResult.GetValue();
@@ -486,7 +501,7 @@ namespace Garage
             {
                 DestroyBuffer(indexBuffer);
                 DestroyBuffer(vertexBuffer);
-                return Result<IGPUMesh*, std::string>::Err(std::move(writeResult).GetError());
+                return Result<IGPUMesh*, std::pmr::string>::Err(std::move(writeResult).GetError());
             }
         }
 
@@ -495,12 +510,12 @@ namespace Garage
         {
             DestroyBuffer(indexBuffer);
             DestroyBuffer(vertexBuffer);
-            return Result<IGPUMesh*, std::string>::Err(std::move(meshResult).GetError());
+            return Result<IGPUMesh*, std::pmr::string>::Err(std::move(meshResult).GetError());
         }
 
         IGPUMesh* mesh = meshResult.GetValue();
         static_cast<GPUMeshImpl*>(mesh)->SetOwnedBuffers(vertexBuffer, indexBuffer);
-        return Result<IGPUMesh*, std::string>::Ok(mesh);
+        return Result<IGPUMesh*, std::pmr::string>::Ok(mesh);
     }
 
     void GPUDeviceImpl::DestroyMesh(IGPUMesh* mesh) noexcept

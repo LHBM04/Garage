@@ -1,16 +1,17 @@
-#ifndef GARAGE_CORE_SYSTEM_HPP
+﻿#ifndef GARAGE_CORE_SYSTEM_HPP
 #define GARAGE_CORE_SYSTEM_HPP
 
 #include <algorithm>
 #include <concepts>
 #include <functional>
-#include <memory>
+#include <memory_resource>
 #include <ranges>
 #include <typeindex>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include "allocator.hpp"
 #include "subsystem.hpp"
 #include "system_status.hpp"
 #include "types.hpp"
@@ -23,12 +24,12 @@ namespace Garage
     public:
         using SubsystemPtr      = TSubsystem*;
         using ConstSubsystemPtr = const TSubsystem*;
-        using SubsystemOwner    = std::unique_ptr<TSubsystem>;
-        using SubsystemList     = std::vector<SubsystemOwner>;
-        using SubsystemMap      = std::unordered_map<std::type_index, SubsystemPtr>;
+        using SubsystemOwner    = Allocator::UniquePtr<TSubsystem>;
+        using SubsystemList     = std::pmr::vector<SubsystemOwner>;
+        using SubsystemMap      = std::pmr::unordered_map<std::type_index, SubsystemPtr>;
         using SubsystemDelegate = Delegate<SubsystemPtr>;
         using ListenerId        = typename SubsystemDelegate::ListenerId;
-        using DelegateMap       = std::unordered_map<std::type_index, SubsystemDelegate>;
+        using DelegateMap       = std::pmr::unordered_map<std::type_index, SubsystemDelegate>;
 
         template <std::derived_from<TSubsystem> TResult>
         using SubsystemCallback = Action<TResult*>;
@@ -78,10 +79,10 @@ namespace Garage
         ListenerId OnSubsystemRemoved(TObject* object, SubsystemMethod<TResult, TObject> method);
 
     private:
-        SubsystemList subsystems         = {};
-        SubsystemMap  subsystemsByType   = {};
-        DelegateMap   onSubsystemAdded   = {};
-        DelegateMap   onSubsystemRemoved = {};
+        SubsystemList subsystems{Allocator::GetMemoryResource()};
+        SubsystemMap  subsystemsByType{Allocator::GetMemoryResource()};
+        DelegateMap   onSubsystemAdded{Allocator::GetMemoryResource()};
+        DelegateMap   onSubsystemRemoved{Allocator::GetMemoryResource()};
     };
 
     template <std::derived_from<SubsystemBase> TSubsystem>
@@ -145,7 +146,7 @@ namespace Garage
             return static_cast<TResult*>(RESULT->second);
         }
 
-        auto  subsystem = std::make_unique<TResult>();
+        auto  subsystem = Allocator::MakeUnique<TResult>();
         auto* pointer   = subsystem.get();
         subsystems.push_back(std::move(subsystem));
         subsystemsByType.emplace(TYPE, pointer);

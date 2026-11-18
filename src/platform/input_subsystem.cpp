@@ -1,15 +1,15 @@
 ﻿#include "garage/platform/input_subsystem.hpp"
 
 #include <array>
-#include <memory>
 #include <ranges>
-#include <string_view>
 #include <string>
+#include <string_view>
 
 #include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_scancode.h>
 
+#include "garage/core/allocator.hpp"
 #include "garage/core/defines.hpp"
 #include "garage/core/engine.hpp"
 #include "garage/core/system_status.hpp"
@@ -250,11 +250,11 @@ namespace Garage
 
     InputAction* InputSubsystem::AddAction(std::string_view name)
     {
-        const std::string KEY(name);
+        const std::pmr::string KEY(name, Allocator::GetMemoryResource());
         auto [it, inserted] = actions.try_emplace(KEY, nullptr);
         if (inserted)
         {
-            it->second = std::make_unique<InputAction>(KEY);
+            it->second = Allocator::MakeUnique<InputAction>(KEY);
         }
 
         return it->second.get();
@@ -262,7 +262,7 @@ namespace Garage
 
     void InputSubsystem::RemoveAction(std::string_view name) noexcept
     {
-        const auto IT = actions.find(std::string(name));
+        const auto IT = actions.find(std::pmr::string(name, Allocator::GetMemoryResource()));
         if (IT != actions.end())
         {
             IT->second->Reset();
@@ -272,13 +272,13 @@ namespace Garage
 
     InputAction* InputSubsystem::GetAction(std::string_view name) noexcept
     {
-        const auto IT = actions.find(std::string(name));
+        const auto IT = actions.find(std::pmr::string(name, Allocator::GetMemoryResource()));
         return IT != actions.end() ? IT->second.get() : nullptr;
     }
 
     const InputAction* InputSubsystem::GetAction(std::string_view name) const noexcept
     {
-        const auto IT = actions.find(std::string(name));
+        const auto IT = actions.find(std::pmr::string(name, Allocator::GetMemoryResource()));
         return IT != actions.end() ? IT->second.get() : nullptr;
     }
 
