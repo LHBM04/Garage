@@ -27,11 +27,11 @@ void CubeWorld::OnEnter()
         return;
     }
 
-    const MeshAsset*     cubeMesh     = assets->LoadAsset<MeshAsset>("Resources/Meshes/Cube.tukmesh");
-    const MaterialAsset* cubeMaterial = assets->LoadAsset<MaterialAsset>("Resources/Materials/Cube.tukmat");
+    const MeshAsset*     cubeMesh     = assets->LoadAsset<MeshAsset>("Resources/Meshes/Cube.json");
+    const MaterialAsset* cubeMaterial = assets->LoadAsset<MaterialAsset>("Resources/Materials/Cube.json");
     if (cubeMesh == nullptr || cubeMaterial == nullptr)
     {
-        LOG_ERROR("큐브 에셋(Cube.tukmesh / Cube.tukmat)을 로드하지 못했습니다.");
+        LOG_ERROR("큐브 에셋(Meshes/Cube.json / Materials/Cube.json)을 로드하지 못했습니다.");
         return;
     }
 

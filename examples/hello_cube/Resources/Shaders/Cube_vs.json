@@ -1,0 +1,7 @@
+{
+  "stage": "Vertex",
+  "entryPoint": "VSMain",
+  "uniformBuffers": 2,
+  "samplers": 0,
+  "vertexInput": "Mesh"
+}
