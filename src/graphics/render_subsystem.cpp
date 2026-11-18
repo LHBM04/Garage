@@ -1,4 +1,4 @@
-﻿#include "garage/graphics/render_subsystem.hpp"
+#include "garage/graphics/render_subsystem.hpp"
 
 #include <ranges>
 #include <string>
@@ -30,6 +30,11 @@
 
 namespace Garage
 {
+    RenderSubsystem::RenderSubsystem() noexcept
+        : EngineSubsystemBase(20)
+    {
+    }
+
     RenderSubsystem::~RenderSubsystem() noexcept = default;
 
     ESystemStatus RenderSubsystem::OnStartup()
