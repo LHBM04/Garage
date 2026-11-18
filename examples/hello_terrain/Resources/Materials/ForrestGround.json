@@ -1,0 +1,14 @@
+{
+  "baseColor": [1.0, 1.0, 1.0, 1.0],
+  "emissiveColor": [0.0, 0.0, 0.0, 1.0],
+  "specularColor": [1.0, 1.0, 1.0, 1.0],
+  "metallic": 0.0,
+  "roughness": 0.9,
+  "textures": {
+    "baseColor": "Textures/ForrestGround/forrest_ground_01_diff_4k.dds",
+    "normal": "Textures/ForrestGround/forrest_ground_01_nor_gl_4k.dds",
+    "roughness": "Textures/ForrestGround/forrest_ground_01_rough_4k.dds"
+  },
+  "vertexShader": "Shaders/Standard_vs.dxil",
+  "fragmentShader": "Shaders/Standard_ps.dxil"
+}
