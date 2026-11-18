@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_RENDER_SUBSYSTEM_HPP
+#ifndef GARAGE_GRAPHICS_RENDER_SUBSYSTEM_HPP
 #define GARAGE_GRAPHICS_RENDER_SUBSYSTEM_HPP
 
 #include <memory_resource>
@@ -58,11 +58,6 @@ namespace Garage
         Int32                                                  displayCloseListenerId   = 0;
         Int32                                                  displayDestroyListenerId = 0;
     };
-
-    inline RenderSubsystem::RenderSubsystem() noexcept
-        : EngineSubsystemBase(20)
-    {
-    }
 
     inline Delegate<IGPUCommandBuffer&>& RenderSubsystem::OnRender() noexcept
     {
