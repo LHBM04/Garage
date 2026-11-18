@@ -2,6 +2,9 @@
 #define GARAGE_GRAPHICS_GPU_SWAP_CHAIN_IMPL_HPP
 
 #include <memory>
+#include <string>
+
+#include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_swap_chain.hpp"
 #include "garage/graphics/gpu_target.hpp"
@@ -25,7 +28,8 @@ namespace Garage
         void Present() const noexcept override;
         void Release() noexcept;
 
-        [[nodiscard]] const GPUTarget*  AcquireBackBufferTarget(IGPUCommandBuffer& commandBuffer) noexcept override;
+        [[nodiscard]] Result<const GPUTarget*, std::string>
+                                        AcquireBackBufferTarget(IGPUCommandBuffer& commandBuffer) override;
         [[nodiscard]] const GPUTarget*  GetCurrentBackBufferTarget() const noexcept override;
         [[nodiscard]] const IGPUDevice* GetDevice() const noexcept override;
         [[nodiscard]] const IDisplay*   GetDisplay() const noexcept override;

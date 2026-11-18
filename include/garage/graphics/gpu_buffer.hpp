@@ -2,6 +2,7 @@
 #define GARAGE_GRAPHICS_GPU_BUFFER_HPP
 
 #include <span>
+#include <string>
 
 #include "../core/defines.hpp"
 #include "../core/types.hpp"
@@ -24,10 +25,10 @@ namespace Garage
         IGPUBuffer(IGPUBuffer&&)            = delete;
         IGPUBuffer& operator=(IGPUBuffer&&) = delete;
 
-        [[nodiscard]] virtual bool Write(std::span<const UInt8> data, UInt64 offset = 0) noexcept = 0;
-        [[nodiscard]] virtual bool Write(std::span<const Byte> data, UInt64 offset = 0) noexcept  = 0;
-        [[nodiscard]] virtual bool Read(std::span<UInt8> data, UInt64 offset = 0) const noexcept  = 0;
-        [[nodiscard]] virtual bool Read(std::span<Byte> data, UInt64 offset = 0) const noexcept   = 0;
+        [[nodiscard]] virtual Result<void, std::string> Write(std::span<const UInt8> data, UInt64 offset = 0) = 0;
+        [[nodiscard]] virtual Result<void, std::string> Write(std::span<const Byte> data, UInt64 offset = 0)  = 0;
+        [[nodiscard]] virtual Result<void, std::string> Read(std::span<UInt8> data, UInt64 offset = 0) const  = 0;
+        [[nodiscard]] virtual Result<void, std::string> Read(std::span<Byte> data, UInt64 offset = 0) const   = 0;
 
         [[nodiscard]] virtual const IGPUDevice* GetDevice() const noexcept      = 0;
         [[nodiscard]] virtual UInt64            GetSizeInBytes() const noexcept = 0;
