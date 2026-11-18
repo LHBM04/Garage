@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_PLATFORM_EVENT_SUBSYSTEM_HPP
+#ifndef GARAGE_PLATFORM_EVENT_SUBSYSTEM_HPP
 #define GARAGE_PLATFORM_EVENT_SUBSYSTEM_HPP
 
 #include <functional>
@@ -11,8 +11,6 @@
 #include "../core/engine_subsystem.hpp"
 #include "../core/system_status.hpp"
 #include "../core/types.hpp"
-
-#include "../utilities/delegate.hpp"
 
 #include "event.hpp"
 

@@ -12,8 +12,6 @@
 
 #include "../platform/display.hpp"
 
-#include "../utilities/delegate.hpp"
-
 namespace Garage
 {
     struct DisplayCreateEvent;
