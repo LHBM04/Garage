@@ -1,0 +1,6 @@
+{
+  "stage": "Fragment",
+  "entryPoint": "PSMain",
+  "uniformBuffers": 3,
+  "samplers": 0
+}

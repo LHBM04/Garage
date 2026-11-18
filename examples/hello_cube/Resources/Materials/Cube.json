@@ -1,0 +1,9 @@
+{
+  "baseColor": [1.0, 1.0, 1.0, 1.0],
+  "emissiveColor": [0.0, 0.0, 0.0, 1.0],
+  "specularColor": [1.0, 1.0, 1.0, 1.0],
+  "metallic": 0.0,
+  "roughness": 0.5,
+  "vertexShader": "Shaders/Cube_vs.dxil",
+  "fragmentShader": "Shaders/Cube_ps.dxil"
+}

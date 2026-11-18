@@ -77,3 +77,8 @@ if(GARAGE_SOURCES)
 else()
     message(STATUS "[Garage] No .cpp source files found in src/. Garage library target creation skipped.")
 endif()
+
+option(GARAGE_BUILD_EXAMPLES "Build Garage example applications" ON)
+if(GARAGE_BUILD_EXAMPLES AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/examples/CMakeLists.txt")
+    add_subdirectory(examples)
+endif()

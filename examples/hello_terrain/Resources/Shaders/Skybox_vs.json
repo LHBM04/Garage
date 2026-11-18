@@ -1,0 +1,11 @@
+{
+  "stage": "Vertex",
+  "entryPoint": "VSMain",
+  "uniformBuffers": 1,
+  "samplers": 0,
+  "vertexInput": "None",
+  "cull": "None",
+  "blend": "Alpha",
+  "depth": "LessEqual",
+  "depthWrite": false
+}
