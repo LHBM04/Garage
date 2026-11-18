@@ -1,6 +1,8 @@
-﻿#ifndef GARAGE_GRAPHICS_HPP
+#ifndef GARAGE_GRAPHICS_HPP
 #define GARAGE_GRAPHICS_HPP
 
+#include "graphics/camera.hpp"
+#include "graphics/directional_light.hpp"
 #include "graphics/gpu_buffer.hpp"
 #include "graphics/gpu_command_buffer.hpp"
 #include "graphics/gpu_constants.hpp"

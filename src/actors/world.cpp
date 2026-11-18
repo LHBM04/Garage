@@ -1,6 +1,7 @@
 #include "garage/actors/world.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <ranges>
 #include <string_view>
 #include <utility>
@@ -13,10 +14,18 @@
 #include "garage/core/defines.hpp"
 #include "garage/core/types.hpp"
 
+#include "garage/graphics/camera.hpp"
+#include "garage/graphics/directional_light.hpp"
 #include "garage/graphics/gpu_command_buffer.hpp"
+#include "garage/graphics/gpu_constants.hpp"
+#include "garage/graphics/gpu_target.hpp"
+#include "garage/graphics/gpu_types.hpp"
 
+#include "garage/math/color_rgba.hpp"
 #include "garage/math/quaternion.hpp"
 #include "garage/math/vector3d.hpp"
+
+#include "garage/utilities/logger.hpp"
 
 namespace Garage
 {
@@ -116,10 +125,104 @@ namespace Garage
         RunPhase(
                 [this, &commandBuffer]()
                 {
-                    RenderActors(&ActorBase::Render, commandBuffer);
+                    for (const Camera* activeCamera : activeCameras)
+                    {
+                        ASSERT(activeCamera != nullptr);
+
+                        if (!isEntered)
+                        {
+                            break;
+                        }
+
+                        if (!activeCamera->IsEnabled() || activeCamera->IsDestroyed())
+                        {
+                            continue;
+                        }
+
+                        const ActorBase* owner = activeCamera->GetOwner();
+                        ASSERT(owner != nullptr);
+
+                        if (!owner->IsEnabled() || owner->IsDestroyed())
+                        {
+                            continue;
+                        }
+
+                        if (commandBuffer.GetActiveTargetFormat() == EGPUTextureFormat::UNKNOWN)
+                        {
+                            LOG_ERROR("카메라를 적용하기 전에 렌더 타깃을 설정해야 합니다.");
+                            continue;
+                        }
+
+                        const GPUViewport& VIEWPORT = activeCamera->GetViewport();
+                        const GPURect&     SCISSOR  = activeCamera->GetScissorRect();
+                        const GPURect&     BOUNDS   = commandBuffer.GetActiveTargetBounds();
+                        if (VIEWPORT.width <= 0.0f || VIEWPORT.height <= 0.0f)
+                        {
+                            continue;
+                        }
+
+                        const Float32 TARGET_LEFT   = static_cast<Float32>(BOUNDS.x);
+                        const Float32 TARGET_TOP    = static_cast<Float32>(BOUNDS.y);
+                        const Float32 TARGET_RIGHT  = static_cast<Float32>(BOUNDS.x + BOUNDS.width);
+                        const Float32 TARGET_BOTTOM = static_cast<Float32>(BOUNDS.y + BOUNDS.height);
+
+                        const Int32 CLIPPED_LEFT = std::max(
+                                SCISSOR.x,
+                                static_cast<Int32>(std::floor(std::clamp(VIEWPORT.x, TARGET_LEFT, TARGET_RIGHT))));
+                        const Int32 CLIPPED_TOP = std::max(
+                                SCISSOR.y,
+                                static_cast<Int32>(std::floor(std::clamp(VIEWPORT.y, TARGET_TOP, TARGET_BOTTOM))));
+                        const Int32 CLIPPED_RIGHT =
+                                std::min(SCISSOR.x + SCISSOR.width,
+                                         static_cast<Int32>(std::ceil(
+                                                 std::clamp(VIEWPORT.x + VIEWPORT.width, TARGET_LEFT, TARGET_RIGHT))));
+                        const Int32 CLIPPED_BOTTOM =
+                                std::min(SCISSOR.y + SCISSOR.height,
+                                         static_cast<Int32>(std::ceil(
+                                                 std::clamp(VIEWPORT.y + VIEWPORT.height, TARGET_TOP, TARGET_BOTTOM))));
+                        if (CLIPPED_LEFT >= CLIPPED_RIGHT || CLIPPED_TOP >= CLIPPED_BOTTOM)
+                        {
+                            continue;
+                        }
+
+                        Vector3DFloat  lightDir       = Vector3DFloat{-0.5f, -1.0f, 0.5f};
+                        Float32        lightIntensity = 1.0f;
+                        ColorRGBAFloat lightColor     = ColorRGBAFloat::GetWhite();
+                        ColorRGBAFloat ambientColor{0.15f, 0.15f, 0.15f, 1.0f};
+
+                        if (const DirectionalLight* mainLight = GetMainLight(); mainLight != nullptr)
+                        {
+                            lightDir       = mainLight->GetDirection();
+                            lightIntensity = mainLight->GetIntensity();
+                            lightColor     = mainLight->GetColor();
+                            ambientColor   = mainLight->GetAmbientColor();
+                        }
+
+                        const CameraConstants CONSTANTS{
+                                .view              = activeCamera->GetViewMatrix(),
+                                .projection        = activeCamera->GetProjectionMatrix(),
+                                .lightDirection    = lightDir,
+                                .lightIntensity    = lightIntensity,
+                                .lightColor        = lightColor,
+                                .ambientLightColor = ambientColor,
+                        };
+                        if (const auto UPLOADED = commandBuffer.SetGraphicsConstants(CONSTANTS); !UPLOADED)
+                        {
+                            LOG_ERROR("월드의 카메라 상수 설정에 실패했습니다: {}", UPLOADED.GetError());
+                            continue;
+                        }
+
+                        commandBuffer.EndRenderPass();
+                        commandBuffer.SetViewport(VIEWPORT);
+                        commandBuffer.SetScissorRect(SCISSOR);
+                        commandBuffer.ClearRenderTarget(activeCamera->GetClearColor());
+                        commandBuffer.ClearDepthStencil(GPUTarget::DEPTH_CLEAR_VALUE);
+
+                        RenderActors(&ActorBase::Render, commandBuffer);
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-                    RenderActors(&ActorBase::DrawGizmos, commandBuffer);
+                        RenderActors(&ActorBase::DrawGizmos, commandBuffer);
 #endif
+                    }
                 });
     }
 
@@ -293,6 +396,8 @@ namespace Garage
     {
         if (actors.empty())
         {
+            activeCameras.clear();
+            activeDirectionalLights.clear();
             return;
         }
 
@@ -304,6 +409,77 @@ namespace Garage
             actor->Destroy();
             actor.reset();
         }
+
+        activeCameras.clear();
+        activeDirectionalLights.clear();
+    }
+
+    void WorldBase::AddCamera(Camera* camera)
+    {
+        ASSERT(camera != nullptr);
+
+        if (camera != nullptr && std::ranges::find(activeCameras, camera) == activeCameras.end())
+        {
+            activeCameras.push_back(camera);
+        }
+    }
+
+    void WorldBase::RemoveCamera(const Camera* camera)
+    {
+        ASSERT(camera != nullptr);
+
+        std::erase(activeCameras, camera);
+    }
+
+    void WorldBase::AddDirectionalLight(DirectionalLight* light)
+    {
+        ASSERT(light != nullptr);
+
+        if (light != nullptr && std::ranges::find(activeDirectionalLights, light) == activeDirectionalLights.end())
+        {
+            activeDirectionalLights.push_back(light);
+        }
+    }
+
+    void WorldBase::RemoveDirectionalLight(const DirectionalLight* light)
+    {
+        ASSERT(light != nullptr);
+
+        std::erase(activeDirectionalLights, light);
+    }
+
+    DirectionalLight* WorldBase::GetMainLight() noexcept
+    {
+        for (DirectionalLight* light : activeDirectionalLights)
+        {
+            if (light != nullptr && light->IsEnabled() && !light->IsDestroyed())
+            {
+                const ActorBase* owner = light->GetOwner();
+                if (owner != nullptr && owner->IsEnabled() && !owner->IsDestroyed())
+                {
+                    return light;
+                }
+            }
+        }
+
+        return nullptr;
+    }
+
+    const DirectionalLight* WorldBase::GetMainLight() const noexcept
+    {
+        for (const DirectionalLight* light : activeDirectionalLights)
+        {
+            if (light != nullptr && light->IsEnabled() && !light->IsDestroyed())
+            {
+                const ActorBase* owner = light->GetOwner();
+                if (owner != nullptr && owner->IsEnabled() && !owner->IsDestroyed())
+                {
+                    return light;
+                }
+            }
+        }
+
+        return nullptr;
     }
 
     std::pmr::vector<Allocator::UniquePtr<ActorBase>> WorldBase::ExtractPersistentActors()
@@ -314,6 +490,15 @@ namespace Garage
             ActorBase* actor = actorIt->get();
             if (actor->ShouldDontDestroyOnLoad() && !actor->IsDestroyed())
             {
+                if (Camera* camera = actor->GetComponent<Camera>(); camera != nullptr)
+                {
+                    RemoveCamera(camera);
+                }
+                if (DirectionalLight* light = actor->GetComponent<DirectionalLight>(); light != nullptr)
+                {
+                    RemoveDirectionalLight(light);
+                }
+
                 extracted.push_back(std::move(*actorIt));
                 actorIt = actors.erase(actorIt);
             }
@@ -336,6 +521,16 @@ namespace Garage
             }
 
             actor->world = this;
+            if (Camera* camera = actor->GetComponent<Camera>(); camera != nullptr && camera->IsEnabled())
+            {
+                AddCamera(camera);
+            }
+            if (DirectionalLight* light = actor->GetComponent<DirectionalLight>();
+                light != nullptr && light->IsEnabled())
+            {
+                AddDirectionalLight(light);
+            }
+
             actors.push_back(std::move(actor));
         }
     }
