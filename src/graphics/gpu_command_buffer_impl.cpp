@@ -1,5 +1,6 @@
-﻿#include "gpu_command_buffer_impl.hpp"
+#include "gpu_command_buffer_impl.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 #include <limits>
@@ -276,6 +277,64 @@ namespace Garage
 
         SDL_CopyGPUBufferToBuffer(
                 copyPass, &sourceLocation, &destinationLocation, static_cast<UInt32>(sizeInBytes), false);
+        SDL_EndGPUCopyPass(copyPass);
+    }
+
+    void GPUCommandBufferImpl::CopyBufferToTexture(const IGPUTexture2D& destination,
+                                                   UInt32               mipLevel,
+                                                   UInt32               layer,
+                                                   const IGPUBuffer&    source,
+                                                   UInt64               sourceOffset,
+                                                   UInt32               pixelsPerRow,
+                                                   UInt32               rowsPerLayer) noexcept
+    {
+        if (commandBuffer == nullptr || mipLevel >= destination.GetMipLevels() || layer >= destination.GetLayerCount())
+        {
+            return;
+        }
+
+        if (sourceOffset > std::numeric_limits<UInt32>::max() || sourceOffset >= source.GetSizeInBytes())
+        {
+            LOG_ERROR("텍스처 복사 소스 오프셋이 유효하지 않습니다.");
+            return;
+        }
+
+        const auto&            destinationImpl = static_cast<const GPUTexture2DImpl&>(destination);
+        const auto&            sourceImpl      = static_cast<const GPUBufferImpl&>(source);
+        SDL_GPUTexture*        sdlTexture      = destinationImpl.GetSDLTexture();
+        SDL_GPUTransferBuffer* sdlTransfer     = sourceImpl.GetSDLTransferBuffer();
+        if (sdlTexture == nullptr || sdlTransfer == nullptr)
+        {
+            return;
+        }
+
+        EndRenderPass();
+
+        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
+        if (copyPass == nullptr)
+        {
+            LOG_ERROR("GPU 복사 패스 시작에 실패했습니다: {}", SDL_GetError());
+            return;
+        }
+
+        SDL_GPUTextureTransferInfo sourceInfo{};
+        sourceInfo.transfer_buffer = sdlTransfer;
+        sourceInfo.offset          = static_cast<UInt32>(sourceOffset);
+        sourceInfo.pixels_per_row  = pixelsPerRow;
+        sourceInfo.rows_per_layer  = rowsPerLayer;
+
+        SDL_GPUTextureRegion destinationRegion{};
+        destinationRegion.texture   = sdlTexture;
+        destinationRegion.mip_level = mipLevel;
+        destinationRegion.layer     = layer;
+        destinationRegion.x         = 0u;
+        destinationRegion.y         = 0u;
+        destinationRegion.z         = 0u;
+        destinationRegion.w         = std::max(1u, destination.GetWidth() >> mipLevel);
+        destinationRegion.h         = std::max(1u, destination.GetHeight() >> mipLevel);
+        destinationRegion.d         = 1u;
+
+        SDL_UploadToGPUTexture(copyPass, &sourceInfo, &destinationRegion, false);
         SDL_EndGPUCopyPass(copyPass);
     }
 

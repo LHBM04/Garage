@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_DEVICE_HPP
+#ifndef GARAGE_GRAPHICS_GPU_DEVICE_HPP
 #define GARAGE_GRAPHICS_GPU_DEVICE_HPP
 
 #include <span>
@@ -47,8 +47,11 @@ namespace Garage
         virtual void DestroyShader(IGPUShader* shader) noexcept          = 0;
 
         [[nodiscard]] virtual Result<IGPUTexture2D*, std::pmr::string>
-                     CreateTexture2D(const GPUTexture2DCreateInfo& createInfo) = 0;
-        virtual void DestroyTexture2D(IGPUTexture2D* texture) noexcept         = 0;
+                CreateTexture2D(const GPUTexture2DCreateInfo& createInfo) = 0;
+        [[nodiscard]] virtual Result<IGPUTexture2D*, std::pmr::string>
+                     CreateTexture2D(const GPUTexture2DCreateInfo&              createInfo,
+                                     std::span<const GPUTextureSubresourceData> subresources) = 0;
+        virtual void DestroyTexture2D(IGPUTexture2D* texture) noexcept                        = 0;
 
         [[nodiscard]] virtual Result<IGPUCommandBuffer*, std::pmr::string> CreateCommandBuffer() = 0;
         virtual void DestroyCommandBuffer(IGPUCommandBuffer* commandBuffer) noexcept             = 0;
