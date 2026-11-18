@@ -24,5 +24,12 @@ ESystemStatus MyEngine::Startup()
         return ESystemStatus::FAILURE;
     }
 
+    rendering = AddSubsystem<RenderSubsystem>();
+    if (rendering == nullptr)
+    {
+        LOG_ERROR("렌더링 서브시스템을 추가하지 못했습니다.");
+        return ESystemStatus::FAILURE;
+    }
+
     return Engine::Startup();
 }

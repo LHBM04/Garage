@@ -13,8 +13,9 @@ public:
     [[nodiscard]] ESystemStatus Startup() override;
 
 private:
-    DisplaySubsystem* displays = nullptr;
-    EventSubsystem*   events   = nullptr;
+    DisplaySubsystem* displays  = nullptr;
+    EventSubsystem*   events    = nullptr;
+    RenderSubsystem*  rendering = nullptr;
 };
 
 #endif // MY_ENGINE_HPP

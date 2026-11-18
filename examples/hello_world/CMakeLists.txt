@@ -79,6 +79,15 @@ if(EXAMPLE_01_SOURCES)
             COMMENT "Copying runtime DLLs for GarageExample01"
         )
     endif()
+
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Resources")
+        add_custom_command(TARGET GarageExample01 POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_directory
+                "${CMAKE_CURRENT_SOURCE_DIR}/Resources"
+                "$<TARGET_FILE_DIR:GarageExample01>/Resources"
+            COMMENT "Copying Resources for GarageExample01"
+        )
+    endif()
 else()
     message(STATUS "[GarageExample01] No .cpp source files found in examples/hello_world/. GarageExample01 target creation skipped.")
 endif()
