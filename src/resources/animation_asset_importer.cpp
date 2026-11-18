@@ -1,80 +1,89 @@
 #include "garage/resources/animation_asset_importer.hpp"
 
+#include <array>
 #include <cmath>
 #include <filesystem>
-#include <fstream>
-#include <ios>
 #include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include <rapidjson/document.h>
+
 #include "garage/core/allocator.hpp"
-#include "garage/core/binary_reader.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/resources/animation_asset.hpp"
+
+#include "garage/utilities/json_utility.hpp"
 
 namespace Garage
 {
     Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>
             AnimationAssetImporter::Import(const std::filesystem::path& path) const
     {
-        if (path.extension() != ".tukanim")
+        if (!JsonUtility::HasJsonExtension(path))
         {
             return Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>::Err(
-                    Allocator::MakeString("애니메이션 로더에는 .tukanim 파일이 필요합니다."));
+                    Allocator::MakeString("애니메이션 로더에는 .json 파일이 필요합니다."));
         }
 
-        std::ifstream file(path, std::ios::binary);
-        if (!file)
+        auto documentResult = JsonUtility::LoadDocument(path);
+        if (!documentResult)
         {
-            std::pmr::string error = Allocator::MakeString("리소스를 열 수 없습니다: ");
-            error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>::Err(
+                    std::move(documentResult).GetError());
         }
 
-        BinaryReader     reader(file);
+        const rapidjson::Value& ROOT = *documentResult;
+
         std::pmr::string name{Allocator::GetMemoryResource()};
         Float32          length    = 0.0f;
         Float32          frameRate = 0.0f;
-        if (!reader.Read(name, length, frameRate))
+        if (!JsonUtility::ReadString(ROOT, "name", name) || !JsonUtility::ReadFloat32(ROOT, "length", length) ||
+            !JsonUtility::ReadFloat32(ROOT, "frameRate", frameRate))
         {
             return Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>::Err(
                     Allocator::MakeString("애니메이션 헤더가 유효하지 않습니다."));
         }
 
-        Int32 count = 0;
-        if (!reader.ReadCount(count, sizeof(AnimationTransform)))
+        const rapidjson::Value* transformsArray = nullptr;
+        if (!JsonUtility::ReadArray(ROOT, "transforms", transformsArray) || transformsArray->Empty())
         {
             return Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>::Err(
                     Allocator::MakeString("애니메이션 트랜스폼 개수가 유효하지 않습니다."));
         }
 
-        std::pmr::vector<AnimationTransform> transforms(static_cast<USize>(count), Allocator::GetMemoryResource());
-        for (AnimationTransform& transform : transforms)
+        std::pmr::vector<AnimationTransform> transforms{Allocator::GetMemoryResource()};
+        transforms.reserve(transformsArray->Size());
+        for (const rapidjson::Value& transformValue : transformsArray->GetArray())
         {
-            if (!reader.Read(transform.path) || !reader.ReadCount(count, sizeof(AnimationFrame)))
+            const rapidjson::Value* framesArray = nullptr;
+            AnimationTransform      transform{};
+            if (!transformValue.IsObject() || !JsonUtility::ReadString(transformValue, "path", transform.path) ||
+                !JsonUtility::ReadArray(transformValue, "frames", framesArray) || framesArray->Empty())
             {
                 return Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>::Err(
                         Allocator::MakeString("애니메이션 트랜스폼 데이터가 유효하지 않습니다."));
             }
 
-            transform.frames.resize(static_cast<USize>(count));
-            for (AnimationFrame& frame : transform.frames)
+            transform.frames.reserve(framesArray->Size());
+            for (const rapidjson::Value& frameValue : framesArray->GetArray())
             {
-                if (!reader.Read(frame.time, frame.position, frame.rotation, frame.scale))
+                AnimationFrame frame{};
+                if (!frameValue.IsObject() || !JsonUtility::ReadFloat32(frameValue, "time", frame.time) ||
+                    !JsonUtility::ReadFloatArray(frameValue, "position", frame.position) ||
+                    !JsonUtility::ReadFloatArray(frameValue, "rotation", frame.rotation) ||
+                    !JsonUtility::ReadFloatArray(frameValue, "scale", frame.scale))
                 {
                     return Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>::Err(
                             Allocator::MakeString("애니메이션 프레임 데이터가 유효하지 않습니다."));
                 }
-            }
-        }
 
-        if (!reader.IsAtEnd())
-        {
-            return Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>::Err(
-                    Allocator::MakeString("애니메이션 파일 끝에 예상치 못한 데이터가 남아 있습니다."));
+                transform.frames.push_back(frame);
+            }
+
+            transforms.push_back(std::move(transform));
         }
 
         if (length < 0.0f || frameRate <= 0.0f || transforms.empty())
