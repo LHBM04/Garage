@@ -3,6 +3,7 @@
 
 #include <array>
 #include <span>
+#include <string>
 
 #include <SDL3/SDL_gpu.h>
 
@@ -30,18 +31,19 @@ namespace Garage
         explicit GPUCommandBufferImpl(const GPUDeviceImpl* device) noexcept;
         ~GPUCommandBufferImpl() noexcept override;
 
-        [[nodiscard]] bool Reset() noexcept override;
-        [[nodiscard]] bool Submit(IGPUFence* fence = nullptr) noexcept override;
+        [[nodiscard]] Result<void, std::string> Reset() override;
+        [[nodiscard]] Result<void, std::string> Submit(IGPUFence* fence = nullptr) override;
 
-        [[nodiscard]] bool SetGraphicsConstants(UInt32 rootSlot, std::span<const Byte> bytes) noexcept override;
+        [[nodiscard]] Result<void, std::string> SetGraphicsConstants(UInt32                rootSlot,
+                                                                     std::span<const Byte> bytes) override;
 
         void SetGraphicsRootConstants(UInt32                rootSlot,
                                       std::span<const Byte> bytes,
                                       UInt32                offset = 0) noexcept override;
         void SetGPUGraphicsPipelineState(const IGPUGraphicsPipelineState& pipelineState) noexcept override;
 
-        [[nodiscard]] bool
-                BindTextures(std::span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures) noexcept override;
+        [[nodiscard]] Result<void, std::string>
+                BindTextures(std::span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures) override;
 
         void CopyGPUBuffer(const IGPUBuffer& destination,
                            UInt64            destinationOffset,

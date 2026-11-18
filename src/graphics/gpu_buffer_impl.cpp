@@ -3,6 +3,9 @@
 #include <cstring>
 #include <limits>
 #include <span>
+#include <string>
+
+#include <fmt/format.h>
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_gpu.h>
@@ -11,8 +14,6 @@
 
 #include "garage/graphics/gpu_device.hpp"
 #include "garage/graphics/gpu_types.hpp"
-
-#include "garage/utilities/logger.hpp"
 
 #include "gpu_device_impl.hpp"
 
@@ -36,34 +37,31 @@ namespace Garage
         Release();
     }
 
-    bool GPUBufferImpl::Write(std::span<const UInt8> data, UInt64 offset) noexcept
+    Result<void, std::string> GPUBufferImpl::Write(std::span<const UInt8> data, UInt64 offset)
     {
         if (device == nullptr || device->GetSDLDevice() == nullptr)
         {
-            return false;
-        }
-
-        if (data.empty())
-        {
-            return offset <= sizeInBytes;
+            return Result<void, std::string>::Err("유효한 GPU 디바이스가 필요합니다.");
         }
 
         if (offset > sizeInBytes || data.size() > sizeInBytes - offset)
         {
-            LOG_ERROR("GPU 버퍼 쓰기 범위가 버퍼 크기를 초과했습니다.");
-            return false;
+            return Result<void, std::string>::Err("GPU 버퍼 쓰기 범위가 유효 범위를 벗어났습니다.");
+        }
+
+        if (data.empty())
+        {
+            return Result<void, std::string>::Ok();
         }
 
         if (usage == EGPUBufferUsage::READBACK)
         {
-            LOG_ERROR("READBACK 전용 GPU 버퍼에는 쓸 수 없습니다.");
-            return false;
+            return Result<void, std::string>::Err("READBACK 전용 GPU 버퍼에는 쓸 수 없습니다.");
         }
 
         if (data.size() > std::numeric_limits<UInt32>::max() || offset > std::numeric_limits<UInt32>::max())
         {
-            LOG_ERROR("GPU 버퍼 쓰기 크기 또는 오프셋이 32비트 범위를 초과했습니다.");
-            return false;
+            return Result<void, std::string>::Err("GPU 버퍼 쓰기 크기 또는 오프셋이 32비트 범위를 초과했습니다.");
         }
 
         SDL_GPUDevice* sdlDevice = device->GetSDLDevice();
@@ -73,18 +71,18 @@ namespace Garage
             void* mapped = SDL_MapGPUTransferBuffer(sdlDevice, transferBuffer, false);
             if (mapped == nullptr)
             {
-                LOG_ERROR("GPU 전송 버퍼 매핑에 실패했습니다: {}", SDL_GetError());
-                return false;
+                return Result<void, std::string>::Err(
+                        fmt::format("GPU 전송 버퍼 매핑에 실패했습니다: {}", SDL_GetError()));
             }
 
             std::memcpy(static_cast<UInt8*>(mapped) + offset, data.data(), data.size());
             SDL_UnmapGPUTransferBuffer(sdlDevice, transferBuffer);
-            return true;
+            return Result<void, std::string>::Ok();
         }
 
         if (buffer == nullptr)
         {
-            return false;
+            return Result<void, std::string>::Err("유효한 GPU 버퍼 핸들이 없습니다.");
         }
 
         SDL_GPUTransferBufferCreateInfo stagingInfo{};
@@ -94,16 +92,16 @@ namespace Garage
         SDL_GPUTransferBuffer* stagingBuffer = SDL_CreateGPUTransferBuffer(sdlDevice, &stagingInfo);
         if (stagingBuffer == nullptr)
         {
-            LOG_ERROR("임시 GPU 업로드 버퍼 생성에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(
+                    fmt::format("임시 GPU 업로드 버퍼 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
         void* mapped = SDL_MapGPUTransferBuffer(sdlDevice, stagingBuffer, false);
         if (mapped == nullptr)
         {
             SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-            LOG_ERROR("임시 GPU 업로드 버퍼 매핑에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(
+                    fmt::format("임시 GPU 업로드 버퍼 매핑에 실패했습니다: {}", SDL_GetError()));
         }
 
         std::memcpy(mapped, data.data(), data.size());
@@ -113,8 +111,8 @@ namespace Garage
         if (sdlCommandBuffer == nullptr)
         {
             SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-            LOG_ERROR("GPU 업로드용 명령 버퍼 획득에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(
+                    fmt::format("GPU 업로드용 명령 버퍼 획득에 실패했습니다: {}", SDL_GetError()));
         }
 
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(sdlCommandBuffer);
@@ -122,8 +120,7 @@ namespace Garage
         {
             SDL_CancelGPUCommandBuffer(sdlCommandBuffer);
             SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-            LOG_ERROR("GPU 복사 패스 시작에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(fmt::format("GPU 복사 패스 시작에 실패했습니다: {}", SDL_GetError()));
         }
 
         SDL_GPUTransferBufferLocation sourceLocation{};
@@ -142,43 +139,41 @@ namespace Garage
         if (uploadFence == nullptr)
         {
             SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-            LOG_ERROR("GPU 버퍼 업로드 제출에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(
+                    fmt::format("GPU 버퍼 업로드 제출에 실패했습니다: {}", SDL_GetError()));
         }
 
         SDL_WaitForGPUFences(sdlDevice, true, &uploadFence, 1);
         SDL_ReleaseGPUFence(sdlDevice, uploadFence);
         SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-        return true;
+        return Result<void, std::string>::Ok();
     }
 
-    bool GPUBufferImpl::Write(std::span<const Byte> data, UInt64 offset) noexcept
+    Result<void, std::string> GPUBufferImpl::Write(std::span<const Byte> data, UInt64 offset)
     {
         return Write(std::span<const UInt8>{reinterpret_cast<const UInt8*>(data.data()), data.size()}, offset);
     }
 
-    bool GPUBufferImpl::Read(std::span<UInt8> data, UInt64 offset) const noexcept
+    Result<void, std::string> GPUBufferImpl::Read(std::span<UInt8> data, UInt64 offset) const
     {
         if (device == nullptr || device->GetSDLDevice() == nullptr)
         {
-            return false;
-        }
-
-        if (data.empty())
-        {
-            return offset <= sizeInBytes;
+            return Result<void, std::string>::Err("유효한 GPU 디바이스가 필요합니다.");
         }
 
         if (offset > sizeInBytes || data.size() > sizeInBytes - offset)
         {
-            LOG_ERROR("GPU 버퍼 읽기 범위가 버퍼 크기를 초과했습니다.");
-            return false;
+            return Result<void, std::string>::Err("GPU 버퍼 읽기 범위가 유효 범위를 벗어났습니다.");
+        }
+
+        if (data.empty())
+        {
+            return Result<void, std::string>::Ok();
         }
 
         if (data.size() > std::numeric_limits<UInt32>::max() || offset > std::numeric_limits<UInt32>::max())
         {
-            LOG_ERROR("GPU 버퍼 읽기 크기 또는 오프셋이 32비트 범위를 초과했습니다.");
-            return false;
+            return Result<void, std::string>::Err("GPU 버퍼 읽기 크기 또는 오프셋이 32비트 범위를 초과했습니다.");
         }
 
         SDL_GPUDevice* sdlDevice = device->GetSDLDevice();
@@ -188,18 +183,18 @@ namespace Garage
             void* mapped = SDL_MapGPUTransferBuffer(sdlDevice, transferBuffer, false);
             if (mapped == nullptr)
             {
-                LOG_ERROR("GPU 전송 버퍼 매핑에 실패했습니다: {}", SDL_GetError());
-                return false;
+                return Result<void, std::string>::Err(
+                        fmt::format("GPU 전송 버퍼 매핑에 실패했습니다: {}", SDL_GetError()));
             }
 
             std::memcpy(data.data(), static_cast<const UInt8*>(mapped) + offset, data.size());
             SDL_UnmapGPUTransferBuffer(sdlDevice, transferBuffer);
-            return true;
+            return Result<void, std::string>::Ok();
         }
 
         if (buffer == nullptr)
         {
-            return false;
+            return Result<void, std::string>::Err("유효한 GPU 버퍼 핸들이 없습니다.");
         }
 
         SDL_GPUTransferBufferCreateInfo stagingInfo{};
@@ -209,16 +204,16 @@ namespace Garage
         SDL_GPUTransferBuffer* stagingBuffer = SDL_CreateGPUTransferBuffer(sdlDevice, &stagingInfo);
         if (stagingBuffer == nullptr)
         {
-            LOG_ERROR("임시 GPU 다운로드 버퍼 생성에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(
+                    fmt::format("임시 GPU 다운로드 버퍼 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
         SDL_GPUCommandBuffer* sdlCommandBuffer = SDL_AcquireGPUCommandBuffer(sdlDevice);
         if (sdlCommandBuffer == nullptr)
         {
             SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-            LOG_ERROR("GPU 다운로드용 명령 버퍼 획득에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(
+                    fmt::format("GPU 다운로드용 명령 버퍼 획득에 실패했습니다: {}", SDL_GetError()));
         }
 
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(sdlCommandBuffer);
@@ -226,8 +221,7 @@ namespace Garage
         {
             SDL_CancelGPUCommandBuffer(sdlCommandBuffer);
             SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-            LOG_ERROR("GPU 복사 패스 시작에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(fmt::format("GPU 복사 패스 시작에 실패했습니다: {}", SDL_GetError()));
         }
 
         SDL_GPUBufferRegion sourceRegion{};
@@ -246,8 +240,8 @@ namespace Garage
         if (downloadFence == nullptr)
         {
             SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-            LOG_ERROR("GPU 버퍼 다운로드 제출에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(
+                    fmt::format("GPU 버퍼 다운로드 제출에 실패했습니다: {}", SDL_GetError()));
         }
 
         SDL_WaitForGPUFences(sdlDevice, true, &downloadFence, 1);
@@ -257,17 +251,17 @@ namespace Garage
         if (mapped == nullptr)
         {
             SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-            LOG_ERROR("임시 GPU 다운로드 버퍼 매핑에 실패했습니다: {}", SDL_GetError());
-            return false;
+            return Result<void, std::string>::Err(
+                    fmt::format("임시 GPU 다운로드 버퍼 매핑에 실패했습니다: {}", SDL_GetError()));
         }
 
         std::memcpy(data.data(), mapped, data.size());
         SDL_UnmapGPUTransferBuffer(sdlDevice, stagingBuffer);
         SDL_ReleaseGPUTransferBuffer(sdlDevice, stagingBuffer);
-        return true;
+        return Result<void, std::string>::Ok();
     }
 
-    bool GPUBufferImpl::Read(std::span<Byte> data, UInt64 offset) const noexcept
+    Result<void, std::string> GPUBufferImpl::Read(std::span<Byte> data, UInt64 offset) const
     {
         return Read(std::span<UInt8>{reinterpret_cast<UInt8*>(data.data()), data.size()}, offset);
     }

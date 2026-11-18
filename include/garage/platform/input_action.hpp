@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_PLATFORM_INPUT_ACTION_HPP
+#ifndef GARAGE_PLATFORM_INPUT_ACTION_HPP
 #define GARAGE_PLATFORM_INPUT_ACTION_HPP
 
 #include <string>
@@ -9,8 +9,6 @@
 #include "../core/types.hpp"
 
 #include "../math/vector2d.hpp"
-
-#include "../utilities/delegate.hpp"
 
 #include "input_states.hpp"
 

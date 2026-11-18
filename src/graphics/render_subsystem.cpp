@@ -2,13 +2,17 @@
 
 #include <memory>
 #include <ranges>
+#include <string>
 #include <utility>
+
+#include <fmt/format.h>
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_gpu.h>
 
 #include "garage/core/engine.hpp"
 #include "garage/core/system_status.hpp"
+#include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
 #include "garage/graphics/gpu_device.hpp"
@@ -31,26 +35,35 @@ namespace Garage
 
     ESystemStatus RenderSubsystem::OnStartup()
     {
-        device = CreateDevice();
-        if (device == nullptr)
+        auto deviceResult = CreateDevice();
+        if (!deviceResult)
         {
+            LOG_CRITICAL("{}", deviceResult.GetError());
             return ESystemStatus::FAILURE;
         }
 
-        commandBuffer = device->CreateCommandBuffer();
-        if (commandBuffer == nullptr)
+        device = std::move(deviceResult).GetValue();
+
+        const auto COMMAND_BUFFER_RESULT = device->CreateCommandBuffer();
+        if (!COMMAND_BUFFER_RESULT)
         {
+            LOG_CRITICAL("{}", COMMAND_BUFFER_RESULT.GetError());
             device.reset();
             return ESystemStatus::FAILURE;
         }
 
-        fence = device->CreateFence();
-        if (fence == nullptr)
+        commandBuffer = COMMAND_BUFFER_RESULT.GetValue();
+
+        const auto FENCE_RESULT = device->CreateFence();
+        if (!FENCE_RESULT)
         {
+            LOG_CRITICAL("{}", FENCE_RESULT.GetError());
             commandBuffer = nullptr;
             device.reset();
             return ESystemStatus::FAILURE;
         }
+
+        fence = FENCE_RESULT.GetValue();
 
         Engine* engine = Engine::GetInstance();
         if (engine != nullptr)
@@ -100,8 +113,10 @@ namespace Garage
             return ESystemStatus::CONTINUE;
         }
 
-        if (!commandBuffer->Reset())
+        const auto RESET_RESULT = commandBuffer->Reset();
+        if (!RESET_RESULT)
         {
+            LOG_ERROR("{}", RESET_RESULT.GetError());
             return ESystemStatus::FAILURE;
         }
 
@@ -112,7 +127,14 @@ namespace Garage
                 continue;
             }
 
-            const GPUTarget* target = swapChain->AcquireBackBufferTarget(*commandBuffer);
+            const auto TARGET_RESULT = swapChain->AcquireBackBufferTarget(*commandBuffer);
+            if (!TARGET_RESULT)
+            {
+                LOG_ERROR("{}", TARGET_RESULT.GetError());
+                continue;
+            }
+
+            const GPUTarget* target = TARGET_RESULT.GetValue();
             if (target == nullptr)
             {
                 continue;
@@ -123,9 +145,10 @@ namespace Garage
             commandBuffer->EndRenderPass();
         }
 
-        if (!commandBuffer->Submit(fence))
+        const auto SUBMIT_RESULT = commandBuffer->Submit(fence);
+        if (!SUBMIT_RESULT)
         {
-            LOG_CRITICAL("GPU 명령 버퍼 제출에 실패했습니다.");
+            LOG_CRITICAL("{}", SUBMIT_RESULT.GetError());
             return ESystemStatus::FAILURE;
         }
 
@@ -178,14 +201,14 @@ namespace Garage
             return;
         }
 
-        IGPUSwapChain* swapChain = device->CreateSwapChain(display);
-        if (swapChain == nullptr)
+        const auto SWAP_CHAIN_RESULT = device->CreateSwapChain(display);
+        if (!SWAP_CHAIN_RESULT)
         {
-            LOG_ERROR("GPU 스왑체인 생성에 실패했습니다.");
+            LOG_ERROR("{}", SWAP_CHAIN_RESULT.GetError());
             return;
         }
 
-        swapChains.emplace(display->GetID(), swapChain);
+        swapChains.emplace(display->GetID(), SWAP_CHAIN_RESULT.GetValue());
     }
 
     void RenderSubsystem::OnDisplayClose(const DisplayCloseEvent& event)
@@ -213,7 +236,7 @@ namespace Garage
         }
     }
 
-    std::unique_ptr<IGPUDevice> RenderSubsystem::CreateDevice() const
+    Result<std::unique_ptr<IGPUDevice>, std::string> RenderSubsystem::CreateDevice() const
     {
         constexpr SDL_GPUShaderFormat SHADER_FORMATS =
                 SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
@@ -227,8 +250,8 @@ namespace Garage
         SDL_GPUDevice* sdlDevice = SDL_CreateGPUDevice(SHADER_FORMATS, DEBUG_MODE, nullptr);
         if (sdlDevice == nullptr)
         {
-            LOG_CRITICAL("SDL_GPU 디바이스 생성에 실패했습니다: {}", SDL_GetError());
-            return nullptr;
+            return Result<std::unique_ptr<IGPUDevice>, std::string>::Err(
+                    fmt::format("SDL_GPU 디바이스 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
         SDL_GPUSamplerCreateInfo samplerInfo{};
@@ -244,8 +267,8 @@ namespace Garage
         if (defaultSampler == nullptr)
         {
             SDL_DestroyGPUDevice(sdlDevice);
-            LOG_ERROR("기본 GPU 샘플러 생성에 실패했습니다: {}", SDL_GetError());
-            return nullptr;
+            return Result<std::unique_ptr<IGPUDevice>, std::string>::Err(
+                    fmt::format("기본 GPU 샘플러 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
         SDL_GPUTextureCreateInfo fallbackTextureInfo{};
@@ -263,10 +286,11 @@ namespace Garage
         {
             SDL_ReleaseGPUSampler(sdlDevice, defaultSampler);
             SDL_DestroyGPUDevice(sdlDevice);
-            LOG_ERROR("기본 폴백 GPU 텍스처 생성에 실패했습니다: {}", SDL_GetError());
-            return nullptr;
+            return Result<std::unique_ptr<IGPUDevice>, std::string>::Err(
+                    fmt::format("기본 폴백 GPU 텍스처 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
-        return std::make_unique<GPUDeviceImpl>(sdlDevice, defaultSampler, fallbackTexture);
+        return Result<std::unique_ptr<IGPUDevice>, std::string>::Ok(
+                std::make_unique<GPUDeviceImpl>(sdlDevice, defaultSampler, fallbackTexture));
     }
 } // namespace Garage

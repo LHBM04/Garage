@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <span>
+#include <string>
 #include <vector>
 
 #include <SDL3/SDL_gpu.h>
@@ -43,40 +44,41 @@ namespace Garage
         GPUDeviceImpl(SDL_GPUDevice* device, SDL_GPUSampler* defaultSampler, SDL_GPUTexture* fallbackTexture) noexcept;
         ~GPUDeviceImpl() noexcept override;
 
-        [[nodiscard]] IGPUBuffer* CreateBuffer(EGPUBufferUsage usage, UInt64 sizeInBytes) override;
-        [[nodiscard]] IGPUBuffer* CreateUploadBuffer(std::span<const Byte> data) override;
-        void                      DestroyBuffer(IGPUBuffer* buffer) noexcept override;
+        [[nodiscard]] Result<IGPUBuffer*, std::string> CreateBuffer(EGPUBufferUsage usage, UInt64 sizeInBytes) override;
+        [[nodiscard]] Result<IGPUBuffer*, std::string> CreateUploadBuffer(std::span<const Byte> data) override;
+        void                                           DestroyBuffer(IGPUBuffer* buffer) noexcept override;
 
-        [[nodiscard]] IGPUShader* CreateShader(const GPUShaderCreateInfo& createInfo) override;
-        void                      DestroyShader(IGPUShader* shader) noexcept override;
+        [[nodiscard]] Result<IGPUShader*, std::string> CreateShader(const GPUShaderCreateInfo& createInfo) override;
+        void                                           DestroyShader(IGPUShader* shader) noexcept override;
 
-        [[nodiscard]] IGPUTexture2D* CreateTexture2D(const GPUTexture2DCreateInfo& createInfo) override;
-        void                         DestroyTexture2D(IGPUTexture2D* texture) noexcept override;
+        [[nodiscard]] Result<IGPUTexture2D*, std::string>
+                CreateTexture2D(const GPUTexture2DCreateInfo& createInfo) override;
+        void    DestroyTexture2D(IGPUTexture2D* texture) noexcept override;
 
-        [[nodiscard]] IGPUCommandBuffer* CreateCommandBuffer() override;
-        void                             DestroyCommandBuffer(IGPUCommandBuffer* commandBuffer) noexcept override;
+        [[nodiscard]] Result<IGPUCommandBuffer*, std::string> CreateCommandBuffer() override;
+        void DestroyCommandBuffer(IGPUCommandBuffer* commandBuffer) noexcept override;
 
-        [[nodiscard]] IGPUFence* CreateFence() override;
-        void                     DestroyFence(IGPUFence* fence) noexcept override;
+        [[nodiscard]] Result<IGPUFence*, std::string> CreateFence() override;
+        void                                          DestroyFence(IGPUFence* fence) noexcept override;
 
-        [[nodiscard]] IGPUSwapChain* CreateSwapChain(const IDisplay* display) override;
-        void                         DestroySwapChain(IGPUSwapChain* swapChain) noexcept override;
+        [[nodiscard]] Result<IGPUSwapChain*, std::string> CreateSwapChain(const IDisplay* display) override;
+        void                                              DestroySwapChain(IGPUSwapChain* swapChain) noexcept override;
 
-        [[nodiscard]] IGPUGraphicsPipelineState*
+        [[nodiscard]] Result<IGPUGraphicsPipelineState*, std::string>
                 CreateGraphicsPipelineState(const GPUGraphicsPipelineDesc& description) override;
         void    DestroyGraphicsPipelineState(IGPUGraphicsPipelineState* pipelineState) noexcept override;
 
-        [[nodiscard]] IGPUMesh* CreateMesh(const IGPUBuffer*     vertexBuffer,
-                                           UInt32                vertexStride,
-                                           const IGPUBuffer*     indexBuffer,
-                                           EGPUIndexFormat       indexFormat,
-                                           EGPUPrimitiveTopology primitive) override;
-        [[nodiscard]] IGPUMesh* CreateMesh(std::span<const Byte> vertexData,
-                                           UInt32                vertexStride,
-                                           std::span<const Byte> indexData,
-                                           EGPUIndexFormat       indexFormat,
-                                           EGPUPrimitiveTopology primitive) override;
-        void                    DestroyMesh(IGPUMesh* mesh) noexcept override;
+        [[nodiscard]] Result<IGPUMesh*, std::string> CreateMesh(const IGPUBuffer*     vertexBuffer,
+                                                                UInt32                vertexStride,
+                                                                const IGPUBuffer*     indexBuffer,
+                                                                EGPUIndexFormat       indexFormat,
+                                                                EGPUPrimitiveTopology primitive) override;
+        [[nodiscard]] Result<IGPUMesh*, std::string> CreateMesh(std::span<const Byte> vertexData,
+                                                                UInt32                vertexStride,
+                                                                std::span<const Byte> indexData,
+                                                                EGPUIndexFormat       indexFormat,
+                                                                EGPUPrimitiveTopology primitive) override;
+        void                                         DestroyMesh(IGPUMesh* mesh) noexcept override;
 
         void Release() noexcept;
 

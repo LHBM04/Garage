@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_PLATFORM_INPUT_SUBSYSTEM_HPP
+#ifndef GARAGE_PLATFORM_INPUT_SUBSYSTEM_HPP
 #define GARAGE_PLATFORM_INPUT_SUBSYSTEM_HPP
 
 #include <memory>
@@ -9,10 +9,9 @@
 #include "../core/app_subsystem.hpp"
 #include "../core/defines.hpp"
 #include "../core/system_status.hpp"
+#include "../core/types.hpp"
 
 #include "../math/vector2d.hpp"
-
-#include "../utilities/delegate.hpp"
 
 #include "display_events.hpp"
 #include "input_action.hpp"

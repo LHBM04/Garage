@@ -2,6 +2,7 @@
 #define GARAGE_GRAPHICS_RENDER_SUBSYSTEM_HPP
 
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 #include "../core/defines.hpp"
@@ -10,8 +11,6 @@
 #include "../core/types.hpp"
 
 #include "../platform/display.hpp"
-
-#include "../utilities/delegate.hpp"
 
 namespace Garage
 {
@@ -46,8 +45,8 @@ namespace Garage
         [[nodiscard]] const IGPUDevice* GetDevice() const noexcept;
 
     private:
-        [[nodiscard]] std::unique_ptr<IGPUDevice> CreateDevice() const;
-        void                                      ReleaseDisplaySwapChain(const IDisplay* display) noexcept;
+        [[nodiscard]] Result<std::unique_ptr<IGPUDevice>, std::string> CreateDevice() const;
+        void ReleaseDisplaySwapChain(const IDisplay* display) noexcept;
 
         std::unique_ptr<IGPUDevice>                       device                   = nullptr;
         IGPUCommandBuffer*                                commandBuffer            = nullptr;
