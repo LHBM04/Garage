@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_IMPL_HPP
+#ifndef GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_IMPL_HPP
 #define GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_IMPL_HPP
 
 #include <array>
@@ -50,6 +50,14 @@ namespace Garage
                            const IGPUBuffer& source,
                            UInt64            sourceOffset,
                            UInt64            sizeInBytes) noexcept override;
+
+        void CopyBufferToTexture(const IGPUTexture2D& destination,
+                                 UInt32               mipLevel,
+                                 UInt32               layer,
+                                 const IGPUBuffer&    source,
+                                 UInt64               sourceOffset = 0,
+                                 UInt32               pixelsPerRow = 0,
+                                 UInt32               rowsPerLayer = 0) noexcept override;
 
         void SetPrimitiveTopology(EGPUPrimitiveTopology primitive) noexcept override;
 

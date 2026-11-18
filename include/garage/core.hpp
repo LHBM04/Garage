@@ -1,9 +1,10 @@
-﻿#ifndef GARAGE_CORE_HPP
+#ifndef GARAGE_CORE_HPP
 #define GARAGE_CORE_HPP
 
 #include "core/allocator.hpp"
 #include "core/app.hpp"
 #include "core/app_subsystem.hpp"
+#include "core/binary_reader.hpp"
 #include "core/common.hpp"
 #include "core/defines.hpp"
 #include "core/engine.hpp"

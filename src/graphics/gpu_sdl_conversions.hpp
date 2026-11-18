@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_SDL_CONVERSIONS_HPP
+#ifndef GARAGE_GRAPHICS_GPU_SDL_CONVERSIONS_HPP
 #define GARAGE_GRAPHICS_GPU_SDL_CONVERSIONS_HPP
 
 #include <iterator>
@@ -21,6 +21,14 @@ namespace Garage::GraphicsDetail
     {
         switch (format)
         {
+            case EGPUTextureFormat::R8_UNORM:
+            {
+                return SDL_GPU_TEXTUREFORMAT_R8_UNORM;
+            }
+            case EGPUTextureFormat::R8G8_UNORM:
+            {
+                return SDL_GPU_TEXTUREFORMAT_R8G8_UNORM;
+            }
             case EGPUTextureFormat::R8G8B8A8_UNORM:
             {
                 return SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
@@ -36,6 +44,66 @@ namespace Garage::GraphicsDetail
             case EGPUTextureFormat::B8G8R8A8_UNORM_SRGB:
             {
                 return SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM_SRGB;
+            }
+            case EGPUTextureFormat::R16G16_UNORM:
+            {
+                return SDL_GPU_TEXTUREFORMAT_R16G16_UNORM;
+            }
+            case EGPUTextureFormat::R16G16B16A16_FLOAT:
+            {
+                return SDL_GPU_TEXTUREFORMAT_R16G16B16A16_FLOAT;
+            }
+            case EGPUTextureFormat::R32G32B32A32_FLOAT:
+            {
+                return SDL_GPU_TEXTUREFORMAT_R32G32B32A32_FLOAT;
+            }
+            case EGPUTextureFormat::BC1_RGBA_UNORM:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC1_RGBA_UNORM;
+            }
+            case EGPUTextureFormat::BC1_RGBA_UNORM_SRGB:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC1_RGBA_UNORM_SRGB;
+            }
+            case EGPUTextureFormat::BC2_RGBA_UNORM:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC2_RGBA_UNORM;
+            }
+            case EGPUTextureFormat::BC2_RGBA_UNORM_SRGB:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC2_RGBA_UNORM_SRGB;
+            }
+            case EGPUTextureFormat::BC3_RGBA_UNORM:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC3_RGBA_UNORM;
+            }
+            case EGPUTextureFormat::BC3_RGBA_UNORM_SRGB:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC3_RGBA_UNORM_SRGB;
+            }
+            case EGPUTextureFormat::BC4_R_UNORM:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC4_R_UNORM;
+            }
+            case EGPUTextureFormat::BC5_RG_UNORM:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC5_RG_UNORM;
+            }
+            case EGPUTextureFormat::BC6H_RGB_FLOAT:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC6H_RGB_FLOAT;
+            }
+            case EGPUTextureFormat::BC6H_RGB_UFLOAT:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC6H_RGB_UFLOAT;
+            }
+            case EGPUTextureFormat::BC7_RGBA_UNORM:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC7_RGBA_UNORM;
+            }
+            case EGPUTextureFormat::BC7_RGBA_UNORM_SRGB:
+            {
+                return SDL_GPU_TEXTUREFORMAT_BC7_RGBA_UNORM_SRGB;
             }
             case EGPUTextureFormat::D16_UNORM:
             {
@@ -69,6 +137,14 @@ namespace Garage::GraphicsDetail
     {
         switch (format)
         {
+            case SDL_GPU_TEXTUREFORMAT_R8_UNORM:
+            {
+                return EGPUTextureFormat::R8_UNORM;
+            }
+            case SDL_GPU_TEXTUREFORMAT_R8G8_UNORM:
+            {
+                return EGPUTextureFormat::R8G8_UNORM;
+            }
             case SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM:
             {
                 return EGPUTextureFormat::R8G8B8A8_UNORM;
@@ -84,6 +160,66 @@ namespace Garage::GraphicsDetail
             case SDL_GPU_TEXTUREFORMAT_B8G8R8A8_UNORM_SRGB:
             {
                 return EGPUTextureFormat::B8G8R8A8_UNORM_SRGB;
+            }
+            case SDL_GPU_TEXTUREFORMAT_R16G16_UNORM:
+            {
+                return EGPUTextureFormat::R16G16_UNORM;
+            }
+            case SDL_GPU_TEXTUREFORMAT_R16G16B16A16_FLOAT:
+            {
+                return EGPUTextureFormat::R16G16B16A16_FLOAT;
+            }
+            case SDL_GPU_TEXTUREFORMAT_R32G32B32A32_FLOAT:
+            {
+                return EGPUTextureFormat::R32G32B32A32_FLOAT;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC1_RGBA_UNORM:
+            {
+                return EGPUTextureFormat::BC1_RGBA_UNORM;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC1_RGBA_UNORM_SRGB:
+            {
+                return EGPUTextureFormat::BC1_RGBA_UNORM_SRGB;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC2_RGBA_UNORM:
+            {
+                return EGPUTextureFormat::BC2_RGBA_UNORM;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC2_RGBA_UNORM_SRGB:
+            {
+                return EGPUTextureFormat::BC2_RGBA_UNORM_SRGB;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC3_RGBA_UNORM:
+            {
+                return EGPUTextureFormat::BC3_RGBA_UNORM;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC3_RGBA_UNORM_SRGB:
+            {
+                return EGPUTextureFormat::BC3_RGBA_UNORM_SRGB;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC4_R_UNORM:
+            {
+                return EGPUTextureFormat::BC4_R_UNORM;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC5_RG_UNORM:
+            {
+                return EGPUTextureFormat::BC5_RG_UNORM;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC6H_RGB_FLOAT:
+            {
+                return EGPUTextureFormat::BC6H_RGB_FLOAT;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC6H_RGB_UFLOAT:
+            {
+                return EGPUTextureFormat::BC6H_RGB_UFLOAT;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC7_RGBA_UNORM:
+            {
+                return EGPUTextureFormat::BC7_RGBA_UNORM;
+            }
+            case SDL_GPU_TEXTUREFORMAT_BC7_RGBA_UNORM_SRGB:
+            {
+                return EGPUTextureFormat::BC7_RGBA_UNORM_SRGB;
             }
             case SDL_GPU_TEXTUREFORMAT_D16_UNORM:
             {

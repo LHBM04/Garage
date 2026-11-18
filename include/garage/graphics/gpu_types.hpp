@@ -1,6 +1,8 @@
 #ifndef GARAGE_GRAPHICS_GPU_TYPES_HPP
 #define GARAGE_GRAPHICS_GPU_TYPES_HPP
 
+#include <span>
+
 #include "../core/defines.hpp"
 #include "../core/types.hpp"
 
@@ -19,10 +21,27 @@ namespace Garage
     enum class EGPUTextureFormat : UInt8
     {
         UNKNOWN,
+        R8_UNORM,
+        R8G8_UNORM,
         R8G8B8A8_UNORM,
         B8G8R8A8_UNORM,
         R8G8B8A8_UNORM_SRGB,
         B8G8R8A8_UNORM_SRGB,
+        R16G16_UNORM,
+        R16G16B16A16_FLOAT,
+        R32G32B32A32_FLOAT,
+        BC1_RGBA_UNORM,
+        BC1_RGBA_UNORM_SRGB,
+        BC2_RGBA_UNORM,
+        BC2_RGBA_UNORM_SRGB,
+        BC3_RGBA_UNORM,
+        BC3_RGBA_UNORM_SRGB,
+        BC4_R_UNORM,
+        BC5_RG_UNORM,
+        BC6H_RGB_FLOAT,
+        BC6H_RGB_UFLOAT,
+        BC7_RGBA_UNORM,
+        BC7_RGBA_UNORM_SRGB,
         D16_UNORM,
         D24_UNORM,
         D32_FLOAT,
@@ -186,6 +205,13 @@ namespace Garage
         UInt32            offset      = 0;
         UInt32            sizeInBytes = 0;
         EGPUIndexFormat   format      = EGPUIndexFormat::UINT32;
+    };
+
+    struct GARAGE_API GPUTextureSubresourceData final
+    {
+        std::span<const Byte> data     = {};
+        UInt32                mipLevel = 0;
+        UInt32                layer    = 0;
     };
 } // namespace Garage
 

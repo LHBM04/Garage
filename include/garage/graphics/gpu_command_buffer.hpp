@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_HPP
+#ifndef GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_HPP
 #define GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_HPP
 
 #include <span>
@@ -61,6 +61,14 @@ namespace Garage
                                    const IGPUBuffer& source,
                                    UInt64            sourceOffset,
                                    UInt64            sizeInBytes) noexcept = 0;
+
+        virtual void CopyBufferToTexture(const IGPUTexture2D& destination,
+                                         UInt32               mipLevel,
+                                         UInt32               layer,
+                                         const IGPUBuffer&    source,
+                                         UInt64               sourceOffset = 0,
+                                         UInt32               pixelsPerRow = 0,
+                                         UInt32               rowsPerLayer = 0) noexcept = 0;
 
         virtual void SetPrimitiveTopology(EGPUPrimitiveTopology primitive) noexcept = 0;
 

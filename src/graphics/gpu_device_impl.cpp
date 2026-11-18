@@ -1,5 +1,7 @@
-﻿#include "gpu_device_impl.hpp"
+#include "gpu_device_impl.hpp"
 
+#include <algorithm>
+#include <cstring>
 #include <limits>
 #include <memory_resource>
 #include <span>
@@ -258,6 +260,146 @@ namespace Garage
         GPUTexture2DImpl* result      = textureImpl.get();
         textures.push_back(std::move(textureImpl));
         return Result<IGPUTexture2D*, std::pmr::string>::Ok(result);
+    }
+
+    Result<IGPUTexture2D*, std::pmr::string>
+            GPUDeviceImpl::CreateTexture2D(const GPUTexture2DCreateInfo&              createInfo,
+                                           std::span<const GPUTextureSubresourceData> subresources)
+    {
+        if (device == nullptr)
+        {
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("유효한 SDL_GPU 디바이스가 필요합니다."));
+        }
+
+        if (subresources.empty())
+        {
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::MakeError("텍스처 업로드에 사용할 서브리소스 데이터가 비어 있습니다."));
+        }
+
+        constexpr UInt64         UPLOAD_OFFSET_ALIGNMENT = 512u;
+        UInt64                   totalUploadSize         = 0u;
+        std::pmr::vector<UInt32> offsets(Allocator::GetMemoryResource());
+        offsets.reserve(subresources.size());
+
+        for (const GPUTextureSubresourceData& subresource : subresources)
+        {
+            if (subresource.data.empty() || subresource.mipLevel >= createInfo.mipLevels ||
+                subresource.layer >= createInfo.layerCount)
+            {
+                return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                        GraphicsDetail::MakeError("텍스처 서브리소스 범위 또는 데이터가 유효하지 않습니다."));
+            }
+
+            const UInt64 ALIGNED_OFFSET =
+                    (totalUploadSize + UPLOAD_OFFSET_ALIGNMENT - 1u) & ~(UPLOAD_OFFSET_ALIGNMENT - 1u);
+            if (ALIGNED_OFFSET > std::numeric_limits<UInt32>::max() ||
+                subresource.data.size() > std::numeric_limits<UInt32>::max() - ALIGNED_OFFSET)
+            {
+                return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                        GraphicsDetail::MakeError("텍스처 업로드 크기가 32비트 범위를 초과했습니다."));
+            }
+
+            offsets.push_back(static_cast<UInt32>(ALIGNED_OFFSET));
+            totalUploadSize = ALIGNED_OFFSET + subresource.data.size();
+        }
+
+        auto textureResult = CreateTexture2D(createInfo);
+        if (!textureResult)
+        {
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(std::move(textureResult).GetError());
+        }
+
+        IGPUTexture2D*  texture    = textureResult.GetValue();
+        SDL_GPUTexture* sdlTexture = static_cast<const GPUTexture2DImpl*>(texture)->GetSDLTexture();
+
+        SDL_GPUTransferBufferCreateInfo transferInfo{};
+        transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+        transferInfo.size  = static_cast<UInt32>(totalUploadSize);
+
+        SDL_GPUTransferBuffer* stagingBuffer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
+        if (stagingBuffer == nullptr)
+        {
+            DestroyTexture2D(texture);
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("텍스처 업로드용 전송 버퍼 생성에 실패했습니다: {}", SDL_GetError()));
+        }
+
+        void* mapped = SDL_MapGPUTransferBuffer(device, stagingBuffer, false);
+        if (mapped == nullptr)
+        {
+            SDL_ReleaseGPUTransferBuffer(device, stagingBuffer);
+            DestroyTexture2D(texture);
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("텍스처 업로드용 전송 버퍼 매핑에 실패했습니다: {}", SDL_GetError()));
+        }
+
+        auto* mappedBytes = static_cast<Byte*>(mapped);
+        for (USize index = 0; index < subresources.size(); ++index)
+        {
+            const std::span<const Byte> SRC = subresources[index].data;
+            std::memcpy(mappedBytes + offsets[index], SRC.data(), SRC.size());
+        }
+        SDL_UnmapGPUTransferBuffer(device, stagingBuffer);
+
+        SDL_GPUCommandBuffer* sdlCommandBuffer = SDL_AcquireGPUCommandBuffer(device);
+        if (sdlCommandBuffer == nullptr)
+        {
+            SDL_ReleaseGPUTransferBuffer(device, stagingBuffer);
+            DestroyTexture2D(texture);
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("텍스처 업로드용 명령 버퍼 획득에 실패했습니다: {}", SDL_GetError()));
+        }
+
+        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(sdlCommandBuffer);
+        if (copyPass == nullptr)
+        {
+            SDL_CancelGPUCommandBuffer(sdlCommandBuffer);
+            SDL_ReleaseGPUTransferBuffer(device, stagingBuffer);
+            DestroyTexture2D(texture);
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("텍스처 업로드용 복사 패스 시작에 실패했습니다: {}", SDL_GetError()));
+        }
+
+        for (USize index = 0; index < subresources.size(); ++index)
+        {
+            const GPUTextureSubresourceData& SUBRESOURCE = subresources[index];
+
+            SDL_GPUTextureTransferInfo sourceInfo{};
+            sourceInfo.transfer_buffer = stagingBuffer;
+            sourceInfo.offset          = offsets[index];
+            sourceInfo.pixels_per_row  = 0u;
+            sourceInfo.rows_per_layer  = 0u;
+
+            SDL_GPUTextureRegion destinationRegion{};
+            destinationRegion.texture   = sdlTexture;
+            destinationRegion.mip_level = SUBRESOURCE.mipLevel;
+            destinationRegion.layer     = SUBRESOURCE.layer;
+            destinationRegion.x         = 0u;
+            destinationRegion.y         = 0u;
+            destinationRegion.z         = 0u;
+            destinationRegion.w         = std::max(1u, createInfo.width >> SUBRESOURCE.mipLevel);
+            destinationRegion.h         = std::max(1u, createInfo.height >> SUBRESOURCE.mipLevel);
+            destinationRegion.d         = 1u;
+
+            SDL_UploadToGPUTexture(copyPass, &sourceInfo, &destinationRegion, false);
+        }
+        SDL_EndGPUCopyPass(copyPass);
+
+        SDL_GPUFence* uploadFence = SDL_SubmitGPUCommandBufferAndAcquireFence(sdlCommandBuffer);
+        if (uploadFence == nullptr)
+        {
+            SDL_ReleaseGPUTransferBuffer(device, stagingBuffer);
+            DestroyTexture2D(texture);
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(
+                    GraphicsDetail::FormatError("텍스처 업로드 제출에 실패했습니다: {}", SDL_GetError()));
+        }
+
+        SDL_WaitForGPUFences(device, true, &uploadFence, 1u);
+        SDL_ReleaseGPUFence(device, uploadFence);
+        SDL_ReleaseGPUTransferBuffer(device, stagingBuffer);
+        return Result<IGPUTexture2D*, std::pmr::string>::Ok(texture);
     }
 
     void GPUDeviceImpl::DestroyTexture2D(IGPUTexture2D* texture) noexcept

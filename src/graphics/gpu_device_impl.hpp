@@ -1,4 +1,4 @@
-﻿#ifndef GARAGE_GRAPHICS_GPU_DEVICE_IMPL_HPP
+#ifndef GARAGE_GRAPHICS_GPU_DEVICE_IMPL_HPP
 #define GARAGE_GRAPHICS_GPU_DEVICE_IMPL_HPP
 
 #include <memory_resource>
@@ -56,6 +56,9 @@ namespace Garage
 
         [[nodiscard]] Result<IGPUTexture2D*, std::pmr::string>
                 CreateTexture2D(const GPUTexture2DCreateInfo& createInfo) override;
+        [[nodiscard]] Result<IGPUTexture2D*, std::pmr::string>
+                CreateTexture2D(const GPUTexture2DCreateInfo&              createInfo,
+                                std::span<const GPUTextureSubresourceData> subresources) override;
         void    DestroyTexture2D(IGPUTexture2D* texture) noexcept override;
 
         [[nodiscard]] Result<IGPUCommandBuffer*, std::pmr::string> CreateCommandBuffer() override;
