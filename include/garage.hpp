@@ -1,6 +1,7 @@
-﻿#ifndef GARAGE_GARAGE_HPP
+#ifndef GARAGE_GARAGE_HPP
 #define GARAGE_GARAGE_HPP
 
+#include "garage/actors.hpp"
 #include "garage/core.hpp"
 #include "garage/graphics.hpp"
 #include "garage/math.hpp"
