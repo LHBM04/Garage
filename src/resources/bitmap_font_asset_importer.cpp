@@ -1,40 +1,42 @@
 #include "garage/resources/bitmap_font_asset_importer.hpp"
 
+#include <array>
 #include <filesystem>
-#include <fstream>
-#include <ios>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include <rapidjson/document.h>
+
 #include "garage/core/allocator.hpp"
-#include "garage/core/binary_reader.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/resources/bitmap_font_asset.hpp"
+
+#include "garage/utilities/json_utility.hpp"
 
 namespace Garage
 {
     Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>
             BitmapFontAssetImporter::Import(const std::filesystem::path& path) const
     {
-        if (path.extension() != ".tukfont")
+        if (!JsonUtility::HasJsonExtension(path))
         {
             return Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>::Err(
-                    Allocator::MakeString("폰트 로더에는 .tukfont 파일이 필요합니다."));
+                    Allocator::MakeString("폰트 로더에는 .json 파일이 필요합니다."));
         }
 
-        std::ifstream file(path, std::ios::binary);
-        if (!file)
+        auto documentResult = JsonUtility::LoadDocument(path);
+        if (!documentResult)
         {
-            std::pmr::string error = Allocator::MakeString("리소스를 열 수 없습니다: ");
-            error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>::Err(
+                    std::move(documentResult).GetError());
         }
 
-        BinaryReader     reader(file);
+        const rapidjson::Value& ROOT = *documentResult;
+
         std::pmr::string name{Allocator::GetMemoryResource()};
         std::pmr::string renderMode{Allocator::GetMemoryResource()};
         bool             isDistanceField = false;
@@ -44,70 +46,75 @@ namespace Garage
         Float32          ascentLine      = 0.0f;
         Float32          descentLine     = 0.0f;
         Int32            atlasPadding    = 0;
-        if (!reader.Read(name,
-                         renderMode,
-                         isDistanceField,
-                         pointSize,
-                         faceScale,
-                         lineHeight,
-                         ascentLine,
-                         descentLine,
-                         atlasPadding))
+        if (!JsonUtility::ReadString(ROOT, "name", name) || !JsonUtility::ReadString(ROOT, "renderMode", renderMode) ||
+            !JsonUtility::ReadBool(ROOT, "isDistanceField", isDistanceField) ||
+            !JsonUtility::ReadFloat32(ROOT, "pointSize", pointSize) ||
+            !JsonUtility::ReadFloat32(ROOT, "faceScale", faceScale) ||
+            !JsonUtility::ReadFloat32(ROOT, "lineHeight", lineHeight) ||
+            !JsonUtility::ReadFloat32(ROOT, "ascentLine", ascentLine) ||
+            !JsonUtility::ReadFloat32(ROOT, "descentLine", descentLine) ||
+            !JsonUtility::ReadInt32(ROOT, "atlasPadding", atlasPadding))
         {
             return Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>::Err(
                     Allocator::MakeString("폰트 헤더가 유효하지 않습니다."));
         }
 
-        Int32 count = 0;
-        if (!reader.ReadCount(count, sizeof(FontAtlasData)))
+        const rapidjson::Value* atlasesArray = nullptr;
+        if (!JsonUtility::ReadArray(ROOT, "atlases", atlasesArray) || atlasesArray->Empty())
         {
             return Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>::Err(
                     Allocator::MakeString("폰트 아틀라스 개수가 유효하지 않습니다."));
         }
 
-        std::pmr::vector<FontAtlasData> parsedAtlases(static_cast<USize>(count), Allocator::GetMemoryResource());
-        for (FontAtlasData& atlas : parsedAtlases)
+        std::pmr::vector<FontAtlasData> parsedAtlases{Allocator::GetMemoryResource()};
+        parsedAtlases.reserve(atlasesArray->Size());
+        for (const rapidjson::Value& atlasValue : atlasesArray->GetArray())
         {
-            if (!reader.Read(atlas.index, atlas.texture, atlas.width, atlas.height))
+            FontAtlasData atlas{};
+            if (!atlasValue.IsObject() || !JsonUtility::ReadInt32(atlasValue, "index", atlas.index) ||
+                !JsonUtility::ReadString(atlasValue, "texture", atlas.texture) ||
+                !JsonUtility::ReadInt32(atlasValue, "width", atlas.width) ||
+                !JsonUtility::ReadInt32(atlasValue, "height", atlas.height))
             {
                 return Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>::Err(
                         Allocator::MakeString("폰트 아틀라스 데이터가 유효하지 않습니다."));
             }
+
+            parsedAtlases.push_back(std::move(atlas));
         }
 
-        if (!reader.ReadCount(count, sizeof(FontCharacterData)))
+        const rapidjson::Value* charactersArray = nullptr;
+        if (!JsonUtility::ReadArray(ROOT, "characters", charactersArray))
         {
             return Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>::Err(
                     Allocator::MakeString("폰트 문자 개수가 유효하지 않습니다."));
         }
 
-        std::pmr::vector<FontCharacterData> parsedCharacters(static_cast<USize>(count), Allocator::GetMemoryResource());
-        for (FontCharacterData& character : parsedCharacters)
+        std::pmr::vector<FontCharacterData> parsedCharacters{Allocator::GetMemoryResource()};
+        parsedCharacters.reserve(charactersArray->Size());
+        for (const rapidjson::Value& characterValue : charactersArray->GetArray())
         {
-            if (!reader.Read(character.unicode,
-                             character.glyphIndex,
-                             character.atlasIndex,
-                             character.characterScale,
-                             character.glyphScale,
-                             character.glyphRect,
-                             character.sampleRect,
-                             character.uvMin,
-                             character.uvMax,
-                             character.width,
-                             character.height,
-                             character.bearingX,
-                             character.bearingY,
-                             character.advance))
+            FontCharacterData character{};
+            if (!characterValue.IsObject() || !JsonUtility::ReadUInt32(characterValue, "unicode", character.unicode) ||
+                !JsonUtility::ReadUInt32(characterValue, "glyphIndex", character.glyphIndex) ||
+                !JsonUtility::ReadInt32(characterValue, "atlasIndex", character.atlasIndex) ||
+                !JsonUtility::ReadFloat32(characterValue, "characterScale", character.characterScale) ||
+                !JsonUtility::ReadFloat32(characterValue, "glyphScale", character.glyphScale) ||
+                !JsonUtility::ReadFloatArray(characterValue, "glyphRect", character.glyphRect) ||
+                !JsonUtility::ReadFloatArray(characterValue, "sampleRect", character.sampleRect) ||
+                !JsonUtility::ReadFloatArray(characterValue, "uvMin", character.uvMin) ||
+                !JsonUtility::ReadFloatArray(characterValue, "uvMax", character.uvMax) ||
+                !JsonUtility::ReadFloat32(characterValue, "width", character.width) ||
+                !JsonUtility::ReadFloat32(characterValue, "height", character.height) ||
+                !JsonUtility::ReadFloat32(characterValue, "bearingX", character.bearingX) ||
+                !JsonUtility::ReadFloat32(characterValue, "bearingY", character.bearingY) ||
+                !JsonUtility::ReadFloat32(characterValue, "advance", character.advance))
             {
                 return Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>::Err(
                         Allocator::MakeString("폰트 문자 데이터가 유효하지 않습니다."));
             }
-        }
 
-        if (!reader.IsAtEnd())
-        {
-            return Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>::Err(
-                    Allocator::MakeString("폰트 파일 끝에 예상치 못한 데이터가 남아 있습니다."));
+            parsedCharacters.push_back(character);
         }
 
         if (pointSize <= 0.0f || faceScale <= 0.0f || atlasPadding < 0 || parsedAtlases.empty())

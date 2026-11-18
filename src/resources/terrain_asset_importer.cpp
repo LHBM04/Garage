@@ -1,16 +1,15 @@
 #include "garage/resources/terrain_asset_importer.hpp"
 
+#include <array>
 #include <filesystem>
-#include <fstream>
-#include <ios>
-#include <limits>
 #include <span>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include <rapidjson/document.h>
+
 #include "garage/core/allocator.hpp"
-#include "garage/core/binary_reader.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
@@ -24,6 +23,8 @@
 
 #include "garage/resources/terrain_asset.hpp"
 
+#include "garage/utilities/json_utility.hpp"
+
 namespace Garage
 {
     namespace
@@ -32,40 +33,11 @@ namespace Garage
         {
             UInt32            width       = 0;
             UInt32            height      = 0;
-            UInt32            bitDepth    = 0;
+            UInt32            bitDepth    = 16;
             Float32           cellSize    = 4.0f;
             Float32           heightScale = 120.0f;
             Vector2D<Float32> uvTiling{1.0f, 1.0f};
         };
-
-        [[nodiscard]] bool HasTerrainExtension(const std::filesystem::path& path) noexcept
-        {
-            const std::pmr::string EXTENSION(path.extension().string(), Allocator::GetMemoryResource());
-            return EXTENSION == ".tukterrain" || EXTENSION == ".TUKTERRAIN";
-        }
-
-        template <class TSample>
-        [[nodiscard]] Result<std::pmr::vector<Float32>, std::pmr::string>
-                ReadAndNormalizeSamples(std::ifstream& file, USize sampleCount, const std::filesystem::path& path)
-        {
-            std::pmr::vector<TSample> rawSamples(sampleCount, TSample{0}, Allocator::GetMemoryResource());
-            if (!static_cast<bool>(file.read(reinterpret_cast<char*>(rawSamples.data()),
-                                             static_cast<std::streamsize>(sampleCount * sizeof(TSample)))))
-            {
-                std::pmr::string error = Allocator::MakeString("높이맵 데이터를 읽지 못했습니다: ");
-                error.append(path.generic_string());
-                return Result<std::pmr::vector<Float32>, std::pmr::string>::Err(std::move(error));
-            }
-
-            constexpr Float32         MAX_SAMPLE_VALUE = static_cast<Float32>(std::numeric_limits<TSample>::max());
-            std::pmr::vector<Float32> normalizedHeights(sampleCount, 0.0f, Allocator::GetMemoryResource());
-            for (USize index = 0; index < sampleCount; ++index)
-            {
-                normalizedHeights[index] = static_cast<Float32>(rawSamples[index]) / MAX_SAMPLE_VALUE;
-            }
-
-            return Result<std::pmr::vector<Float32>, std::pmr::string>::Ok(std::move(normalizedHeights));
-        }
 
         void BuildTerrainMeshData(std::span<const Float32>      normalizedHeights,
                                   UInt32                        width,
@@ -134,41 +106,29 @@ namespace Garage
     Result<Allocator::UniquePtr<TerrainAsset>, std::pmr::string>
             TerrainAssetImporter::Import(const std::filesystem::path& path) const
     {
-        if (!HasTerrainExtension(path))
+        if (!JsonUtility::HasJsonExtension(path))
         {
             return Result<Allocator::UniquePtr<TerrainAsset>, std::pmr::string>::Err(
-                    Allocator::MakeString("지형 로더에는 .tukterrain 높이맵 파일이 필요합니다."));
+                    Allocator::MakeString("지형 로더에는 .json 높이맵 파일이 필요합니다."));
         }
 
-        std::ifstream file(path, std::ios::binary | std::ios::ate);
-        if (!file.is_open())
+        auto documentResult = JsonUtility::LoadDocument(path);
+        if (!documentResult)
         {
-            std::pmr::string error = Allocator::MakeString("지형 높이맵 파일을 열 수 없습니다: ");
-            error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<Allocator::UniquePtr<TerrainAsset>, std::pmr::string>::Err(
+                    std::move(documentResult).GetError());
         }
 
-        const std::streamsize FILE_SIZE = file.tellg();
-        if (FILE_SIZE <= 0)
-        {
-            std::pmr::string error = Allocator::MakeString("지형 높이맵 파일이 비어 있습니다: ");
-            error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(error));
-        }
-        file.seekg(0, std::ios::beg);
+        const rapidjson::Value& ROOT = *documentResult;
 
-        constexpr UInt64      HEADER_SIZE = 3 * sizeof(UInt32) + 4 * sizeof(Float32);
-        BinaryReader          reader(file);
-        TerrainImportSettings settings{};
-        Float32               uvTilingX = 0.0f;
-        Float32               uvTilingY = 0.0f;
-        if (!reader.Read(settings.width,
-                         settings.height,
-                         settings.bitDepth,
-                         settings.cellSize,
-                         settings.heightScale,
-                         uvTilingX,
-                         uvTilingY))
+        TerrainImportSettings  settings{};
+        std::array<Float32, 2> uvTiling{1.0f, 1.0f};
+        if (!JsonUtility::ReadUInt32(ROOT, "width", settings.width) ||
+            !JsonUtility::ReadUInt32(ROOT, "height", settings.height) ||
+            !JsonUtility::ReadOptionalUInt32(ROOT, "bitDepth", settings.bitDepth) ||
+            !JsonUtility::ReadOptionalFloat32(ROOT, "cellSize", settings.cellSize) ||
+            !JsonUtility::ReadOptionalFloat32(ROOT, "heightScale", settings.heightScale) ||
+            !JsonUtility::ReadOptionalFloatArray(ROOT, "uvTiling", uvTiling))
         {
             std::pmr::string error = Allocator::MakeString("지형 헤더를 읽지 못했습니다: ");
             error.append(path.generic_string());
@@ -176,40 +136,46 @@ namespace Garage
         }
 
         if (settings.width < 2 || settings.height < 2 || (settings.bitDepth != 8 && settings.bitDepth != 16) ||
-            settings.cellSize <= 0.0f || settings.heightScale < 0.0f || uvTilingX <= 0.0f || uvTilingY <= 0.0f)
+            settings.cellSize <= 0.0f || settings.heightScale < 0.0f || uvTiling[0] <= 0.0f || uvTiling[1] <= 0.0f)
         {
             std::pmr::string error = Allocator::MakeString("지형 헤더의 설정값이 유효하지 않습니다: ");
             error.append(path.generic_string());
             return Result<Allocator::UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(error));
         }
-        settings.uvTiling = Vector2D<Float32>{uvTilingX, uvTilingY};
+        settings.uvTiling = Vector2D<Float32>{uvTiling[0], uvTiling[1]};
 
         const UInt32 WIDTH           = settings.width;
         const UInt32 HEIGHT          = settings.height;
         const bool   IS_16_BIT       = settings.bitDepth == 16;
         const UInt64 SAMPLE_COUNT_64 = static_cast<UInt64>(WIDTH) * HEIGHT;
-        const UInt64 SAMPLE_SIZE     = IS_16_BIT ? sizeof(UInt16) : sizeof(UInt8);
-        if (SAMPLE_COUNT_64 > BinaryReader::MAX_ELEMENTS ||
-            static_cast<UInt64>(FILE_SIZE) != HEADER_SIZE + SAMPLE_COUNT_64 * SAMPLE_SIZE)
+
+        const rapidjson::Value* heightsArray = nullptr;
+        if (!JsonUtility::ReadArray(ROOT, "heights", heightsArray) || SAMPLE_COUNT_64 > JsonUtility::MAX_ELEMENTS ||
+            heightsArray->Size() != static_cast<USize>(SAMPLE_COUNT_64))
         {
-            std::pmr::string error =
-                    Allocator::MakeString("지형 높이 데이터 크기가 해상도 및 샘플 형식과 일치하지 않습니다: ");
+            std::pmr::string error = Allocator::MakeString("지형 높이 데이터 개수가 해상도와 일치하지 않습니다: ");
             error.append(path.generic_string());
             return Result<Allocator::UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(error));
         }
 
-        const USize SAMPLE_COUNT            = static_cast<USize>(SAMPLE_COUNT_64);
-        auto        normalizedHeightsResult = IS_16_BIT ? ReadAndNormalizeSamples<UInt16>(file, SAMPLE_COUNT, path)
-                                                        : ReadAndNormalizeSamples<UInt8>(file, SAMPLE_COUNT, path);
-        if (!normalizedHeightsResult)
+        std::pmr::vector<Float32> normalizedHeights{Allocator::GetMemoryResource()};
+        normalizedHeights.reserve(static_cast<USize>(SAMPLE_COUNT_64));
+        for (const rapidjson::Value& sampleValue : heightsArray->GetArray())
         {
-            return Result<Allocator::UniquePtr<TerrainAsset>, std::pmr::string>::Err(
-                    std::move(normalizedHeightsResult).GetError());
+            Float32 heightSample = 0.0f;
+            if (!JsonUtility::TryReadFloat32(sampleValue, heightSample) || heightSample < 0.0f || heightSample > 1.0f)
+            {
+                std::pmr::string error = Allocator::MakeString("지형 높이 샘플 값이 유효하지 않습니다: ");
+                error.append(path.generic_string());
+                return Result<Allocator::UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(error));
+            }
+
+            normalizedHeights.push_back(heightSample);
         }
 
         std::pmr::vector<MeshVertex> vertices{Allocator::GetMemoryResource()};
         std::pmr::vector<UInt32>     indices{Allocator::GetMemoryResource()};
-        BuildTerrainMeshData(*normalizedHeightsResult,
+        BuildTerrainMeshData(normalizedHeights,
                              WIDTH,
                              HEIGHT,
                              settings.cellSize,
@@ -237,7 +203,7 @@ namespace Garage
                                                     settings.cellSize,
                                                     settings.heightScale,
                                                     settings.uvTiling,
-                                                    std::move(*normalizedHeightsResult),
+                                                    std::move(normalizedHeights),
                                                     device,
                                                     gpuMeshResult.GetValue()));
     }
