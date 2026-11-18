@@ -25,6 +25,8 @@
 
 #include "garage/resources/shader_asset.hpp"
 
+#include "garage/utilities/json_utility.hpp"
+
 namespace Garage
 {
     namespace
@@ -371,59 +373,21 @@ namespace Garage
             }
         }
 
-        void LoadMetaSidecar(const std::filesystem::path& metaPath, ShaderMetadata& metadata)
-        {
-            std::ifstream metaFile(metaPath);
-            if (!metaFile)
-            {
-                return;
-            }
-
-            std::string line;
-            while (std::getline(metaFile, line))
-            {
-                const std::string_view TRIMMED   = Trim(line);
-                const USize            SEPARATOR = TRIMMED.find('=');
-                if (SEPARATOR == std::string_view::npos)
-                {
-                    continue;
-                }
-
-                const std::string_view KEY   = Trim(TRIMMED.substr(0, SEPARATOR));
-                const std::string_view VALUE = Trim(TRIMMED.substr(SEPARATOR + 1));
-                ApplyMetadataEntry(KEY, VALUE, metadata);
-            }
-        }
-
         void LoadJsonSidecar(const std::filesystem::path& jsonPath, ShaderMetadata& metadata)
         {
-            std::ifstream jsonFile(jsonPath, std::ios::binary | std::ios::ate);
-            if (!jsonFile.is_open())
+            if (!std::filesystem::exists(jsonPath))
             {
                 return;
             }
 
-            const std::streamsize FILE_SIZE = jsonFile.tellg();
-            if (FILE_SIZE <= 0)
+            auto documentResult = JsonUtility::LoadDocument(jsonPath);
+            if (!documentResult)
             {
                 return;
             }
 
-            jsonFile.seekg(0, std::ios::beg);
-            std::pmr::string jsonText(static_cast<USize>(FILE_SIZE), '\0', Allocator::GetMemoryResource());
-            if (!jsonFile.read(jsonText.data(), FILE_SIZE))
-            {
-                return;
-            }
-
-            rapidjson::Document document;
-            document.Parse(jsonText.c_str(), jsonText.size());
-            if (document.HasParseError() || !document.IsObject())
-            {
-                return;
-            }
-
-            for (auto it = document.MemberBegin(); it != document.MemberEnd(); ++it)
+            const rapidjson::Document& DOCUMENT = *documentResult;
+            for (auto it = DOCUMENT.MemberBegin(); it != DOCUMENT.MemberEnd(); ++it)
             {
                 const std::string_view KEY(it->name.GetString(), it->name.GetStringLength());
                 if (it->value.IsString())
@@ -470,13 +434,9 @@ namespace Garage
                 baseStem = baseStem.stem();
             }
 
-            const std::filesystem::path SHARED_META = shaderPath.parent_path() / (baseStem.string() + ".meta");
-            const std::filesystem::path EXACT_META  = std::filesystem::path(shaderPath.string() + ".meta");
             const std::filesystem::path SHARED_JSON = shaderPath.parent_path() / (baseStem.string() + ".json");
             const std::filesystem::path EXACT_JSON  = std::filesystem::path(shaderPath.string() + ".json");
 
-            LoadMetaSidecar(SHARED_META, metadata);
-            LoadMetaSidecar(EXACT_META, metadata);
             LoadJsonSidecar(SHARED_JSON, metadata);
             LoadJsonSidecar(EXACT_JSON, metadata);
         }

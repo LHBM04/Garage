@@ -2,16 +2,14 @@
 
 #include <array>
 #include <filesystem>
-#include <fstream>
-#include <ios>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <fmt/format.h>
+#include <rapidjson/document.h>
 
 #include "garage/core/allocator.hpp"
-#include "garage/core/binary_reader.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/resources/asset_subsystem.hpp"
@@ -19,6 +17,8 @@
 #include "garage/resources/mesh_asset.hpp"
 #include "garage/resources/model_asset.hpp"
 #include "garage/resources/resource_path.hpp"
+
+#include "garage/utilities/json_utility.hpp"
 
 namespace Garage
 {
@@ -32,61 +32,73 @@ namespace Garage
                     Allocator::MakeString("모델 로더의 에셋 서브시스템이 nullptr입니다."));
         }
 
-        if (path.extension() != ".tukmodel")
+        if (!JsonUtility::HasJsonExtension(path))
         {
             return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(
-                    Allocator::MakeString("모델 로더에는 .tukmodel 파일이 필요합니다."));
+                    Allocator::MakeString("모델 로더에는 .json 파일이 필요합니다."));
         }
 
-        std::ifstream file(path, std::ios::binary);
-        if (!file)
+        auto documentResult = JsonUtility::LoadDocument(path);
+        if (!documentResult)
         {
-            std::pmr::string error = Allocator::MakeString("리소스를 열 수 없습니다: ");
-            error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(
+                    std::move(documentResult).GetError());
         }
 
-        BinaryReader reader(file);
-        const auto   ROOT = FindResourceRoot(path, "Models");
-        if (!ROOT)
+        const auto ROOT_DIR = FindResourceRoot(path, "Models");
+        if (!ROOT_DIR)
         {
-            return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(ROOT.GetError());
+            return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(ROOT_DIR.GetError());
         }
 
-        struct PendingChildren final
+        struct PendingNode final
         {
-            Int32 parentIndex = -1;
-            Int32 count       = 0;
+            Int32                   parentIndex = -1;
+            const rapidjson::Value* jsonNode    = nullptr;
+            USize                   depth       = 0;
         };
 
-        std::pmr::vector<PendingChildren> pending({{-1, 1}}, Allocator::GetMemoryResource());
-        std::pmr::vector<Submodel>        nodes{Allocator::GetMemoryResource()};
+        std::pmr::vector<PendingNode> pending(Allocator::GetMemoryResource());
+        pending.push_back(PendingNode{.parentIndex = -1, .jsonNode = &(*documentResult), .depth = 1u});
+        std::pmr::vector<Submodel> nodes{Allocator::GetMemoryResource()};
+
         while (!pending.empty())
         {
-            if (pending.back().count == 0)
-            {
-                pending.pop_back();
-                continue;
-            }
+            const PendingNode CURRENT = pending.back();
+            pending.pop_back();
 
-            if (nodes.size() >= BinaryReader::MAX_ELEMENTS || pending.size() > BinaryReader::MAX_DEPTH)
+            if (nodes.size() >= JsonUtility::MAX_ELEMENTS || CURRENT.depth > JsonUtility::MAX_DEPTH)
             {
                 return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(
                         Allocator::MakeString("모델 노드 수 또는 계층 깊이가 제한을 초과했습니다."));
             }
 
-            Submodel node{};
-            node.parentIndex = pending.back().parentIndex;
-            --pending.back().count;
+            if (CURRENT.jsonNode == nullptr || !CURRENT.jsonNode->IsObject())
+            {
+                std::pmr::string error = Allocator::MakeString("모델 노드 데이터가 유효하지 않습니다: ");
+                error.append(path.generic_string());
+                return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(std::move(error));
+            }
 
-            std::array<Float32, 3> position{};
-            std::array<Float32, 4> rotation{};
-            std::array<Float32, 3> scale{};
-            std::pmr::string       meshReference{Allocator::GetMemoryResource()};
-            std::pmr::string       materialReference{Allocator::GetMemoryResource()};
-            Int32                  childCount = 0;
-            if (!reader.Read(node.name, position, rotation, scale, meshReference, materialReference) ||
-                !reader.ReadCount(childCount, sizeof(Submodel)))
+            const rapidjson::Value& NODE_VALUE = *CURRENT.jsonNode;
+
+            Submodel node{};
+            node.parentIndex = CURRENT.parentIndex;
+
+            std::array<Float32, 3>  position{0.0f, 0.0f, 0.0f};
+            std::array<Float32, 4>  rotation{0.0f, 0.0f, 0.0f, 1.0f};
+            std::array<Float32, 3>  scale{1.0f, 1.0f, 1.0f};
+            std::pmr::string        meshReference{Allocator::GetMemoryResource()};
+            std::pmr::string        materialReference{Allocator::GetMemoryResource()};
+            const rapidjson::Value* childrenArray = nullptr;
+
+            if (!JsonUtility::ReadOptionalString(NODE_VALUE, "name", node.name) ||
+                !JsonUtility::ReadOptionalFloatArray(NODE_VALUE, "position", position) ||
+                !JsonUtility::ReadOptionalFloatArray(NODE_VALUE, "rotation", rotation) ||
+                !JsonUtility::ReadOptionalFloatArray(NODE_VALUE, "scale", scale) ||
+                !JsonUtility::ReadOptionalString(NODE_VALUE, "mesh", meshReference) ||
+                !JsonUtility::ReadOptionalString(NODE_VALUE, "material", materialReference) ||
+                !JsonUtility::ReadOptionalArray(NODE_VALUE, "children", childrenArray))
             {
                 std::pmr::string error = Allocator::MakeString("모델 노드 데이터가 유효하지 않습니다: ");
                 error.append(path.generic_string());
@@ -107,8 +119,8 @@ namespace Garage
 
             if (!meshReference.empty() && !materialReference.empty())
             {
-                const auto MESH_PATH     = ResolveResourcePath(*ROOT, meshReference);
-                const auto MATERIAL_PATH = ResolveResourcePath(*ROOT, materialReference);
+                const auto MESH_PATH     = ResolveResourcePath(*ROOT_DIR, meshReference);
+                const auto MATERIAL_PATH = ResolveResourcePath(*ROOT_DIR, materialReference);
                 if (!MESH_PATH || !MATERIAL_PATH)
                 {
                     return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(
@@ -128,17 +140,17 @@ namespace Garage
 
             const Int32 INDEX = static_cast<Int32>(nodes.size());
             nodes.push_back(std::move(node));
-            if (childCount > 0)
-            {
-                pending.push_back({INDEX, childCount});
-            }
-        }
 
-        if (!reader.IsAtEnd())
-        {
-            std::pmr::string error = Allocator::MakeString("모델 파일 끝에 예상치 못한 데이터가 남아 있습니다: ");
-            error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(std::move(error));
+            if (childrenArray != nullptr)
+            {
+                const auto CHILDREN = childrenArray->GetArray();
+                for (USize childOffset = CHILDREN.Size(); childOffset > 0; --childOffset)
+                {
+                    const rapidjson::Value& CHILD = CHILDREN[static_cast<unsigned int>(childOffset - 1)];
+                    pending.push_back(
+                            PendingNode{.parentIndex = INDEX, .jsonNode = &CHILD, .depth = CURRENT.depth + 1u});
+                }
+            }
         }
 
         return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Ok(
