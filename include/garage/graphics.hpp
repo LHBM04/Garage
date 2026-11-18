@@ -21,5 +21,6 @@
 #include "graphics/render_subsystem.hpp"
 #include "graphics/renderer.hpp"
 #include "graphics/skybox_renderer.hpp"
+#include "graphics/terrain.hpp"
 
 #endif // GARAGE_GRAPHICS_HPP
