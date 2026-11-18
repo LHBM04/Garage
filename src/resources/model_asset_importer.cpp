@@ -59,7 +59,7 @@ namespace Garage
             Int32 count       = 0;
         };
 
-        std::pmr::vector<PendingChildren> pending{{-1, 1}, Allocator::GetMemoryResource()};
+        std::pmr::vector<PendingChildren> pending({{-1, 1}}, Allocator::GetMemoryResource());
         std::pmr::vector<Submodel>        nodes{Allocator::GetMemoryResource()};
         while (!pending.empty())
         {
