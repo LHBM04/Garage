@@ -2,6 +2,8 @@
 
 #include <array>
 
+#include "garage/actors/actor.hpp"
+
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -9,9 +11,11 @@
 #include "garage/graphics/gpu_graphics_pipeline_state.hpp"
 #include "garage/graphics/gpu_mesh.hpp"
 #include "garage/graphics/gpu_texture2d.hpp"
+#include "garage/graphics/terrain.hpp"
 
 #include "garage/resources/material_asset.hpp"
 #include "garage/resources/mesh_asset.hpp"
+#include "garage/resources/terrain_asset.hpp"
 #include "garage/resources/texture_asset.hpp"
 
 #include "garage/utilities/logger.hpp"
@@ -22,8 +26,25 @@ namespace Garage
     {
         const MaterialAsset*             material      = GetMaterial();
         const IGPUGraphicsPipelineState* pipelineState = GetPipelineState();
-        const IGPUMesh*                  gpuMesh       = (mesh != nullptr) ? mesh->GetGPUMesh() : nullptr;
-        if (material == nullptr || pipelineState == nullptr || gpuMesh == nullptr)
+        if (material == nullptr || pipelineState == nullptr)
+        {
+            return;
+        }
+
+        const IGPUMesh* gpuMesh = nullptr;
+        if (mesh != nullptr)
+        {
+            gpuMesh = mesh->GetGPUMesh();
+        }
+        else if (const ActorBase* owner = GetOwner(); owner != nullptr)
+        {
+            if (const Terrain* terrain = owner->GetComponent<Terrain>(); terrain != nullptr && terrain->IsValid())
+            {
+                gpuMesh = terrain->GetTerrain()->GetGPUMesh();
+            }
+        }
+
+        if (gpuMesh == nullptr)
         {
             return;
         }
