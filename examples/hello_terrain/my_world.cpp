@@ -1,8 +1,8 @@
-#include "terrain_world.hpp"
+#include "my_world.hpp"
 
-#include "terrain_camera_controller.hpp"
+#include "camera_controller.hpp"
 
-void TerrainWorld::OnEnter()
+void MyWorld::OnEnter()
 {
     App*            app    = App::GetInstance();
     AssetSubsystem* assets = (app != nullptr) ? app->GetSubsystem<AssetSubsystem>() : nullptr;
@@ -61,6 +61,6 @@ void TerrainWorld::OnEnter()
     camera->SetScissorRect(GPURect{0, 0, 1280, 720});
     camera->SetFarPlane(2000.0f);
 
-    TerrainCameraController* cameraController = cameraActor->AddComponent<TerrainCameraController>();
+    CameraController* cameraController = cameraActor->AddComponent<CameraController>();
     cameraController->SetTerrain(terrain);
 }

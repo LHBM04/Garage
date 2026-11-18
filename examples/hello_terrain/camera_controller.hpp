@@ -1,11 +1,11 @@
-#ifndef TERRAIN_CAMERA_CONTROLLER_HPP
-#define TERRAIN_CAMERA_CONTROLLER_HPP
+#ifndef CAMERA_CONTROLLER_HPP
+#define CAMERA_CONTROLLER_HPP
 
 #include "garage.hpp"
 
 using namespace Garage;
 
-class TerrainCameraController final : public ComponentBase
+class CameraController final : public ComponentBase
 {
     using ComponentBase::ComponentBase;
 
@@ -20,4 +20,4 @@ private:
     Float32        pitchDegrees = 10.0f;
 };
 
-#endif // TERRAIN_CAMERA_CONTROLLER_HPP
+#endif // CAMERA_CONTROLLER_HPP

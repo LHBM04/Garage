@@ -1,13 +1,13 @@
-#include "terrain_camera_controller.hpp"
+#include "camera_controller.hpp"
 
 #include <algorithm>
 
-void TerrainCameraController::SetTerrain(const Terrain* value) noexcept
+void CameraController::SetTerrain(const Terrain* value) noexcept
 {
     terrain = value;
 }
 
-void TerrainCameraController::OnUpdate()
+void CameraController::OnUpdate()
 {
     const App*            app   = App::GetInstance();
     const InputSubsystem* input = (app != nullptr) ? app->GetSubsystem<InputSubsystem>() : nullptr;

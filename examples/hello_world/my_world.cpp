@@ -1,6 +1,6 @@
-#include "triangle_world.hpp"
+#include "my_world.hpp"
 
-void TriangleWorld::OnEnter()
+void MyWorld::OnEnter()
 {
     ActorBase* cameraActor = Instantiate(Vector3D<Float32>{0.0f, 0.0f, -2.5f});
     Camera*    camera      = cameraActor->AddComponent<Camera>();

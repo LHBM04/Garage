@@ -1,6 +1,6 @@
 #include "my_app.hpp"
 
-#include "triangle_world.hpp"
+#include "my_world.hpp"
 
 ESystemStatus MyApp::Startup()
 {
@@ -75,7 +75,7 @@ void MyApp::OnWorldSubsystemAdded(WorldSubsystem* subsystem)
 {
     ASSERT(subsystem != nullptr);
 
-    WorldBase*                  world   = subsystem->AddWorld(Allocator::MakeUnique<TriangleWorld>());
+    WorldBase*                  world   = subsystem->AddWorld(Allocator::MakeUnique<MyWorld>());
     [[maybe_unused]] const bool CHANGED = subsystem->RequestWorldChange(world);
 }
 

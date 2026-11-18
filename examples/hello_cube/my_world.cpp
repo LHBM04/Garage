@@ -1,8 +1,8 @@
-#include "cube_world.hpp"
+#include "my_world.hpp"
 
 #include "cube_controller.hpp"
 
-void CubeWorld::OnEnter()
+void MyWorld::OnEnter()
 {
     ActorBase* cameraActor =
             Instantiate(Vector3D<Float32>{0.0f, 0.8f, -3.2f}, Quaternion<Float32>::Euler(14.0f, 0.0f, 0.0f));
