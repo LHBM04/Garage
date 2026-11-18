@@ -49,7 +49,7 @@ namespace Garage
         [[nodiscard]] Result<Allocator::UniquePtr<IGPUDevice>, std::pmr::string> CreateDevice() const;
         void ReleaseDisplaySwapChain(const IDisplay* display) noexcept;
 
-        Allocator::UniquePtr<IGPUDevice>                       device        = nullptr;
+        Allocator::UniquePtr<IGPUDevice>                       device;
         IGPUCommandBuffer*                                     commandBuffer = nullptr;
         IGPUFence*                                             fence         = nullptr;
         std::pmr::unordered_map<IDisplay::EId, IGPUSwapChain*> swapChains{Allocator::GetMemoryResource()};
