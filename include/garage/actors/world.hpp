@@ -2,6 +2,7 @@
 #define GARAGE_ACTORS_WORLD_HPP
 
 #include <ranges>
+#include <span>
 #include <string_view>
 #include <vector>
 
@@ -17,6 +18,8 @@
 
 namespace Garage
 {
+    class Camera;
+    class DirectionalLight;
     class IGPUCommandBuffer;
     class Transform;
 
@@ -52,6 +55,15 @@ namespace Garage
 
         void Destroy(ActorBase* actor) noexcept;
 
+        void AddCamera(Camera* camera);
+        void RemoveCamera(const Camera* camera);
+
+        void AddDirectionalLight(DirectionalLight* light);
+        void RemoveDirectionalLight(const DirectionalLight* light);
+
+        [[nodiscard]] DirectionalLight*       GetMainLight() noexcept;
+        [[nodiscard]] const DirectionalLight* GetMainLight() const noexcept;
+
         [[nodiscard]] std::pmr::vector<Allocator::UniquePtr<ActorBase>> ExtractPersistentActors();
         void AdoptActors(std::pmr::vector<Allocator::UniquePtr<ActorBase>>&& adopted);
 
@@ -69,6 +81,12 @@ namespace Garage
 
         [[nodiscard]] auto GetActors() noexcept;
         [[nodiscard]] auto GetActors() const noexcept;
+
+        [[nodiscard]] std::span<Camera* const>       GetCameras() noexcept;
+        [[nodiscard]] std::span<const Camera* const> GetCameras() const noexcept;
+
+        [[nodiscard]] std::span<DirectionalLight* const>       GetDirectionalLights() noexcept;
+        [[nodiscard]] std::span<const DirectionalLight* const> GetDirectionalLights() const noexcept;
 
     protected:
         virtual void OnEnter();
@@ -98,6 +116,8 @@ namespace Garage
         bool isRunningPhase = false;
 
         std::pmr::vector<Allocator::UniquePtr<ActorBase>> actors{Allocator::GetMemoryResource()};
+        std::pmr::vector<Camera*>                         activeCameras{Allocator::GetMemoryResource()};
+        std::pmr::vector<DirectionalLight*>               activeDirectionalLights{Allocator::GetMemoryResource()};
     };
 
     inline bool WorldBase::IsEntered() const noexcept
@@ -123,6 +143,26 @@ namespace Garage
                         {
                             return actorPtr.get();
                         });
+    }
+
+    inline std::span<Camera* const> WorldBase::GetCameras() noexcept
+    {
+        return activeCameras;
+    }
+
+    inline std::span<const Camera* const> WorldBase::GetCameras() const noexcept
+    {
+        return activeCameras;
+    }
+
+    inline std::span<DirectionalLight* const> WorldBase::GetDirectionalLights() noexcept
+    {
+        return activeDirectionalLights;
+    }
+
+    inline std::span<const DirectionalLight* const> WorldBase::GetDirectionalLights() const noexcept
+    {
+        return activeDirectionalLights;
     }
 
     inline void WorldBase::OnEnter()
