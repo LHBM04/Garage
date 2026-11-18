@@ -5,6 +5,7 @@
 
 #include <SDL3/SDL_video.h>
 
+#include "garage/core/allocator.hpp"
 #include "garage/core/defines.hpp"
 #include "garage/core/types.hpp"
 
@@ -63,7 +64,7 @@ namespace Garage
     {
         ASSERT(window != nullptr);
 
-        const std::string TITLE(value);
+        const std::pmr::string TITLE(value, Allocator::GetMemoryResource());
         SDL_SetWindowTitle(window, TITLE.c_str());
     }
 

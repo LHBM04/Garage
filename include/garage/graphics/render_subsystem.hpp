@@ -1,10 +1,11 @@
-#ifndef GARAGE_GRAPHICS_RENDER_SUBSYSTEM_HPP
+﻿#ifndef GARAGE_GRAPHICS_RENDER_SUBSYSTEM_HPP
 #define GARAGE_GRAPHICS_RENDER_SUBSYSTEM_HPP
 
-#include <memory>
+#include <memory_resource>
 #include <string>
 #include <unordered_map>
 
+#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
 #include "../core/engine_subsystem.hpp"
 #include "../core/system_status.hpp"
@@ -45,17 +46,17 @@ namespace Garage
         [[nodiscard]] const IGPUDevice* GetDevice() const noexcept;
 
     private:
-        [[nodiscard]] Result<std::unique_ptr<IGPUDevice>, std::string> CreateDevice() const;
+        [[nodiscard]] Result<Allocator::UniquePtr<IGPUDevice>, std::pmr::string> CreateDevice() const;
         void ReleaseDisplaySwapChain(const IDisplay* display) noexcept;
 
-        std::unique_ptr<IGPUDevice>                       device                   = nullptr;
-        IGPUCommandBuffer*                                commandBuffer            = nullptr;
-        IGPUFence*                                        fence                    = nullptr;
-        std::unordered_map<IDisplay::EId, IGPUSwapChain*> swapChains               = {};
-        Delegate<IGPUCommandBuffer&>                      onRender                 = {};
-        Int32                                             displayCreateListenerId  = 0;
-        Int32                                             displayCloseListenerId   = 0;
-        Int32                                             displayDestroyListenerId = 0;
+        Allocator::UniquePtr<IGPUDevice>                       device        = nullptr;
+        IGPUCommandBuffer*                                     commandBuffer = nullptr;
+        IGPUFence*                                             fence         = nullptr;
+        std::pmr::unordered_map<IDisplay::EId, IGPUSwapChain*> swapChains{Allocator::GetMemoryResource()};
+        Delegate<IGPUCommandBuffer&>                           onRender                 = {};
+        Int32                                                  displayCreateListenerId  = 0;
+        Int32                                                  displayCloseListenerId   = 0;
+        Int32                                                  displayDestroyListenerId = 0;
     };
 
     inline RenderSubsystem::RenderSubsystem() noexcept

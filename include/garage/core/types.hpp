@@ -1,4 +1,4 @@
-#ifndef GARAGE_CORE_TYPES_HPP
+﻿#ifndef GARAGE_CORE_TYPES_HPP
 #define GARAGE_CORE_TYPES_HPP
 
 #include <algorithm>
@@ -7,11 +7,13 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <memory_resource>
 #include <type_traits>
 #include <utility>
 #include <variant>
 #include <vector>
 
+#include "allocator.hpp"
 #include "defines.hpp"
 
 namespace Garage
@@ -1500,14 +1502,26 @@ namespace Garage
         using Listener   = std::function<void(TArgs...)>;
         using ListenerId = Int32;
 
+    private:
+        struct Subscription final
+        {
+            ListenerId id          = 0;
+            Listener   callback    = {};
+            bool       isConnected = true;
+        };
+
+        using SubscriptionPtr  = std::shared_ptr<Subscription>;
+        using SubscriptionList = std::pmr::vector<SubscriptionPtr>;
+
+    public:
         Delegate() noexcept  = default;
         ~Delegate() noexcept = default;
 
         Delegate(const Delegate&) noexcept            = delete;
         Delegate& operator=(const Delegate&) noexcept = delete;
 
-        Delegate(Delegate&&) noexcept            = default;
-        Delegate& operator=(Delegate&&) noexcept = default;
+        Delegate(Delegate&&) noexcept                                                                 = default;
+        Delegate& operator=(Delegate&&) noexcept(std::is_nothrow_move_assignable_v<SubscriptionList>) = default;
 
         Delegate& operator+=(Listener callback) noexcept;
 
@@ -1519,17 +1533,7 @@ namespace Garage
         void Clear() noexcept;
 
     private:
-        struct Subscription final
-        {
-            ListenerId id          = 0;
-            Listener   callback    = {};
-            bool       isConnected = true;
-        };
-
-        using SubscriptionPtr  = std::shared_ptr<Subscription>;
-        using SubscriptionList = std::vector<SubscriptionPtr>;
-
-        SubscriptionList subscriptions  = {};
+        SubscriptionList subscriptions{Allocator::GetMemoryResource()};
         ListenerId       nextListenerId = 1;
     };
 
@@ -1544,7 +1548,7 @@ namespace Garage
     typename Delegate<TArgs...>::ListenerId Delegate<TArgs...>::AddListener(Listener callback)
     {
         const ListenerId ID = nextListenerId++;
-        subscriptions.push_back(std::make_shared<Subscription>(Subscription{ID, std::move(callback), true}));
+        subscriptions.push_back(Allocator::MakeShared<Subscription>(Subscription{ID, std::move(callback), true}));
         return ID;
     }
 
@@ -1562,7 +1566,7 @@ namespace Garage
     template <class... TArgs>
     void Delegate<TArgs...>::Broadcast(TArgs... args) const
     {
-        const SubscriptionList SNAPSHOT = subscriptions;
+        const SubscriptionList SNAPSHOT(subscriptions, Allocator::GetMemoryResource());
         for (const SubscriptionPtr& subscription : SNAPSHOT)
         {
             if (subscription->isConnected && subscription->callback)

@@ -1,11 +1,12 @@
-#ifndef GARAGE_PLATFORM_INPUT_SUBSYSTEM_HPP
+﻿#ifndef GARAGE_PLATFORM_INPUT_SUBSYSTEM_HPP
 #define GARAGE_PLATFORM_INPUT_SUBSYSTEM_HPP
 
-#include <memory>
+#include <memory_resource>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 
+#include "../core/allocator.hpp"
 #include "../core/app_subsystem.hpp"
 #include "../core/defines.hpp"
 #include "../core/system_status.hpp"
@@ -56,9 +57,10 @@ namespace Garage
         void PollMouse(InputProvider& targetProvider) noexcept;
         void ResetInputState() noexcept;
 
-        const IDisplay*                                               activeDisplay = nullptr;
-        InputProvider                                                 provider{};
-        std::unordered_map<std::string, std::unique_ptr<InputAction>> actions = {};
+        const IDisplay*                                                              activeDisplay = nullptr;
+        InputProvider                                                                provider{};
+        std::pmr::unordered_map<std::pmr::string, Allocator::UniquePtr<InputAction>> actions{
+                Allocator::GetMemoryResource()};
 
         Delegate<const DisplayCreateEvent&>::ListenerId   displayCreateListenerId   = 0;
         Delegate<const DisplayCloseEvent&>::ListenerId    displayCloseListenerId    = 0;

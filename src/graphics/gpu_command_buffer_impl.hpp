@@ -1,4 +1,4 @@
-#ifndef GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_IMPL_HPP
+﻿#ifndef GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_IMPL_HPP
 #define GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_IMPL_HPP
 
 #include <array>
@@ -31,18 +31,18 @@ namespace Garage
         explicit GPUCommandBufferImpl(const GPUDeviceImpl* device) noexcept;
         ~GPUCommandBufferImpl() noexcept override;
 
-        [[nodiscard]] Result<void, std::string> Reset() override;
-        [[nodiscard]] Result<void, std::string> Submit(IGPUFence* fence = nullptr) override;
+        [[nodiscard]] Result<void, std::pmr::string> Reset() override;
+        [[nodiscard]] Result<void, std::pmr::string> Submit(IGPUFence* fence = nullptr) override;
 
-        [[nodiscard]] Result<void, std::string> SetGraphicsConstants(UInt32                rootSlot,
-                                                                     std::span<const Byte> bytes) override;
+        [[nodiscard]] Result<void, std::pmr::string> SetGraphicsConstants(UInt32                rootSlot,
+                                                                          std::span<const Byte> bytes) override;
 
         void SetGraphicsRootConstants(UInt32                rootSlot,
                                       std::span<const Byte> bytes,
                                       UInt32                offset = 0) noexcept override;
         void SetGPUGraphicsPipelineState(const IGPUGraphicsPipelineState& pipelineState) noexcept override;
 
-        [[nodiscard]] Result<void, std::string>
+        [[nodiscard]] Result<void, std::pmr::string>
                 BindTextures(std::span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures) override;
 
         void CopyGPUBuffer(const IGPUBuffer& destination,

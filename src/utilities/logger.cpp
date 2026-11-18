@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <memory_resource>
 #include <source_location>
 #include <string>
 #include <string_view>
@@ -28,6 +29,9 @@
 #    include <spdlog/sinks/msvc_sink.h>
 #endif
 
+#include "garage/core/allocator.hpp"
+#include "garage/core/types.hpp"
+
 namespace Garage::Logger
 {
     namespace
@@ -53,13 +57,13 @@ namespace Garage::Logger
 
         [[nodiscard]] std::shared_ptr<spdlog::logger> CreateLogger()
         {
-            std::vector<spdlog::sink_ptr> sinks = {};
-            sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+            std::pmr::vector<spdlog::sink_ptr> sinks(Allocator::GetMemoryResource());
+            sinks.push_back(Allocator::MakeShared<spdlog::sinks::stdout_color_sink_mt>());
 #if defined(_WIN32)
-            sinks.push_back(std::make_shared<spdlog::sinks::msvc_sink_mt>());
+            sinks.push_back(Allocator::MakeShared<spdlog::sinks::msvc_sink_mt>());
 #endif
 
-            auto logger = std::make_shared<spdlog::logger>("Garage", sinks.begin(), sinks.end());
+            auto logger = Allocator::MakeShared<spdlog::logger>("Garage", sinks.begin(), sinks.end());
             logger->set_level(spdlog::level::trace);
             logger->set_pattern("[%T] [%^%l%$] %v (%s:%#)");
             return logger;
@@ -71,11 +75,11 @@ namespace Garage::Logger
             return *LOGGER;
         }
 
-        [[nodiscard]] std::string WideToUtf8(std::wstring_view wide)
+        [[nodiscard]] std::pmr::string WideToUtf8(std::wstring_view wide)
         {
             if (wide.empty())
             {
-                return {};
+                return std::pmr::string(Allocator::GetMemoryResource());
             }
 
 #if defined(_WIN32)
@@ -84,15 +88,15 @@ namespace Garage::Logger
                     WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, wide.data(), SIZE, nullptr, 0, nullptr, nullptr);
             if (LENGTH <= 0)
             {
-                return {};
+                return std::pmr::string(Allocator::GetMemoryResource());
             }
 
-            std::string utf8(static_cast<std::size_t>(LENGTH), '\0');
+            std::pmr::string utf8(static_cast<USize>(LENGTH), '\0', Allocator::GetMemoryResource());
             WideCharToMultiByte(
                     CP_UTF8, WC_ERR_INVALID_CHARS, wide.data(), SIZE, utf8.data(), LENGTH, nullptr, nullptr);
             return utf8;
 #else
-            std::string utf8 = {};
+            std::pmr::string utf8(Allocator::GetMemoryResource());
             utf8.reserve(wide.size());
             for (const wchar_t WC : wide)
             {

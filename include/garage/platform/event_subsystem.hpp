@@ -1,12 +1,14 @@
-#ifndef GARAGE_PLATFORM_EVENT_SUBSYSTEM_HPP
+﻿#ifndef GARAGE_PLATFORM_EVENT_SUBSYSTEM_HPP
 #define GARAGE_PLATFORM_EVENT_SUBSYSTEM_HPP
 
 #include <functional>
+#include <memory_resource>
 #include <tuple>
 #include <utility>
 #include <variant>
 #include <vector>
 
+#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
 #include "../core/engine_subsystem.hpp"
 #include "../core/system_status.hpp"
@@ -63,9 +65,9 @@ namespace Garage
             using Type = std::tuple<Delegate<const TEvents&>...>;
         };
 
-        std::vector<Event>         writeBuffer = {};
-        std::vector<Event>         readBuffer  = {};
-        ListenerTuple<Event>::Type listeners   = {};
+        std::pmr::vector<Event>    writeBuffer{Allocator::GetMemoryResource()};
+        std::pmr::vector<Event>    readBuffer{Allocator::GetMemoryResource()};
+        ListenerTuple<Event>::Type listeners = {};
     };
 
     inline EventSubsystem::EventSubsystem() noexcept
