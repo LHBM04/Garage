@@ -22,44 +22,44 @@ namespace Garage
         DestroyAllComponents();
     }
 
-    void ActorBase::FixedUpdate()
+    void ActorBase::FixedUpdate(SystemContext& context)
     {
-        UpdateComponents(&ComponentBase::OnFixedUpdate);
+        UpdateComponents(&ComponentBase::OnFixedUpdate, context);
     }
 
-    void ActorBase::Update()
+    void ActorBase::Update(SystemContext& context)
     {
-        UpdateComponents(&ComponentBase::OnUpdate);
+        UpdateComponents(&ComponentBase::OnUpdate, context);
     }
 
-    void ActorBase::LateUpdate()
+    void ActorBase::LateUpdate(SystemContext& context)
     {
-        UpdateComponents(&ComponentBase::OnLateUpdate);
+        UpdateComponents(&ComponentBase::OnLateUpdate, context);
     }
 
-    void ActorBase::PreRender(IGPUCommandBuffer& commandBuffer)
+    void ActorBase::PreRender(SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
-        RenderComponents(&ComponentBase::OnPreRender, commandBuffer);
+        RenderComponents(&ComponentBase::OnPreRender, context, commandBuffer);
     }
 
-    void ActorBase::Render(IGPUCommandBuffer& commandBuffer)
+    void ActorBase::Render(SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
-        RenderComponents(&ComponentBase::OnRender, commandBuffer);
+        RenderComponents(&ComponentBase::OnRender, context, commandBuffer);
     }
 
-    void ActorBase::PostRender(IGPUCommandBuffer& commandBuffer)
+    void ActorBase::PostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
-        RenderComponents(&ComponentBase::OnPostRender, commandBuffer);
+        RenderComponents(&ComponentBase::OnPostRender, context, commandBuffer);
     }
 
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-    void ActorBase::DrawGizmos(IGPUCommandBuffer& commandBuffer)
+    void ActorBase::DrawGizmos(SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
-        RenderComponents(&ComponentBase::OnDrawGizmos, commandBuffer);
+        RenderComponents(&ComponentBase::OnDrawGizmos, context, commandBuffer);
     }
 #endif
 
-    void ActorBase::UpdateComponents(ComponentCallback callback)
+    void ActorBase::UpdateComponents(ComponentCallback callback, SystemContext& context)
     {
         ASSERT(callback != nullptr);
 
@@ -82,7 +82,7 @@ namespace Garage
             if (!component->IsStarted())
             {
                 component->SetStarted(true);
-                component->OnStart();
+                component->OnStart(context);
                 if (!world->IsEntered() || !isEnabled || isDestroyed || !component->IsEnabled() ||
                     component->IsDestroyed())
                 {
@@ -90,11 +90,13 @@ namespace Garage
                 }
             }
 
-            (component->*callback)();
+            (component->*callback)(context);
         }
     }
 
-    void ActorBase::RenderComponents(RenderCallback callback, IGPUCommandBuffer& commandBuffer)
+    void ActorBase::RenderComponents(RenderCallback     callback,
+                                     SystemContext&     context,
+                                     IGPUCommandBuffer& commandBuffer)
     {
         ASSERT(callback != nullptr);
 
@@ -109,7 +111,7 @@ namespace Garage
             ComponentBase* component = components[index].get();
             if (component->IsStarted() && component->IsEnabled() && !component->IsDestroyed())
             {
-                (component->*callback)(commandBuffer);
+                (component->*callback)(context, commandBuffer);
             }
         }
     }

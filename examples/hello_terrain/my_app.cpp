@@ -2,62 +2,55 @@
 
 #include "my_world.hpp"
 
-ESystemStatus MyApp::Startup()
+ESystemStatus MyApp::Startup(SystemContext& context)
 {
-    Engine* engine = Engine::GetInstance();
-    if (engine == nullptr)
-    {
-        LOG_ERROR("엔진 인스턴스를 가져오지 못했습니다.");
-        return ESystemStatus::FAILURE;
-    }
-
-    eventSubsystem = engine->GetSubsystem<EventSubsystem>();
+    eventSubsystem = context.GetEngineSubsystem<EventSubsystem>();
     if (eventSubsystem == nullptr)
     {
         LOG_ERROR("이벤트 서브시스템을 가져오지 못했습니다.");
         return ESystemStatus::FAILURE;
     }
 
-    displaySubsystem = engine->GetSubsystem<DisplaySubsystem>();
+    displaySubsystem = context.GetEngineSubsystem<DisplaySubsystem>();
     if (displaySubsystem == nullptr)
     {
         LOG_ERROR("디스플레이 서브시스템을 가져오지 못했습니다.");
         return ESystemStatus::FAILURE;
     }
 
-    renderSubsystem = engine->GetSubsystem<RenderSubsystem>();
+    renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
     if (renderSubsystem == nullptr)
     {
         LOG_ERROR("렌더 서브시스템을 가져오지 못했습니다.");
         return ESystemStatus::FAILURE;
     }
 
-    OnSubsystemAdded<InputSubsystem>(this, &MyApp::OnInputSubsystemAdded);
-    OnSubsystemAdded<WorldSubsystem>(this, &MyApp::OnWorldSubsystemAdded);
-    OnSubsystemAdded<AssetSubsystem>(this, &MyApp::OnAssetSubsystemAdded);
+    context.OnAppSubsystemAdded<InputSubsystem>(this, &MyApp::OnInputSubsystemAdded);
+    context.OnAppSubsystemAdded<WorldSubsystem>(this, &MyApp::OnWorldSubsystemAdded);
+    context.OnAppSubsystemAdded<AssetSubsystem>(this, &MyApp::OnAssetSubsystemAdded);
 
-    inputSubsystem = AddSubsystem<InputSubsystem>();
+    inputSubsystem = context.AddAppSubsystem<InputSubsystem>();
     if (inputSubsystem == nullptr)
     {
         LOG_ERROR("입력 서브시스템을 추가하지 못했습니다.");
         return ESystemStatus::FAILURE;
     }
 
-    worldSubsystem = AddSubsystem<WorldSubsystem>();
+    worldSubsystem = context.AddAppSubsystem<WorldSubsystem>();
     if (worldSubsystem == nullptr)
     {
         LOG_ERROR("월드 서브시스템을 추가하지 못했습니다.");
         return ESystemStatus::FAILURE;
     }
 
-    assetSubsystem = AddSubsystem<AssetSubsystem>();
+    assetSubsystem = context.AddAppSubsystem<AssetSubsystem>();
     if (assetSubsystem == nullptr)
     {
         LOG_ERROR("에셋 서브시스템을 추가하지 못했습니다.");
         return ESystemStatus::FAILURE;
     }
 
-    if (const ESystemStatus STATUS = App::Startup(); STATUS != ESystemStatus::CONTINUE)
+    if (const ESystemStatus STATUS = App::Startup(context); STATUS != ESystemStatus::CONTINUE)
     {
         return STATUS;
     }

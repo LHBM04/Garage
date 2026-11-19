@@ -8,7 +8,7 @@
 #include <SDL3/SDL_gpu.h>
 
 #include "garage/core/allocator.hpp"
-#include "garage/core/engine.hpp"
+#include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 #include "garage/core/types.hpp"
 
@@ -37,7 +37,7 @@ namespace Garage
 
     RenderSubsystem::~RenderSubsystem() noexcept = default;
 
-    ESystemStatus RenderSubsystem::OnStartup()
+    ESystemStatus RenderSubsystem::OnStartup(SystemContext& context)
     {
         auto deviceResult = CreateDevice();
         if (!deviceResult)
@@ -69,43 +69,39 @@ namespace Garage
 
         fence = FENCE_RESULT.GetValue();
 
-        Engine* engine = Engine::GetInstance();
-        if (engine != nullptr)
+        if (EventSubsystem* eventSubsystem = context.GetEngineSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
         {
-            if (EventSubsystem* eventSubsystem = engine->GetSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
-            {
-                displayCreateListenerId =
-                        eventSubsystem->Subscribe<DisplayCreateEvent>(this, &RenderSubsystem::OnDisplayCreate);
-                displayCloseListenerId =
-                        eventSubsystem->Subscribe<DisplayCloseEvent>(this, &RenderSubsystem::OnDisplayClose);
-                displayDestroyListenerId =
-                        eventSubsystem->Subscribe<DisplayDestroyEvent>(this, &RenderSubsystem::OnDisplayDestroy);
-            }
+            displayCreateListenerId =
+                    eventSubsystem->Subscribe<DisplayCreateEvent>(this, &RenderSubsystem::OnDisplayCreate);
+            displayCloseListenerId =
+                    eventSubsystem->Subscribe<DisplayCloseEvent>(this, &RenderSubsystem::OnDisplayClose);
+            displayDestroyListenerId =
+                    eventSubsystem->Subscribe<DisplayDestroyEvent>(this, &RenderSubsystem::OnDisplayDestroy);
+        }
 
-            if (DisplaySubsystem* displaySubsystem = engine->GetSubsystem<DisplaySubsystem>();
-                displaySubsystem != nullptr)
+        if (DisplaySubsystem* displaySubsystem = context.GetEngineSubsystem<DisplaySubsystem>();
+            displaySubsystem != nullptr)
+        {
+            for (const IDisplay* display : displaySubsystem->GetDisplays())
             {
-                for (const IDisplay* display : displaySubsystem->GetDisplays())
-                {
-                    OnDisplayCreate(DisplayCreateEvent{display});
-                }
+                OnDisplayCreate(DisplayCreateEvent{display});
             }
         }
 
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus RenderSubsystem::OnPreTick()
+    ESystemStatus RenderSubsystem::OnPreTick([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus RenderSubsystem::OnTick()
+    ESystemStatus RenderSubsystem::OnTick([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus RenderSubsystem::OnPostTick()
+    ESystemStatus RenderSubsystem::OnPostTick(SystemContext& context)
     {
         if (device == nullptr || commandBuffer == nullptr || fence == nullptr)
         {
@@ -145,7 +141,7 @@ namespace Garage
             }
 
             commandBuffer->SetGPUTarget(*target);
-            onRender.Broadcast(*commandBuffer);
+            onRender.Broadcast(context, *commandBuffer);
             commandBuffer->EndRenderPass();
         }
 
@@ -168,17 +164,13 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    void RenderSubsystem::OnShutdown()
+    void RenderSubsystem::OnShutdown(SystemContext& context)
     {
-        Engine* engine = Engine::GetInstance();
-        if (engine != nullptr)
+        if (EventSubsystem* eventSubsystem = context.GetEngineSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
         {
-            if (EventSubsystem* eventSubsystem = engine->GetSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
-            {
-                eventSubsystem->Unsubscribe<DisplayCreateEvent>(displayCreateListenerId);
-                eventSubsystem->Unsubscribe<DisplayCloseEvent>(displayCloseListenerId);
-                eventSubsystem->Unsubscribe<DisplayDestroyEvent>(displayDestroyListenerId);
-            }
+            eventSubsystem->Unsubscribe<DisplayCreateEvent>(displayCreateListenerId);
+            eventSubsystem->Unsubscribe<DisplayCloseEvent>(displayCloseListenerId);
+            eventSubsystem->Unsubscribe<DisplayDestroyEvent>(displayDestroyListenerId);
         }
 
         displayCreateListenerId  = 0;

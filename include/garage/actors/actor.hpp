@@ -18,6 +18,7 @@
 namespace Garage
 {
     class IGPUCommandBuffer;
+    class SystemContext;
     class WorldBase;
 
     class GARAGE_API ActorBase
@@ -34,14 +35,14 @@ namespace Garage
         ActorBase(ActorBase&&)            = delete;
         ActorBase& operator=(ActorBase&&) = delete;
 
-        void FixedUpdate();
-        void Update();
-        void LateUpdate();
-        void PreRender(IGPUCommandBuffer& commandBuffer);
-        void Render(IGPUCommandBuffer& commandBuffer);
-        void PostRender(IGPUCommandBuffer& commandBuffer);
+        void FixedUpdate(SystemContext& context);
+        void Update(SystemContext& context);
+        void LateUpdate(SystemContext& context);
+        void PreRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void Render(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void PostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-        void DrawGizmos(IGPUCommandBuffer& commandBuffer);
+        void DrawGizmos(SystemContext& context, IGPUCommandBuffer& commandBuffer);
 #endif
 
         [[nodiscard]] const std::pmr::string& GetName() const noexcept;
@@ -85,11 +86,11 @@ namespace Garage
     private:
         friend class WorldBase;
 
-        using ComponentCallback = void (ComponentBase::*)();
-        using RenderCallback    = void (ComponentBase::*)(IGPUCommandBuffer&);
+        using ComponentCallback = void (ComponentBase::*)(SystemContext&);
+        using RenderCallback    = void (ComponentBase::*)(SystemContext&, IGPUCommandBuffer&);
 
-        void UpdateComponents(ComponentCallback callback);
-        void RenderComponents(RenderCallback callback, IGPUCommandBuffer& commandBuffer);
+        void UpdateComponents(ComponentCallback callback, SystemContext& context);
+        void RenderComponents(RenderCallback callback, SystemContext& context, IGPUCommandBuffer& commandBuffer);
         void DestroyComponents();
         void DestroyAllComponents();
 

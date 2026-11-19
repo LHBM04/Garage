@@ -67,7 +67,7 @@ namespace Garage
         return frameCount;
     }
 
-    ESystemStatus TimeSubsystem::OnStartup() noexcept
+    ESystemStatus TimeSubsystem::OnStartup([[maybe_unused]] SystemContext& context) noexcept
     {
         const UInt64 FREQUENCY = static_cast<UInt64>(SDL_GetPerformanceFrequency());
         if (FREQUENCY == 0)
@@ -91,7 +91,7 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus TimeSubsystem::OnPreTick() noexcept
+    ESystemStatus TimeSubsystem::OnPreTick([[maybe_unused]] SystemContext& context) noexcept
     {
         const UInt64 NOW = static_cast<UInt64>(SDL_GetPerformanceCounter());
 
@@ -112,17 +112,17 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus TimeSubsystem::OnTick() noexcept
+    ESystemStatus TimeSubsystem::OnTick([[maybe_unused]] SystemContext& context) noexcept
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus TimeSubsystem::OnPostTick() noexcept
+    ESystemStatus TimeSubsystem::OnPostTick([[maybe_unused]] SystemContext& context) noexcept
     {
         return ESystemStatus::CONTINUE;
     }
 
-    void TimeSubsystem::OnShutdown() noexcept
+    void TimeSubsystem::OnShutdown([[maybe_unused]] SystemContext& context) noexcept
     {
     }
 

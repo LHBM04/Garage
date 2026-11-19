@@ -15,7 +15,7 @@
 
 namespace Garage
 {
-    void SkyboxRenderer::OnRender(IGPUCommandBuffer& commandBuffer)
+    void SkyboxRenderer::OnRender([[maybe_unused]] SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
         const IGPUGraphicsPipelineState* pipelineState = GetPipelineState();
         const IGPUTexture2D*             texture       = (cubemap != nullptr) ? cubemap->GetTexture() : nullptr;

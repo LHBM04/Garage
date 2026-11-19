@@ -22,7 +22,7 @@
 
 namespace Garage
 {
-    void MeshRenderer::OnRender(IGPUCommandBuffer& commandBuffer)
+    void MeshRenderer::OnRender([[maybe_unused]] SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
         const MaterialAsset*             material      = GetMaterial();
         const IGPUGraphicsPipelineState* pipelineState = GetPipelineState();

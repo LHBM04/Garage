@@ -2,7 +2,7 @@
 
 #include "cube_controller.hpp"
 
-void MyWorld::OnEnter()
+void MyWorld::OnEnter(SystemContext& context)
 {
     ActorBase* cameraActor =
             Instantiate(Vector3D<Float32>{0.0f, 0.8f, -3.2f}, Quaternion<Float32>::Euler(14.0f, 0.0f, 0.0f));
@@ -19,8 +19,7 @@ void MyWorld::OnEnter()
     light->SetColor(ColorRGBA<Float32>::GetWhite());
     light->SetAmbientColor(ColorRGBA<Float32>{0.28f, 0.28f, 0.32f, 1.0f});
 
-    App*            app    = App::GetInstance();
-    AssetSubsystem* assets = (app != nullptr) ? app->GetSubsystem<AssetSubsystem>() : nullptr;
+    AssetSubsystem* assets = context.GetAppSubsystem<AssetSubsystem>();
     if (assets == nullptr)
     {
         LOG_ERROR("에셋 서브시스템을 가져오지 못했습니다.");

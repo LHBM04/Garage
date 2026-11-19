@@ -8,7 +8,7 @@
 #include "garage/actors/transform.hpp"
 #include "garage/actors/world.hpp"
 
-#include "garage/core/app.hpp"
+#include "garage/core/system_context.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/camera.hpp"
@@ -102,7 +102,7 @@ namespace Garage
         }
     } // namespace
 
-    void ButtonUI::OnUpdate()
+    void ButtonUI::OnUpdate(SystemContext& context)
     {
         const ActorBase* owner = GetOwner();
         const WorldBase* world = (owner != nullptr) ? owner->GetWorld() : nullptr;
@@ -116,8 +116,7 @@ namespace Garage
             return IsEnabled() && !IsDestroyed() && owner->IsEnabled() && !owner->IsDestroyed() && world->IsEntered();
         };
 
-        const App*            app       = App::GetInstance();
-        const InputSubsystem* input     = (app != nullptr) ? app->GetSubsystem<InputSubsystem>() : nullptr;
+        const InputSubsystem* input     = context.GetAppSubsystem<InputSubsystem>();
         const InputProvider*  provider  = (input != nullptr) ? input->GetProvider() : nullptr;
         const IDisplay*       display   = (input != nullptr) ? input->GetActiveDisplay() : nullptr;
         const Transform*      transform = owner->GetComponent<Transform>();
@@ -177,7 +176,7 @@ namespace Garage
     }
 
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-    void ButtonUI::OnPostRender(IGPUCommandBuffer& commandBuffer)
+    void ButtonUI::OnPostRender([[maybe_unused]] SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
         if (debugMaterial == nullptr)
         {

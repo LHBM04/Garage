@@ -23,6 +23,7 @@ namespace Garage
     class IGPUDevice;
     class IGPUFence;
     class IGPUSwapChain;
+    class SystemContext;
 
     class GARAGE_API RenderSubsystem final : public EngineSubsystemBase
     {
@@ -30,13 +31,13 @@ namespace Garage
         RenderSubsystem() noexcept;
         ~RenderSubsystem() noexcept override;
 
-        [[nodiscard]] ESystemStatus OnStartup() override;
-        [[nodiscard]] ESystemStatus OnPreTick() override;
-        [[nodiscard]] ESystemStatus OnTick() override;
-        [[nodiscard]] ESystemStatus OnPostTick() override;
-        void                        OnShutdown() override;
+        [[nodiscard]] ESystemStatus OnStartup(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnPreTick(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnTick(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnPostTick(SystemContext& context) override;
+        void                        OnShutdown(SystemContext& context) override;
 
-        [[nodiscard]] Delegate<IGPUCommandBuffer&>& OnRender() noexcept;
+        [[nodiscard]] Delegate<SystemContext&, IGPUCommandBuffer&>& OnRender() noexcept;
 
         void OnDisplayCreate(const DisplayCreateEvent& event);
         void OnDisplayClose(const DisplayCloseEvent& event);
@@ -53,13 +54,13 @@ namespace Garage
         IGPUCommandBuffer*                                     commandBuffer = nullptr;
         IGPUFence*                                             fence         = nullptr;
         std::pmr::unordered_map<IDisplay::EId, IGPUSwapChain*> swapChains{Allocator::GetMemoryResource()};
-        Delegate<IGPUCommandBuffer&>                           onRender                 = {};
+        Delegate<SystemContext&, IGPUCommandBuffer&>           onRender                 = {};
         Int32                                                  displayCreateListenerId  = 0;
         Int32                                                  displayCloseListenerId   = 0;
         Int32                                                  displayDestroyListenerId = 0;
     };
 
-    inline Delegate<IGPUCommandBuffer&>& RenderSubsystem::OnRender() noexcept
+    inline Delegate<SystemContext&, IGPUCommandBuffer&>& RenderSubsystem::OnRender() noexcept
     {
         return onRender;
     }

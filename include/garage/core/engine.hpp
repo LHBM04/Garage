@@ -13,6 +13,7 @@
 namespace Garage
 {
     class App;
+    class SystemContext;
 
     class GARAGE_API Engine : public SystemBase<EngineSubsystemBase>
     {
@@ -26,15 +27,15 @@ namespace Garage
         template <std::derived_from<EngineSubsystemBase> TSubsystem, class TObject>
         using SubsystemMethod = typename Base::template SubsystemMethod<TSubsystem, TObject>;
 
-        [[nodiscard]] ESystemStatus Startup() override;
-        [[nodiscard]] ESystemStatus Routine() override;
-        void                        Shutdown() override;
+        [[nodiscard]] ESystemStatus Startup(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus Routine(SystemContext& context) override;
+        void                        Shutdown(SystemContext& context) override;
 
         template <std::derived_from<EngineSubsystemBase> TSubsystem>
         TSubsystem* AddSubsystem();
 
         template <std::derived_from<EngineSubsystemBase> TSubsystem>
-        void RemoveSubsystem();
+        void RemoveSubsystem(SystemContext& context);
 
         template <std::derived_from<EngineSubsystemBase> TSubsystem>
         [[nodiscard]] TSubsystem* GetSubsystem() noexcept;
@@ -56,14 +57,10 @@ namespace Garage
 
         [[nodiscard]] Int32 Run(App* target);
 
-        [[nodiscard]] static Engine* GetInstance() noexcept;
-
     private:
-        [[nodiscard]] ESystemStatus PreTick();
-        [[nodiscard]] ESystemStatus Tick();
-        [[nodiscard]] ESystemStatus PostTick();
-
-        inline static Engine* instance = nullptr;
+        [[nodiscard]] ESystemStatus PreTick(SystemContext& context);
+        [[nodiscard]] ESystemStatus Tick(SystemContext& context);
+        [[nodiscard]] ESystemStatus PostTick(SystemContext& context);
 
         App* app = nullptr;
     };
@@ -75,9 +72,9 @@ namespace Garage
     }
 
     template <std::derived_from<EngineSubsystemBase> TSubsystem>
-    void Engine::RemoveSubsystem()
+    void Engine::RemoveSubsystem(SystemContext& context)
     {
-        Base::RemoveSubsystem<TSubsystem>();
+        Base::RemoveSubsystem<TSubsystem>(context);
     }
 
     template <std::derived_from<EngineSubsystemBase> TSubsystem>
@@ -114,13 +111,6 @@ namespace Garage
     Engine::ListenerId Engine::OnSubsystemRemoved(TObject* object, SubsystemMethod<TSubsystem, TObject> method)
     {
         return Base::OnSubsystemRemoved<TSubsystem>(object, method);
-    }
-
-    inline Engine* Engine::GetInstance() noexcept
-    {
-        ASSERT(instance != nullptr);
-
-        return instance;
     }
 } // namespace Garage
 

@@ -10,7 +10,7 @@ class MyWorld final : public WorldBase
     GARAGE_WORLD;
 
 protected:
-    void OnEnter() override;
+    void OnEnter(SystemContext& context) override;
 };
 
 #endif // MY_WORLD_HPP

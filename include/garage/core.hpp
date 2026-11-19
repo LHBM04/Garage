@@ -10,6 +10,7 @@
 #include "core/engine_subsystem.hpp"
 #include "core/subsystem.hpp"
 #include "core/system.hpp"
+#include "core/system_context.hpp"
 #include "core/system_status.hpp"
 #include "core/types.hpp"
 

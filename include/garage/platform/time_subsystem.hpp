@@ -9,6 +9,7 @@
 namespace Garage
 {
     class App;
+    class SystemContext;
 
     class GARAGE_API TimeSubsystem final : public EngineSubsystemBase
     {
@@ -33,11 +34,11 @@ namespace Garage
 
         [[nodiscard]] UInt32 GetFrameCount() const noexcept;
 
-        [[nodiscard]] ESystemStatus OnStartup() noexcept override;
-        [[nodiscard]] ESystemStatus OnPreTick() noexcept override;
-        [[nodiscard]] ESystemStatus OnTick() noexcept override;
-        [[nodiscard]] ESystemStatus OnPostTick() noexcept override;
-        void                        OnShutdown() noexcept override;
+        [[nodiscard]] ESystemStatus OnStartup(SystemContext& context) noexcept override;
+        [[nodiscard]] ESystemStatus OnPreTick(SystemContext& context) noexcept override;
+        [[nodiscard]] ESystemStatus OnTick(SystemContext& context) noexcept override;
+        [[nodiscard]] ESystemStatus OnPostTick(SystemContext& context) noexcept override;
+        void                        OnShutdown(SystemContext& context) noexcept override;
 
     private:
         [[nodiscard]] bool ShouldFixedStep() noexcept;

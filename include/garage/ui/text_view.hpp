@@ -20,6 +20,7 @@ namespace Garage
     struct FontCharacterData;
     class IGPUCommandBuffer;
     class MaterialAsset;
+    class SystemContext;
     class TextureAsset;
 
     enum class ETextHorizontalAlignment : UInt8
@@ -35,7 +36,7 @@ namespace Garage
         using ComponentBase::ComponentBase;
         ~TextView() noexcept override = default;
 
-        void OnPostRender(IGPUCommandBuffer& commandBuffer) override;
+        void OnPostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer) override;
 
         [[nodiscard]] const TextureAsset* GetTexture() const noexcept;
         void                              SetTexture(const TextureAsset* value) noexcept;

@@ -9,6 +9,7 @@ namespace Garage
 {
     class CubemapAsset;
     class IGPUCommandBuffer;
+    class SystemContext;
 
     class GARAGE_API SkyboxRenderer final : public RendererBase
     {
@@ -16,7 +17,7 @@ namespace Garage
         using RendererBase::RendererBase;
         ~SkyboxRenderer() noexcept override = default;
 
-        void OnRender(IGPUCommandBuffer& commandBuffer) override;
+        void OnRender(SystemContext& context, IGPUCommandBuffer& commandBuffer) override;
 
         [[nodiscard]] const CubemapAsset* GetCubemap() const noexcept;
         void                              SetCubemap(const CubemapAsset* value) noexcept;

@@ -18,6 +18,8 @@
 
 namespace Garage
 {
+    class SystemContext;
+
     template <std::derived_from<SubsystemBase> TSubsystem>
     class SystemBase
     {
@@ -46,16 +48,16 @@ namespace Garage
         SystemBase(SystemBase&&)            = delete;
         SystemBase& operator=(SystemBase&&) = delete;
 
-        [[nodiscard]] virtual ESystemStatus Startup();
-        [[nodiscard]] virtual ESystemStatus Routine();
-        virtual void                        Shutdown();
+        [[nodiscard]] virtual ESystemStatus Startup(SystemContext& context);
+        [[nodiscard]] virtual ESystemStatus Routine(SystemContext& context);
+        virtual void                        Shutdown(SystemContext& context);
 
     protected:
         template <std::derived_from<TSubsystem> TResult>
         TResult* AddSubsystem();
 
         template <std::derived_from<TSubsystem> TResult>
-        void RemoveSubsystem();
+        void RemoveSubsystem(SystemContext& context);
 
         template <std::derived_from<TSubsystem> TResult>
         [[nodiscard]] TResult* GetSubsystem() noexcept;
@@ -86,13 +88,13 @@ namespace Garage
     };
 
     template <std::derived_from<SubsystemBase> TSubsystem>
-    ESystemStatus SystemBase<TSubsystem>::Startup()
+    ESystemStatus SystemBase<TSubsystem>::Startup(SystemContext& context)
     {
         std::ranges::sort(subsystems, std::ranges::less{}, &SubsystemBase::GetPriority);
 
         for (const SubsystemOwner& subsystem : subsystems)
         {
-            if (subsystem->OnStartup() == ESystemStatus::FAILURE)
+            if (subsystem->OnStartup(context) == ESystemStatus::FAILURE)
             {
                 return ESystemStatus::FAILURE;
             }
@@ -102,13 +104,13 @@ namespace Garage
     }
 
     template <std::derived_from<SubsystemBase> TSubsystem>
-    ESystemStatus SystemBase<TSubsystem>::Routine()
+    ESystemStatus SystemBase<TSubsystem>::Routine([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
     template <std::derived_from<SubsystemBase> TSubsystem>
-    void SystemBase<TSubsystem>::Shutdown()
+    void SystemBase<TSubsystem>::Shutdown(SystemContext& context)
     {
         for (const SubsystemOwner& subsystem : subsystems | std::views::reverse)
         {
@@ -118,7 +120,7 @@ namespace Garage
             {
                 RESULT->second.Broadcast(pointer);
             }
-            pointer->OnShutdown();
+            pointer->OnShutdown(context);
         }
 
         for (auto& entry : onSubsystemAdded)
@@ -160,7 +162,7 @@ namespace Garage
 
     template <std::derived_from<SubsystemBase> TSubsystem>
     template <std::derived_from<TSubsystem> TResult>
-    void SystemBase<TSubsystem>::RemoveSubsystem()
+    void SystemBase<TSubsystem>::RemoveSubsystem(SystemContext& context)
     {
         const std::type_index TYPE(typeid(TResult));
         const auto            RESULT = subsystemsByType.find(TYPE);
@@ -174,7 +176,7 @@ namespace Garage
         {
             FOUND->second.Broadcast(pointer);
         }
-        pointer->OnShutdown();
+        pointer->OnShutdown(context);
 
         subsystemsByType.erase(RESULT);
         std::erase_if(subsystems,

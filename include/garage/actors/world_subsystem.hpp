@@ -12,6 +12,7 @@
 namespace Garage
 {
     class IGPUCommandBuffer;
+    class SystemContext;
     class WorldBase;
 
     class GARAGE_API WorldSubsystem final : public AppSubsystemBase
@@ -21,7 +22,7 @@ namespace Garage
         ~WorldSubsystem() noexcept override;
 
         WorldBase* AddWorld(Allocator::UniquePtr<WorldBase> world);
-        void       ExitWorld();
+        void       ExitWorld(SystemContext& context);
 
         [[nodiscard]] bool RequestWorldChange(WorldBase* targetWorld) noexcept;
 
@@ -31,19 +32,19 @@ namespace Garage
         [[nodiscard]] WorldBase*       GetCurrentWorld() noexcept;
         [[nodiscard]] const WorldBase* GetCurrentWorld() const noexcept;
 
-        void PreRender(IGPUCommandBuffer& commandBuffer);
-        void Render(IGPUCommandBuffer& commandBuffer);
-        void PostRender(IGPUCommandBuffer& commandBuffer);
+        void PreRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void Render(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void PostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
 
-        [[nodiscard]] ESystemStatus OnStartup() override;
-        [[nodiscard]] ESystemStatus OnEarlyUpdate() override;
-        [[nodiscard]] ESystemStatus OnFixedUpdate() override;
-        [[nodiscard]] ESystemStatus OnUpdate() override;
-        [[nodiscard]] ESystemStatus OnLateUpdate() override;
-        void                        OnShutdown() override;
+        [[nodiscard]] ESystemStatus OnStartup(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnEarlyUpdate(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnFixedUpdate(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnUpdate(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnLateUpdate(SystemContext& context) override;
+        void                        OnShutdown(SystemContext& context) override;
 
     private:
-        void ExitCurrentWorld();
+        void ExitCurrentWorld(SystemContext& context);
         void NotifyIfWorldExited(WorldBase* world);
 
         std::pmr::vector<Allocator::UniquePtr<WorldBase>> worlds{Allocator::GetMemoryResource()};

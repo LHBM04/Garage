@@ -7,14 +7,16 @@
 
 namespace Garage
 {
+    class SystemContext;
+
     class GARAGE_API EngineSubsystemBase : public SubsystemBase
     {
     public:
         using SubsystemBase::SubsystemBase;
 
-        [[nodiscard]] virtual ESystemStatus OnPreTick()  = 0;
-        [[nodiscard]] virtual ESystemStatus OnTick()     = 0;
-        [[nodiscard]] virtual ESystemStatus OnPostTick() = 0;
+        [[nodiscard]] virtual ESystemStatus OnPreTick(SystemContext& context)  = 0;
+        [[nodiscard]] virtual ESystemStatus OnTick(SystemContext& context)     = 0;
+        [[nodiscard]] virtual ESystemStatus OnPostTick(SystemContext& context) = 0;
     };
 } // namespace Garage
 

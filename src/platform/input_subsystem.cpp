@@ -11,7 +11,7 @@
 
 #include "garage/core/allocator.hpp"
 #include "garage/core/defines.hpp"
-#include "garage/core/engine.hpp"
+#include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 #include "garage/core/types.hpp"
 
@@ -141,29 +141,25 @@ namespace Garage
         static_assert(static_cast<UInt32>(EButtonCode::X2) == SDL_BUTTON_X2MASK);
     } // namespace
 
-    ESystemStatus InputSubsystem::OnStartup()
+    ESystemStatus InputSubsystem::OnStartup(SystemContext& context)
     {
-        Engine* engine = Engine::GetInstance();
-        if (engine != nullptr)
+        if (EventSubsystem* eventSubsystem = context.GetEngineSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
         {
-            if (EventSubsystem* eventSubsystem = engine->GetSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
-            {
-                displayCreateListenerId =
-                        eventSubsystem->Subscribe<DisplayCreateEvent>(this, &InputSubsystem::OnDisplayCreate);
-                displayCloseListenerId =
-                        eventSubsystem->Subscribe<DisplayCloseEvent>(this, &InputSubsystem::OnDisplayClose);
-                displayFocusListenerId =
-                        eventSubsystem->Subscribe<DisplayFocusEvent>(this, &InputSubsystem::OnDisplayFocus);
-                inputActivationListenerId =
-                        eventSubsystem->Subscribe<InputActivationEvent>(this, &InputSubsystem::OnInputActivation);
-                mouseWheelListenerId = eventSubsystem->Subscribe<MouseWheelEvent>(this, &InputSubsystem::OnMouseWheel);
-            }
+            displayCreateListenerId =
+                    eventSubsystem->Subscribe<DisplayCreateEvent>(this, &InputSubsystem::OnDisplayCreate);
+            displayCloseListenerId =
+                    eventSubsystem->Subscribe<DisplayCloseEvent>(this, &InputSubsystem::OnDisplayClose);
+            displayFocusListenerId =
+                    eventSubsystem->Subscribe<DisplayFocusEvent>(this, &InputSubsystem::OnDisplayFocus);
+            inputActivationListenerId =
+                    eventSubsystem->Subscribe<InputActivationEvent>(this, &InputSubsystem::OnInputActivation);
+            mouseWheelListenerId = eventSubsystem->Subscribe<MouseWheelEvent>(this, &InputSubsystem::OnMouseWheel);
         }
 
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus InputSubsystem::OnEarlyUpdate()
+    ESystemStatus InputSubsystem::OnEarlyUpdate([[maybe_unused]] SystemContext& context)
     {
         if (!isInputEnabled || activeDisplay == nullptr)
         {
@@ -195,34 +191,30 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus InputSubsystem::OnFixedUpdate()
+    ESystemStatus InputSubsystem::OnFixedUpdate([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus InputSubsystem::OnUpdate()
+    ESystemStatus InputSubsystem::OnUpdate([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus InputSubsystem::OnLateUpdate()
+    ESystemStatus InputSubsystem::OnLateUpdate([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    void InputSubsystem::OnShutdown()
+    void InputSubsystem::OnShutdown(SystemContext& context)
     {
-        Engine* engine = Engine::GetInstance();
-        if (engine != nullptr)
+        if (EventSubsystem* eventSubsystem = context.GetEngineSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
         {
-            if (EventSubsystem* eventSubsystem = engine->GetSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
-            {
-                eventSubsystem->Unsubscribe<DisplayCreateEvent>(displayCreateListenerId);
-                eventSubsystem->Unsubscribe<DisplayCloseEvent>(displayCloseListenerId);
-                eventSubsystem->Unsubscribe<DisplayFocusEvent>(displayFocusListenerId);
-                eventSubsystem->Unsubscribe<InputActivationEvent>(inputActivationListenerId);
-                eventSubsystem->Unsubscribe<MouseWheelEvent>(mouseWheelListenerId);
-            }
+            eventSubsystem->Unsubscribe<DisplayCreateEvent>(displayCreateListenerId);
+            eventSubsystem->Unsubscribe<DisplayCloseEvent>(displayCloseListenerId);
+            eventSubsystem->Unsubscribe<DisplayFocusEvent>(displayFocusListenerId);
+            eventSubsystem->Unsubscribe<InputActivationEvent>(inputActivationListenerId);
+            eventSubsystem->Unsubscribe<MouseWheelEvent>(mouseWheelListenerId);
         }
 
         displayCreateListenerId   = 0;

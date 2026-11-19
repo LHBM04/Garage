@@ -1,6 +1,6 @@
 #include "my_world.hpp"
 
-void MyWorld::OnEnter()
+void MyWorld::OnEnter(SystemContext& context)
 {
     ActorBase* cameraActor = Instantiate(Vector3D<Float32>{0.0f, 0.0f, -2.5f});
     Camera*    camera      = cameraActor->AddComponent<Camera>();
@@ -8,8 +8,7 @@ void MyWorld::OnEnter()
     camera->SetViewport(GPUViewport{0.0f, 0.0f, 800.0f, 600.0f, 0.0f, 1.0f});
     camera->SetScissorRect(GPURect{0, 0, 800, 600});
 
-    App*            app    = App::GetInstance();
-    AssetSubsystem* assets = (app != nullptr) ? app->GetSubsystem<AssetSubsystem>() : nullptr;
+    AssetSubsystem* assets = context.GetAppSubsystem<AssetSubsystem>();
     if (assets == nullptr)
     {
         LOG_ERROR("에셋 서브시스템을 가져오지 못했습니다.");

@@ -11,7 +11,7 @@
 
 #include "garage/core/allocator.hpp"
 #include "garage/core/defines.hpp"
-#include "garage/core/engine.hpp"
+#include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 #include "garage/core/types.hpp"
 
@@ -24,7 +24,7 @@
 
 namespace Garage
 {
-    ESystemStatus DisplaySubsystem::OnStartup()
+    ESystemStatus DisplaySubsystem::OnStartup(SystemContext& context)
     {
         if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
         {
@@ -32,23 +32,23 @@ namespace Garage
             return ESystemStatus::FAILURE;
         }
 
+        eventSubsystem = context.GetEngineSubsystem<EventSubsystem>();
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus DisplaySubsystem::OnPreTick()
+    ESystemStatus DisplaySubsystem::OnPreTick([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus DisplaySubsystem::OnTick()
+    ESystemStatus DisplaySubsystem::OnTick([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus DisplaySubsystem::OnPostTick()
+    ESystemStatus DisplaySubsystem::OnPostTick(SystemContext& context)
     {
-        Engine*         engine         = Engine::GetInstance();
-        EventSubsystem* eventSubsystem = (engine != nullptr) ? engine->GetSubsystem<EventSubsystem>() : nullptr;
+        eventSubsystem = context.GetEngineSubsystem<EventSubsystem>();
 
         for (const Allocator::UniquePtr<IDisplay>& display : displays)
         {
@@ -72,9 +72,10 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    void DisplaySubsystem::OnShutdown()
+    void DisplaySubsystem::OnShutdown([[maybe_unused]] SystemContext& context)
     {
         displays.clear();
+        eventSubsystem = nullptr;
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
 
@@ -116,13 +117,9 @@ namespace Garage
         IDisplay* pointer    = newDisplay.get();
         displays.push_back(std::move(newDisplay));
 
-        Engine* engine = Engine::GetInstance();
-        if (engine != nullptr)
+        if (eventSubsystem != nullptr)
         {
-            if (EventSubsystem* eventSubsystem = engine->GetSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
-            {
-                eventSubsystem->PushEvent(DisplayCreateEvent{pointer});
-            }
+            eventSubsystem->PushEvent(DisplayCreateEvent{pointer});
         }
 
         return pointer;
@@ -132,13 +129,9 @@ namespace Garage
     {
         ASSERT(display != nullptr);
 
-        Engine* engine = Engine::GetInstance();
-        if (engine != nullptr)
+        if (eventSubsystem != nullptr)
         {
-            if (EventSubsystem* eventSubsystem = engine->GetSubsystem<EventSubsystem>(); eventSubsystem != nullptr)
-            {
-                eventSubsystem->DispatchEvent(DisplayDestroyEvent{display});
-            }
+            eventSubsystem->DispatchEvent(DisplayDestroyEvent{display});
         }
 
         std::erase_if(displays,

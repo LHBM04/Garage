@@ -22,7 +22,7 @@
 
 namespace Garage
 {
-    void ImageView::OnPostRender(IGPUCommandBuffer& commandBuffer)
+    void ImageView::OnPostRender([[maybe_unused]] SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
         if (texture == nullptr || material == nullptr)
         {

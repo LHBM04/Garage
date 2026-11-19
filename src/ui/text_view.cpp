@@ -101,7 +101,7 @@ namespace Garage
         return FOUND->second;
     }
 
-    void TextView::OnPostRender(IGPUCommandBuffer& commandBuffer)
+    void TextView::OnPostRender([[maybe_unused]] SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
         if (texture == nullptr || font == nullptr || material == nullptr || text.empty())
         {

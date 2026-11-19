@@ -6,7 +6,7 @@
 
 #include "garage/actors/actor.hpp"
 
-#include "garage/core/engine.hpp"
+#include "garage/core/system_context.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -42,15 +42,14 @@ namespace Garage
         isPlaying = false;
     }
 
-    void BillboardRenderer::OnUpdate()
+    void BillboardRenderer::OnUpdate(SystemContext& context)
     {
         if (!isPlaying || duration <= 0.0f)
         {
             return;
         }
 
-        const Engine*        engine        = Engine::GetInstance();
-        const TimeSubsystem* timeSubsystem = (engine != nullptr) ? engine->GetSubsystem<TimeSubsystem>() : nullptr;
+        const TimeSubsystem* timeSubsystem = context.GetEngineSubsystem<TimeSubsystem>();
         const Float32        DELTA_TIME = (timeSubsystem != nullptr) ? timeSubsystem->GetDeltaTime() : (1.0f / 60.0f);
 
         elapsedTime += DELTA_TIME;
@@ -89,7 +88,7 @@ namespace Garage
         }
     }
 
-    void BillboardRenderer::OnRender(IGPUCommandBuffer& commandBuffer)
+    void BillboardRenderer::OnRender([[maybe_unused]] SystemContext& context, IGPUCommandBuffer& commandBuffer)
     {
         const IGPUGraphicsPipelineState* pipelineState = GetPipelineState();
         const IGPUTexture2D*             gpuTexture    = (texture != nullptr) ? texture->GetTexture() : nullptr;

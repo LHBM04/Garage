@@ -10,7 +10,7 @@ class CubeController final : public ComponentBase
     using ComponentBase::ComponentBase;
 
 public:
-    void OnUpdate() override;
+    void OnUpdate(SystemContext& context) override;
 };
 
 #endif // CUBE_CONTROLLER_HPP

@@ -10,7 +10,7 @@ class MyEngine final : public Engine
     using Engine::Engine;
 
 public:
-    [[nodiscard]] ESystemStatus Startup() override;
+    [[nodiscard]] ESystemStatus Startup(SystemContext& context) override;
 
 private:
     DisplaySubsystem* displays  = nullptr;

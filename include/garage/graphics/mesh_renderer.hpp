@@ -9,6 +9,7 @@ namespace Garage
 {
     class IGPUCommandBuffer;
     class MeshAsset;
+    class SystemContext;
 
     class GARAGE_API MeshRenderer final : public RendererBase
     {
@@ -16,7 +17,7 @@ namespace Garage
         using RendererBase::RendererBase;
         ~MeshRenderer() noexcept override = default;
 
-        void OnRender(IGPUCommandBuffer& commandBuffer) override;
+        void OnRender(SystemContext& context, IGPUCommandBuffer& commandBuffer) override;
 
         [[nodiscard]] const MeshAsset* GetMesh() const noexcept;
         void                           SetMesh(const MeshAsset* value) noexcept;

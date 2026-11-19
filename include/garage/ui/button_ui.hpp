@@ -12,6 +12,7 @@ namespace Garage
     class IGPUCommandBuffer;
     class MaterialAsset;
 #endif
+    class SystemContext;
 
     class GARAGE_API ButtonUI final : public ComponentBase
     {
@@ -19,10 +20,10 @@ namespace Garage
         using ComponentBase::ComponentBase;
         ~ButtonUI() noexcept override = default;
 
-        void OnUpdate() override;
+        void OnUpdate(SystemContext& context) override;
         void OnDisable() override;
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-        void OnPostRender(IGPUCommandBuffer& commandBuffer) override;
+        void OnPostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer) override;
 
         [[nodiscard]] const MaterialAsset* GetDebugMaterial() const noexcept;
         void                               SetDebugMaterial(const MaterialAsset* value) noexcept;
