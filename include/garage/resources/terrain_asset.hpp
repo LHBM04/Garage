@@ -5,8 +5,8 @@
 #include <span>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "../math/vector2d.hpp"
@@ -67,7 +67,7 @@ namespace Garage
         Float32                   cellSize    = 4.0f;
         Float32                   heightScale = 120.0f;
         Vector2D<Float32>         uvTiling{1.0f, 1.0f};
-        std::pmr::vector<Float32> normalizedHeights{Allocator::GetMemoryResource()};
+        std::pmr::vector<Float32> normalizedHeights{Memory::GetMemoryResource()};
         IGPUMesh*                 gpuMesh = nullptr;
     };
 

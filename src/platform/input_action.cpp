@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/math/mathf.hpp"
@@ -16,7 +16,7 @@
 namespace Garage
 {
     InputAction::InputAction(std::string_view name) noexcept
-        : name(name, Allocator::GetMemoryResource())
+        : name(name, Memory::GetMemoryResource())
     {
     }
 

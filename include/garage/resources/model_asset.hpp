@@ -7,8 +7,8 @@
 #include <utility>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "../math/quaternion.hpp"
@@ -24,7 +24,7 @@ namespace Garage
     struct GARAGE_API Submodel final
     {
         Int32            parentIndex = -1;
-        std::pmr::string name{Allocator::GetMemoryResource()};
+        std::pmr::string name{Memory::GetMemoryResource()};
 
         Vector3D<Float32>   localPosition{0.0f, 0.0f, 0.0f};
         Quaternion<Float32> localRotation{0.0f, 0.0f, 0.0f, 1.0f};
@@ -42,7 +42,7 @@ namespace Garage
         [[nodiscard]] std::span<const Submodel> GetSubmodels() const noexcept;
 
     private:
-        std::pmr::vector<Submodel> submodels{Allocator::GetMemoryResource()};
+        std::pmr::vector<Submodel> submodels{Memory::GetMemoryResource()};
     };
 
     inline ModelAsset::ModelAsset(std::filesystem::path path, std::pmr::vector<Submodel>&& submodels) noexcept

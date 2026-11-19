@@ -5,8 +5,8 @@
 #include <filesystem>
 #include <string>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "asset.hpp"
@@ -45,7 +45,7 @@ namespace Garage
     public:
         using AssetImporter<>::AssetImporter;
 
-        [[nodiscard]] virtual Result<Allocator::UniquePtr<TAsset>, std::pmr::string>
+        [[nodiscard]] virtual Result<UniquePtr<TAsset>, std::pmr::string>
                 Import(const std::filesystem::path& path) const = 0;
     };
 

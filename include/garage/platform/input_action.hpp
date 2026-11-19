@@ -7,8 +7,8 @@
 #include <type_traits>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "../math/vector2d.hpp"
@@ -86,8 +86,8 @@ namespace Garage
         [[nodiscard]] ActionCallback& OnCanceled() noexcept;
 
     private:
-        std::pmr::string          name{Allocator::GetMemoryResource()};
-        std::pmr::vector<Binding> bindings{Allocator::GetMemoryResource()};
+        std::pmr::string          name{Memory::GetMemoryResource()};
+        std::pmr::vector<Binding> bindings{Memory::GetMemoryResource()};
         Vector2DFloat             currentValue = {};
         bool                      isActive     = false;
 

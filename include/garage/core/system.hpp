@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include "allocator.hpp"
+#include "memory.hpp"
 #include "subsystem.hpp"
 #include "system_status.hpp"
 #include "types.hpp"
@@ -26,7 +26,7 @@ namespace Garage
     public:
         using SubsystemPtr      = TSubsystem*;
         using ConstSubsystemPtr = const TSubsystem*;
-        using SubsystemOwner    = Allocator::UniquePtr<TSubsystem>;
+        using SubsystemOwner    = UniquePtr<TSubsystem>;
         using SubsystemList     = std::pmr::vector<SubsystemOwner>;
         using SubsystemMap      = std::pmr::unordered_map<std::type_index, SubsystemPtr>;
         using SubsystemDelegate = Delegate<SubsystemPtr>;
@@ -81,10 +81,10 @@ namespace Garage
         ListenerId OnSubsystemRemoved(TObject* object, SubsystemMethod<TResult, TObject> method);
 
     private:
-        SubsystemList subsystems{Allocator::GetMemoryResource()};
-        SubsystemMap  subsystemsByType{Allocator::GetMemoryResource()};
-        DelegateMap   onSubsystemAdded{Allocator::GetMemoryResource()};
-        DelegateMap   onSubsystemRemoved{Allocator::GetMemoryResource()};
+        SubsystemList subsystems{Memory::GetMemoryResource()};
+        SubsystemMap  subsystemsByType{Memory::GetMemoryResource()};
+        DelegateMap   onSubsystemAdded{Memory::GetMemoryResource()};
+        DelegateMap   onSubsystemRemoved{Memory::GetMemoryResource()};
     };
 
     template <std::derived_from<SubsystemBase> TSubsystem>
@@ -148,7 +148,7 @@ namespace Garage
             return static_cast<TResult*>(RESULT->second);
         }
 
-        auto  subsystem = Allocator::MakeUnique<TResult>();
+        auto  subsystem = MakeUnique<TResult>();
         auto* pointer   = subsystem.get();
         subsystems.push_back(std::move(subsystem));
         subsystemsByType.emplace(TYPE, pointer);

@@ -7,7 +7,7 @@
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_video.h>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -128,15 +128,15 @@ namespace Garage
 
         if (backBufferTexture == nullptr)
         {
-            backBufferTexture = Allocator::MakeUnique<GPUTexture2DImpl>(device,
-                                                                        swapchainTexture,
-                                                                        width,
-                                                                        height,
-                                                                        1u,
-                                                                        1u,
-                                                                        backBufferFormat,
-                                                                        EGPUTextureType::TEXTURE_2D,
-                                                                        false);
+            backBufferTexture = MakeUnique<GPUTexture2DImpl>(device,
+                                                             swapchainTexture,
+                                                             width,
+                                                             height,
+                                                             1u,
+                                                             1u,
+                                                             backBufferFormat,
+                                                             EGPUTextureType::TEXTURE_2D,
+                                                             false);
         }
         else
         {

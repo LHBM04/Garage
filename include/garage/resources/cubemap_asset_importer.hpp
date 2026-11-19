@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <string>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "asset_importer.hpp"
@@ -21,7 +21,7 @@ namespace Garage
     public:
         explicit CubemapAssetImporter(AssetSubsystem* owner, IGPUDevice& device) noexcept;
 
-        [[nodiscard]] Result<Allocator::UniquePtr<CubemapAsset>, std::pmr::string>
+        [[nodiscard]] Result<UniquePtr<CubemapAsset>, std::pmr::string>
                 Import(const std::filesystem::path& path) const override;
 
     private:

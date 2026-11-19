@@ -6,8 +6,8 @@
 #include <string_view>
 #include <utility>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 
 namespace Garage
 {
@@ -27,12 +27,12 @@ namespace Garage
         [[nodiscard]] const std::filesystem::path& GetPath() const noexcept;
 
     private:
-        std::pmr::string      name{Allocator::GetMemoryResource()};
+        std::pmr::string      name{Memory::GetMemoryResource()};
         std::filesystem::path path = {};
     };
 
     inline AssetBase::AssetBase(std::filesystem::path path) noexcept
-        : name(path.stem().string(), Allocator::GetMemoryResource())
+        : name(path.stem().string(), Memory::GetMemoryResource())
         , path(std::move(path))
     {
     }

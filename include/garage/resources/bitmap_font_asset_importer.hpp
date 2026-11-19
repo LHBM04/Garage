@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <string>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "asset_importer.hpp"
@@ -18,7 +18,7 @@ namespace Garage
     public:
         using AssetImporter<BitmapFontAsset>::AssetImporter;
 
-        [[nodiscard]] Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>
+        [[nodiscard]] Result<UniquePtr<BitmapFontAsset>, std::pmr::string>
                 Import(const std::filesystem::path& path) const override;
     };
 } // namespace Garage

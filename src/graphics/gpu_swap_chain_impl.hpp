@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_swap_chain.hpp"
@@ -36,13 +36,13 @@ namespace Garage
         [[nodiscard]] EGPUTextureFormat GetBackBufferFormat() const noexcept override;
 
     private:
-        GPUDeviceImpl*                         device                     = nullptr;
-        const IDisplay*                        display                    = nullptr;
-        EGPUTextureFormat                      backBufferFormat           = EGPUTextureFormat::UNKNOWN;
-        Allocator::UniquePtr<GPUTexture2DImpl> backBufferTexture          = nullptr;
-        IGPUTexture2D*                         depthStencilTexture        = nullptr;
-        GPUTarget                              currentBackBufferTarget    = {};
-        bool                                   hasCurrentBackBufferTarget = false;
+        GPUDeviceImpl*              device                     = nullptr;
+        const IDisplay*             display                    = nullptr;
+        EGPUTextureFormat           backBufferFormat           = EGPUTextureFormat::UNKNOWN;
+        UniquePtr<GPUTexture2DImpl> backBufferTexture          = nullptr;
+        IGPUTexture2D*              depthStencilTexture        = nullptr;
+        GPUTarget                   currentBackBufferTarget    = {};
+        bool                        hasCurrentBackBufferTarget = false;
     };
 
     inline const GPUTarget* GPUSwapChainImpl::GetCurrentBackBufferTarget() const noexcept

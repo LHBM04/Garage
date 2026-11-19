@@ -5,9 +5,9 @@
 #include <ranges>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
 #include "../core/engine_subsystem.hpp"
+#include "../core/memory.hpp"
 #include "../core/system_status.hpp"
 #include "../core/types.hpp"
 
@@ -48,8 +48,8 @@ namespace Garage
         [[nodiscard]] bool IsDisplayValid(IDisplay::EId id) const noexcept;
 
     private:
-        EventSubsystem*                                  eventSubsystem = nullptr;
-        std::pmr::vector<Allocator::UniquePtr<IDisplay>> displays{Allocator::GetMemoryResource()};
+        EventSubsystem*                       eventSubsystem = nullptr;
+        std::pmr::vector<UniquePtr<IDisplay>> displays{Memory::GetMemoryResource()};
     };
 
     inline DisplaySubsystem::DisplaySubsystem() noexcept
@@ -61,7 +61,7 @@ namespace Garage
     {
         return displays |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<IDisplay>& displayPtr) noexcept -> IDisplay*
+                        [](const UniquePtr<IDisplay>& displayPtr) noexcept -> IDisplay*
                         {
                             return displayPtr.get();
                         });
@@ -71,7 +71,7 @@ namespace Garage
     {
         return displays |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<IDisplay>& displayPtr) noexcept -> const IDisplay*
+                        [](const UniquePtr<IDisplay>& displayPtr) noexcept -> const IDisplay*
                         {
                             return displayPtr.get();
                         });

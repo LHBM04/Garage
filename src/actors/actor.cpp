@@ -9,8 +9,8 @@
 #include "garage/actors/component.hpp"
 #include "garage/actors/world.hpp"
 
-#include "garage/core/allocator.hpp"
 #include "garage/core/defines.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 namespace Garage
@@ -115,7 +115,7 @@ namespace Garage
     void ActorBase::DestroyComponents()
     {
         const auto DESTROYED_COUNT = std::ranges::count_if(components,
-                                                           [](const Allocator::UniquePtr<ComponentBase>& component)
+                                                           [](const UniquePtr<ComponentBase>& component)
                                                            {
                                                                return component->IsDestroyed();
                                                            });
@@ -124,7 +124,7 @@ namespace Garage
             return;
         }
 
-        std::pmr::vector<Allocator::UniquePtr<ComponentBase>> destroyed{Allocator::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<ComponentBase>> destroyed{Memory::GetMemoryResource()};
         destroyed.reserve(static_cast<USize>(DESTROYED_COUNT));
         std::erase_if(componentsByType,
                       [](const auto& entry)
@@ -150,12 +150,12 @@ namespace Garage
         }
         components.resize(remainingCount);
 
-        for (const Allocator::UniquePtr<ComponentBase>& component : components)
+        for (const UniquePtr<ComponentBase>& component : components)
         {
             componentsByType[std::type_index(typeid(*component))] = component.get();
         }
 
-        for (const Allocator::UniquePtr<ComponentBase>& component : destroyed)
+        for (const UniquePtr<ComponentBase>& component : destroyed)
         {
             if (component->IsEnabled())
             {
@@ -173,11 +173,10 @@ namespace Garage
         }
 
         componentsByType.clear();
-        std::pmr::vector<Allocator::UniquePtr<ComponentBase>> removing(std::move(components),
-                                                                       Allocator::GetMemoryResource());
+        std::pmr::vector<UniquePtr<ComponentBase>> removing(std::move(components), Memory::GetMemoryResource());
         components.clear();
 
-        for (const Allocator::UniquePtr<ComponentBase>& component : removing | std::views::reverse)
+        for (const UniquePtr<ComponentBase>& component : removing | std::views::reverse)
         {
             const bool WAS_ENABLED = component->IsEnabled();
             component->Destroy();

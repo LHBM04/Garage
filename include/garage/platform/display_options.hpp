@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "../math/vector2d.hpp"
@@ -13,7 +13,7 @@ namespace Garage
 {
     struct GARAGE_API DisplayOptions final
     {
-        std::pmr::string title{"Garage", Allocator::GetMemoryResource()};
+        std::pmr::string title{"Garage", Memory::GetMemoryResource()};
         Vector2DInt      position{0, 0};
         Vector2DInt      size{1280, 720};
         UInt64           flags    = 0;

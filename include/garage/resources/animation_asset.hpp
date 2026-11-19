@@ -8,8 +8,8 @@
 #include <utility>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "asset.hpp"
@@ -26,8 +26,8 @@ namespace Garage
 
     struct GARAGE_API AnimationTransform final
     {
-        std::pmr::string                 path{Allocator::GetMemoryResource()};
-        std::pmr::vector<AnimationFrame> frames{Allocator::GetMemoryResource()};
+        std::pmr::string                 path{Memory::GetMemoryResource()};
+        std::pmr::vector<AnimationFrame> frames{Memory::GetMemoryResource()};
     };
 
     class GARAGE_API AnimationAsset final : public AssetBase
@@ -45,10 +45,10 @@ namespace Garage
         [[nodiscard]] std::span<const AnimationTransform> GetTransforms() const noexcept;
 
     private:
-        std::pmr::string                     name{Allocator::GetMemoryResource()};
+        std::pmr::string                     name{Memory::GetMemoryResource()};
         Float32                              length    = 0.0f;
         Float32                              frameRate = 0.0f;
-        std::pmr::vector<AnimationTransform> transforms{Allocator::GetMemoryResource()};
+        std::pmr::vector<AnimationTransform> transforms{Memory::GetMemoryResource()};
     };
 
     inline AnimationAsset::AnimationAsset(std::filesystem::path                  path,

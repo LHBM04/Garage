@@ -11,7 +11,7 @@
 
 #include <rapidjson/document.h>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 namespace Garage::JsonUtility
@@ -44,7 +44,7 @@ namespace Garage::JsonUtility
         std::ifstream file(path, std::ios::binary | std::ios::ate);
         if (!file.is_open())
         {
-            std::pmr::string error = Allocator::MakeString("리소스를 열 수 없습니다: ");
+            std::pmr::string error = Memory::MakeString("리소스를 열 수 없습니다: ");
             error.append(path.generic_string());
             return Result<rapidjson::Document, std::pmr::string>::Err(std::move(error));
         }
@@ -52,16 +52,16 @@ namespace Garage::JsonUtility
         const std::streamsize FILE_SIZE = file.tellg();
         if (FILE_SIZE <= 0 || static_cast<USize>(FILE_SIZE) > MAX_FILE_SIZE)
         {
-            std::pmr::string error = Allocator::MakeString("JSON 파일 크기가 유효하지 않습니다: ");
+            std::pmr::string error = Memory::MakeString("JSON 파일 크기가 유효하지 않습니다: ");
             error.append(path.generic_string());
             return Result<rapidjson::Document, std::pmr::string>::Err(std::move(error));
         }
 
         file.seekg(0, std::ios::beg);
-        std::pmr::string jsonText(static_cast<USize>(FILE_SIZE), '\0', Allocator::GetMemoryResource());
+        std::pmr::string jsonText(static_cast<USize>(FILE_SIZE), '\0', Memory::GetMemoryResource());
         if (!file.read(jsonText.data(), FILE_SIZE))
         {
-            std::pmr::string error = Allocator::MakeString("JSON 파일을 읽지 못했습니다: ");
+            std::pmr::string error = Memory::MakeString("JSON 파일을 읽지 못했습니다: ");
             error.append(path.generic_string());
             return Result<rapidjson::Document, std::pmr::string>::Err(std::move(error));
         }
@@ -79,7 +79,7 @@ namespace Garage::JsonUtility
         document.Parse(parseBegin, parseLength);
         if (document.HasParseError() || !document.IsObject())
         {
-            std::pmr::string error = Allocator::MakeString("JSON 구문 분석에 실패했습니다: ");
+            std::pmr::string error = Memory::MakeString("JSON 구문 분석에 실패했습니다: ");
             error.append(path.generic_string());
             return Result<rapidjson::Document, std::pmr::string>::Err(std::move(error));
         }

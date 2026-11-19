@@ -8,7 +8,7 @@
 
 #include <SDL3/SDL_gpu.h>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
@@ -93,18 +93,17 @@ namespace Garage
         [[nodiscard]] SDL_GPUTexture* GetFallbackTexture() const noexcept;
 
     private:
-        SDL_GPUDevice*                                               device          = nullptr;
-        SDL_GPUSampler*                                              defaultSampler  = nullptr;
-        SDL_GPUTexture*                                              fallbackTexture = nullptr;
-        std::pmr::vector<Allocator::UniquePtr<GPUBufferImpl>>        buffers{Allocator::GetMemoryResource()};
-        std::pmr::vector<Allocator::UniquePtr<GPUShaderImpl>>        shaders{Allocator::GetMemoryResource()};
-        std::pmr::vector<Allocator::UniquePtr<GPUTexture2DImpl>>     textures{Allocator::GetMemoryResource()};
-        std::pmr::vector<Allocator::UniquePtr<GPUCommandBufferImpl>> commandBuffers{Allocator::GetMemoryResource()};
-        std::pmr::vector<Allocator::UniquePtr<GPUFenceImpl>>         fences{Allocator::GetMemoryResource()};
-        std::pmr::vector<Allocator::UniquePtr<GPUSwapChainImpl>>     swapChains{Allocator::GetMemoryResource()};
-        std::pmr::vector<Allocator::UniquePtr<GPUGraphicsPipelineStateImpl>> pipelineStates{
-                Allocator::GetMemoryResource()};
-        std::pmr::vector<Allocator::UniquePtr<GPUMeshImpl>> meshes{Allocator::GetMemoryResource()};
+        SDL_GPUDevice*                                            device          = nullptr;
+        SDL_GPUSampler*                                           defaultSampler  = nullptr;
+        SDL_GPUTexture*                                           fallbackTexture = nullptr;
+        std::pmr::vector<UniquePtr<GPUBufferImpl>>                buffers{Memory::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<GPUShaderImpl>>                shaders{Memory::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<GPUTexture2DImpl>>             textures{Memory::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<GPUCommandBufferImpl>>         commandBuffers{Memory::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<GPUFenceImpl>>                 fences{Memory::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<GPUSwapChainImpl>>             swapChains{Memory::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<GPUGraphicsPipelineStateImpl>> pipelineStates{Memory::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<GPUMeshImpl>>                  meshes{Memory::GetMemoryResource()};
     };
 
     inline SDL_GPUDevice* GPUDeviceImpl::GetSDLDevice() const noexcept

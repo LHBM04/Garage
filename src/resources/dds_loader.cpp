@@ -13,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
@@ -379,7 +379,7 @@ namespace Garage::ResourcesDetail
     Result<IGPUTexture2D*, std::pmr::string>
             LoadDDSTexture(const std::filesystem::path& path, bool expectCubemap, IGPUDevice& device)
     {
-        std::pmr::string extension(path.extension().string(), Allocator::GetMemoryResource());
+        std::pmr::string extension(path.extension().string(), Memory::GetMemoryResource());
         for (char& character : extension)
         {
             character = static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
@@ -387,7 +387,7 @@ namespace Garage::ResourcesDetail
 
         if (extension != ".dds")
         {
-            std::pmr::string error = Allocator::MakeString("지원하지 않는 이미지 파일 확장자입니다: ");
+            std::pmr::string error = Memory::MakeString("지원하지 않는 이미지 파일 확장자입니다: ");
             error.append(extension);
             return Result<IGPUTexture2D*, std::pmr::string>::Err(std::move(error));
         }
@@ -395,7 +395,7 @@ namespace Garage::ResourcesDetail
         std::ifstream file(path, std::ios::binary | std::ios::ate);
         if (!file.is_open())
         {
-            std::pmr::string error = Allocator::MakeString("이미지 파일을 열 수 없습니다: ");
+            std::pmr::string error = Memory::MakeString("이미지 파일을 열 수 없습니다: ");
             error.append(path.generic_string());
             return Result<IGPUTexture2D*, std::pmr::string>::Err(std::move(error));
         }
@@ -404,16 +404,16 @@ namespace Garage::ResourcesDetail
         constexpr USize       MIN_SIZE  = sizeof(UInt32) + sizeof(DDSHeader);
         if (FILE_SIZE < static_cast<std::streamsize>(MIN_SIZE))
         {
-            std::pmr::string error = Allocator::MakeString("DDS 헤더 크기가 유효하지 않습니다: ");
+            std::pmr::string error = Memory::MakeString("DDS 헤더 크기가 유효하지 않습니다: ");
             error.append(path.generic_string());
             return Result<IGPUTexture2D*, std::pmr::string>::Err(std::move(error));
         }
 
         file.seekg(0, std::ios::beg);
-        std::pmr::vector<Byte> fileBytes(static_cast<USize>(FILE_SIZE), Allocator::GetMemoryResource());
+        std::pmr::vector<Byte> fileBytes(static_cast<USize>(FILE_SIZE), Memory::GetMemoryResource());
         if (!file.read(reinterpret_cast<char*>(fileBytes.data()), FILE_SIZE))
         {
-            std::pmr::string error = Allocator::MakeString("이미지 파일 읽기에 실패했습니다: ");
+            std::pmr::string error = Memory::MakeString("이미지 파일 읽기에 실패했습니다: ");
             error.append(path.generic_string());
             return Result<IGPUTexture2D*, std::pmr::string>::Err(std::move(error));
         }
@@ -422,8 +422,7 @@ namespace Garage::ResourcesDetail
         std::memcpy(&magic, fileBytes.data(), sizeof(magic));
         if (magic != DDS_MAGIC)
         {
-            return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                    Allocator::MakeString("유효한 DDS 시그니처가 아닙니다."));
+            return Result<IGPUTexture2D*, std::pmr::string>::Err(Memory::MakeString("유효한 DDS 시그니처가 아닙니다."));
         }
 
         DDSHeader header{};
@@ -432,7 +431,7 @@ namespace Garage::ResourcesDetail
             header.height == 0u)
         {
             return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                    Allocator::MakeString("DDS 헤더 정보가 유효하지 않습니다."));
+                    Memory::MakeString("DDS 헤더 정보가 유효하지 않습니다."));
         }
 
         USize             dataOffset     = MIN_SIZE;
@@ -447,7 +446,7 @@ namespace Garage::ResourcesDetail
             if (fileBytes.size() < dataOffset + sizeof(DDSHeaderDXT10))
             {
                 return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                        Allocator::MakeString("DDS DX10 확장 헤더가 손상되었습니다."));
+                        Memory::MakeString("DDS DX10 확장 헤더가 손상되었습니다."));
             }
 
             DDSHeaderDXT10 dx10{};
@@ -457,7 +456,7 @@ namespace Garage::ResourcesDetail
             if (dx10.resourceDimension != DDS_RESOURCE_DIMENSION_TEXTURE2D || dx10.arraySize == 0u)
             {
                 return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                        Allocator::MakeString("DDS 파일에 2D 텍스처 리소스가 필요합니다."));
+                        Memory::MakeString("DDS 파일에 2D 텍스처 리소스가 필요합니다."));
             }
 
             isCubemap  = (dx10.miscFlag & DDS_RESOURCE_MISC_TEXTURECUBE) != 0u;
@@ -465,7 +464,7 @@ namespace Garage::ResourcesDetail
             if (!MapDXGIFormat(dx10.dxgiFormat, resolvedFormat))
             {
                 return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                        Allocator::MakeString("지원하지 않는 DXGI 텍스처 포맷입니다."));
+                        Memory::MakeString("지원하지 않는 DXGI 텍스처 포맷입니다."));
             }
         }
         else
@@ -473,7 +472,7 @@ namespace Garage::ResourcesDetail
             if ((header.caps2 & DDS_CAPS2_VOLUME) != 0u || ((header.flags & DDS_FLAG_DEPTH) != 0u && header.depth > 1u))
             {
                 return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                        Allocator::MakeString("볼륨 텍스처 DDS는 지원하지 않습니다."));
+                        Memory::MakeString("볼륨 텍스처 DDS는 지원하지 않습니다."));
             }
 
             isCubemap = (header.caps2 & DDS_CAPS2_CUBEMAP) != 0u;
@@ -482,7 +481,7 @@ namespace Garage::ResourcesDetail
                 if ((header.caps2 & DDS_CAPS2_CUBEMAP_ALLFACE) != DDS_CAPS2_CUBEMAP_ALLFACE)
                 {
                     return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                            Allocator::MakeString("큐브맵 DDS에 6개 면이 모두 포함되어야 합니다."));
+                            Memory::MakeString("큐브맵 DDS에 6개 면이 모두 포함되어야 합니다."));
                 }
                 layerCount = 6u;
             }
@@ -490,7 +489,7 @@ namespace Garage::ResourcesDetail
             if (!ResolveLegacyFormat(header.pixelFormat, resolvedFormat))
             {
                 return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                        Allocator::MakeString("지원하지 않는 DDS 픽셀 포맷입니다."));
+                        Memory::MakeString("지원하지 않는 DDS 픽셀 포맷입니다."));
             }
         }
 
@@ -499,7 +498,7 @@ namespace Garage::ResourcesDetail
             if (!isCubemap || layerCount != 6u || header.width != header.height)
             {
                 return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                        Allocator::MakeString("DDS 파일에 단일 큐브맵이 필요합니다."));
+                        Memory::MakeString("DDS 파일에 단일 큐브맵이 필요합니다."));
             }
         }
         else
@@ -507,7 +506,7 @@ namespace Garage::ResourcesDetail
             if (isCubemap || layerCount != 1u)
             {
                 return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                        Allocator::MakeString("DDS 파일에 일반 2D 텍스처가 필요합니다."));
+                        Memory::MakeString("DDS 파일에 일반 2D 텍스처가 필요합니다."));
             }
         }
 
@@ -530,11 +529,11 @@ namespace Garage::ResourcesDetail
         if (fileBytes.size() - dataOffset < expectedSourceBytes || totalDestBytes > std::numeric_limits<USize>::max())
         {
             return Result<IGPUTexture2D*, std::pmr::string>::Err(
-                    Allocator::MakeString("DDS 서브리소스 데이터가 헤더 크기보다 작습니다."));
+                    Memory::MakeString("DDS 서브리소스 데이터가 헤더 크기보다 작습니다."));
         }
 
-        std::pmr::vector<Byte>                      pixelStorage(Allocator::GetMemoryResource());
-        std::pmr::vector<GPUTextureSubresourceData> subresources(Allocator::GetMemoryResource());
+        std::pmr::vector<Byte>                      pixelStorage(Memory::GetMemoryResource());
+        std::pmr::vector<GPUTextureSubresourceData> subresources(Memory::GetMemoryResource());
         subresources.reserve(static_cast<USize>(layerCount) * MIP_LEVELS);
 
         const bool NEEDS_CONVERSION = resolvedFormat.conversion != ESourcePixelConversion::NONE;

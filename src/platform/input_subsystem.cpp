@@ -9,8 +9,8 @@
 #include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_scancode.h>
 
-#include "garage/core/allocator.hpp"
 #include "garage/core/defines.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 #include "garage/core/types.hpp"
@@ -242,11 +242,11 @@ namespace Garage
 
     InputAction* InputSubsystem::AddAction(std::string_view name)
     {
-        const std::pmr::string KEY(name, Allocator::GetMemoryResource());
+        const std::pmr::string KEY(name, Memory::GetMemoryResource());
         auto [it, inserted] = actions.try_emplace(KEY, nullptr);
         if (inserted)
         {
-            it->second = Allocator::MakeUnique<InputAction>(KEY);
+            it->second = MakeUnique<InputAction>(KEY);
         }
 
         return it->second.get();
@@ -254,7 +254,7 @@ namespace Garage
 
     void InputSubsystem::RemoveAction(std::string_view name) noexcept
     {
-        const auto IT = actions.find(std::pmr::string(name, Allocator::GetMemoryResource()));
+        const auto IT = actions.find(std::pmr::string(name, Memory::GetMemoryResource()));
         if (IT != actions.end())
         {
             IT->second->Reset();
@@ -264,13 +264,13 @@ namespace Garage
 
     InputAction* InputSubsystem::GetAction(std::string_view name) noexcept
     {
-        const auto IT = actions.find(std::pmr::string(name, Allocator::GetMemoryResource()));
+        const auto IT = actions.find(std::pmr::string(name, Memory::GetMemoryResource()));
         return IT != actions.end() ? IT->second.get() : nullptr;
     }
 
     const InputAction* InputSubsystem::GetAction(std::string_view name) const noexcept
     {
-        const auto IT = actions.find(std::pmr::string(name, Allocator::GetMemoryResource()));
+        const auto IT = actions.find(std::pmr::string(name, Memory::GetMemoryResource()));
         return IT != actions.end() ? IT->second.get() : nullptr;
     }
 

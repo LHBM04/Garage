@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <string>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "../graphics/gpu_target.hpp"
@@ -27,7 +27,7 @@ namespace Garage
                                        EGPUTextureFormat targetFormat = EGPUTextureFormat::R8G8B8A8_UNORM,
                                        EGPUTextureFormat depthFormat  = GPUTarget::DEPTH_FORMAT) noexcept;
 
-        [[nodiscard]] Result<Allocator::UniquePtr<MaterialAsset>, std::pmr::string>
+        [[nodiscard]] Result<UniquePtr<MaterialAsset>, std::pmr::string>
                 Import(const std::filesystem::path& path) const override;
 
     private:

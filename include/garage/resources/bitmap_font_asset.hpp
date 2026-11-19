@@ -8,8 +8,8 @@
 #include <utility>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "asset.hpp"
@@ -19,7 +19,7 @@ namespace Garage
     struct GARAGE_API FontAtlasData final
     {
         Int32            index = 0;
-        std::pmr::string texture{Allocator::GetMemoryResource()};
+        std::pmr::string texture{Memory::GetMemoryResource()};
         Int32            width  = 0;
         Int32            height = 0;
     };
@@ -81,8 +81,8 @@ namespace Garage
         void SetCharacters(std::pmr::vector<FontCharacterData>&& value) noexcept;
 
     private:
-        std::pmr::string                    name{Allocator::GetMemoryResource()};
-        std::pmr::string                    renderMode{Allocator::GetMemoryResource()};
+        std::pmr::string                    name{Memory::GetMemoryResource()};
+        std::pmr::string                    renderMode{Memory::GetMemoryResource()};
         bool                                isDistanceField = false;
         Float32                             pointSize       = 0.0f;
         Float32                             faceScale       = 0.0f;
@@ -90,8 +90,8 @@ namespace Garage
         Float32                             ascentLine      = 0.0f;
         Float32                             descentLine     = 0.0f;
         Int32                               atlasPadding    = 0;
-        std::pmr::vector<FontAtlasData>     atlasData{Allocator::GetMemoryResource()};
-        std::pmr::vector<FontCharacterData> characters{Allocator::GetMemoryResource()};
+        std::pmr::vector<FontAtlasData>     atlasData{Memory::GetMemoryResource()};
+        std::pmr::vector<FontCharacterData> characters{Memory::GetMemoryResource()};
     };
 
     inline BitmapFontAsset::BitmapFontAsset(std::filesystem::path path) noexcept

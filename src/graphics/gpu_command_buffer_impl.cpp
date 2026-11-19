@@ -13,7 +13,7 @@
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_rect.h>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_buffer.hpp"
@@ -93,7 +93,7 @@ namespace Garage
 
         EndRenderPass();
 
-        std::pmr::string errorMessage(Allocator::GetMemoryResource());
+        std::pmr::string errorMessage(Memory::GetMemoryResource());
         if (fence != nullptr)
         {
             auto*         fenceImpl = static_cast<GPUFenceImpl*>(fence);

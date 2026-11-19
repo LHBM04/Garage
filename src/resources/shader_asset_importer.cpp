@@ -15,7 +15,7 @@
 
 #include <rapidjson/document.h>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
@@ -34,7 +34,7 @@ namespace Garage
         struct ShaderMetadata final
         {
             std::optional<EGPUShaderStage>       stage = std::nullopt;
-            std::pmr::string                     entryPoint{"main", Allocator::GetMemoryResource()};
+            std::pmr::string                     entryPoint{"main", Memory::GetMemoryResource()};
             UInt32                               samplerCount        = 0u;
             UInt32                               storageTextureCount = 0u;
             UInt32                               storageBufferCount  = 0u;
@@ -47,7 +47,7 @@ namespace Garage
             EGPUCompareOp                        depthCompareOp      = EGPUCompareOp::LESS_OR_EQUAL;
             bool                                 alphaBlend          = false;
             EGPUPrimitiveTopology                primitive           = EGPUPrimitiveTopology::TRIANGLE_LIST;
-            std::pmr::vector<GPUVertexAttribute> vertexAttributes{Allocator::GetMemoryResource()};
+            std::pmr::vector<GPUVertexAttribute> vertexAttributes{Memory::GetMemoryResource()};
             UInt32                               vertexStride        = sizeof(MeshVertex);
             bool                                 hasCustomVertexDecl = false;
         };
@@ -126,7 +126,7 @@ namespace Garage
 
         [[nodiscard]] EGPUShaderFormat DetectShaderFormat(const std::filesystem::path& path)
         {
-            std::pmr::string extension(path.extension().string(), Allocator::GetMemoryResource());
+            std::pmr::string extension(path.extension().string(), Memory::GetMemoryResource());
             for (char& ch : extension)
             {
                 ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
@@ -158,7 +158,7 @@ namespace Garage
 
         [[nodiscard]] std::optional<EGPUShaderStage> InferStageFromFilename(const std::filesystem::path& path)
         {
-            const std::pmr::string STEM(path.stem().string(), Allocator::GetMemoryResource());
+            const std::pmr::string STEM(path.stem().string(), Memory::GetMemoryResource());
             const std::string_view VIEW(STEM);
 
             static constexpr std::array<std::string_view, 4> VERTEX_SUFFIXES{".vs", "_vs", ".vert", "_vert"};
@@ -442,39 +442,39 @@ namespace Garage
         }
     } // namespace
 
-    Result<Allocator::UniquePtr<ShaderAsset>, std::pmr::string>
+    Result<UniquePtr<ShaderAsset>, std::pmr::string>
             ShaderAssetImporter::Import(const std::filesystem::path& path) const
     {
         const EGPUShaderFormat FORMAT = DetectShaderFormat(path);
         if (FORMAT == EGPUShaderFormat::INVALID)
         {
-            return Result<Allocator::UniquePtr<ShaderAsset>, std::pmr::string>::Err(Allocator::MakeString(
-                    "셰이더 로더에는 .spv, .dxil, .msl, .dxbc 또는 .metallib 파일이 필요합니다."));
+            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(
+                    Memory::MakeString("셰이더 로더에는 .spv, .dxil, .msl, .dxbc 또는 .metallib 파일이 필요합니다."));
         }
 
         std::ifstream file(path, std::ios::binary | std::ios::ate);
         if (!file.is_open())
         {
-            std::pmr::string error = Allocator::MakeString("셰이더 파일을 열 수 없습니다: ");
+            std::pmr::string error = Memory::MakeString("셰이더 파일을 열 수 없습니다: ");
             error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
         }
 
         const std::streamsize FILE_SIZE = file.tellg();
         if (FILE_SIZE <= 0)
         {
-            std::pmr::string error = Allocator::MakeString("셰이더 파일이 비어 있습니다: ");
+            std::pmr::string error = Memory::MakeString("셰이더 파일이 비어 있습니다: ");
             error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
         }
 
         file.seekg(0, std::ios::beg);
-        std::pmr::vector<Byte> bytecode(static_cast<USize>(FILE_SIZE), Allocator::GetMemoryResource());
+        std::pmr::vector<Byte> bytecode(static_cast<USize>(FILE_SIZE), Memory::GetMemoryResource());
         if (!file.read(reinterpret_cast<char*>(bytecode.data()), FILE_SIZE))
         {
-            std::pmr::string error = Allocator::MakeString("셰이더 바이트코드 읽기에 실패했습니다: ");
+            std::pmr::string error = Memory::MakeString("셰이더 바이트코드 읽기에 실패했습니다: ");
             error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
         }
 
         ShaderMetadata metadata{};
@@ -487,9 +487,9 @@ namespace Garage
 
         if (!metadata.stage.has_value())
         {
-            std::pmr::string error = Allocator::MakeString("셰이더 스테이지(Vertex/Fragment)를 판별할 수 없습니다: ");
+            std::pmr::string error = Memory::MakeString("셰이더 스테이지(Vertex/Fragment)를 판별할 수 없습니다: ");
             error.append(path.generic_string());
-            return Result<Allocator::UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
         }
 
         if (*metadata.stage == EGPUShaderStage::VERTEX && !metadata.hasCustomVertexDecl)
@@ -512,11 +512,10 @@ namespace Garage
         auto shaderResult = device.CreateShader(CREATE_INFO);
         if (!shaderResult)
         {
-            return Result<Allocator::UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(shaderResult).GetError());
+            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(shaderResult).GetError());
         }
 
-        Allocator::UniquePtr<ShaderAsset> asset =
-                Allocator::MakeUnique<ShaderAsset>(path, device, shaderResult.GetValue());
+        UniquePtr<ShaderAsset> asset = MakeUnique<ShaderAsset>(path, device, shaderResult.GetValue());
         asset->SetVertexAttributes(std::move(metadata.vertexAttributes));
         asset->SetVertexStride(metadata.vertexStride);
         asset->SetCullMode(metadata.cullMode);
@@ -535,6 +534,6 @@ namespace Garage
         }
         asset->SetPrimitive(metadata.primitive);
 
-        return Result<Allocator::UniquePtr<ShaderAsset>, std::pmr::string>::Ok(std::move(asset));
+        return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Ok(std::move(asset));
     }
 } // namespace Garage

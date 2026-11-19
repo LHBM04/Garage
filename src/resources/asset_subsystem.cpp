@@ -6,7 +6,7 @@
 #include "garage/actors/world.hpp"
 #include "garage/actors/world_subsystem.hpp"
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 
@@ -28,7 +28,7 @@ namespace Garage
         const AssetBase* target = CACHED->second;
         assetsByPath.erase(CACHED);
         std::erase_if(assets,
-                      [target](const Allocator::UniquePtr<AssetBase>& asset) noexcept
+                      [target](const UniquePtr<AssetBase>& asset) noexcept
                       {
                           return asset.get() == target;
                       });

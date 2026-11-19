@@ -6,8 +6,8 @@
 #include <utility>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "../graphics/gpu_graphics_pipeline_state.hpp"
@@ -70,7 +70,7 @@ namespace Garage
     private:
         IGPUDevice*                          device = nullptr;
         IGPUShader*                          shader = nullptr;
-        std::pmr::vector<GPUVertexAttribute> vertexAttributes{Allocator::GetMemoryResource()};
+        std::pmr::vector<GPUVertexAttribute> vertexAttributes{Memory::GetMemoryResource()};
         UInt32                               vertexStride        = 0u;
         EGPUPrimitiveTopology                primitive           = EGPUPrimitiveTopology::TRIANGLE_LIST;
         EGPUFillMode                         fillMode            = EGPUFillMode::FILL;

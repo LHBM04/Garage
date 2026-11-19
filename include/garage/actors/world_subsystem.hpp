@@ -3,9 +3,9 @@
 
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/app_subsystem.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/system_status.hpp"
 #include "../core/types.hpp"
 
@@ -20,7 +20,7 @@ namespace Garage
         WorldSubsystem() noexcept;
         ~WorldSubsystem() noexcept override;
 
-        WorldBase* AddWorld(Allocator::UniquePtr<WorldBase> world);
+        WorldBase* AddWorld(UniquePtr<WorldBase> world);
         void       ExitWorld(SystemContext& context);
 
         [[nodiscard]] bool RequestWorldChange(WorldBase* targetWorld) noexcept;
@@ -46,9 +46,9 @@ namespace Garage
         void ExitCurrentWorld(SystemContext& context);
         void NotifyIfWorldExited(WorldBase* world);
 
-        std::pmr::vector<Allocator::UniquePtr<WorldBase>> worlds{Allocator::GetMemoryResource()};
-        WorldBase*                                        currentWorld = nullptr;
-        WorldBase*                                        nextWorld    = nullptr;
+        std::pmr::vector<UniquePtr<WorldBase>> worlds{Memory::GetMemoryResource()};
+        WorldBase*                             currentWorld = nullptr;
+        WorldBase*                             nextWorld    = nullptr;
 
         Delegate<WorldBase*> onEnterWorld     = {};
         Delegate<WorldBase*> onExitWorld      = {};

@@ -9,8 +9,8 @@
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_video.h>
 
-#include "garage/core/allocator.hpp"
 #include "garage/core/defines.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 #include "garage/core/types.hpp"
@@ -50,7 +50,7 @@ namespace Garage
     {
         eventSubsystem = context.GetEngineSubsystem<EventSubsystem>();
 
-        for (const Allocator::UniquePtr<IDisplay>& display : displays)
+        for (const UniquePtr<IDisplay>& display : displays)
         {
             if (display->ShouldClose() && eventSubsystem != nullptr)
             {
@@ -59,7 +59,7 @@ namespace Garage
         }
 
         const USize REMOVED = std::erase_if(displays,
-                                            [](const Allocator::UniquePtr<IDisplay>& display)
+                                            [](const UniquePtr<IDisplay>& display)
                                             {
                                                 return display->ShouldClose();
                                             });
@@ -113,7 +113,7 @@ namespace Garage
             return nullptr;
         }
 
-        auto      newDisplay = Allocator::MakeUnique<DisplayImpl>(sdlWindow);
+        auto      newDisplay = MakeUnique<DisplayImpl>(sdlWindow);
         IDisplay* pointer    = newDisplay.get();
         displays.push_back(std::move(newDisplay));
 
@@ -135,7 +135,7 @@ namespace Garage
         }
 
         std::erase_if(displays,
-                      [display](const Allocator::UniquePtr<IDisplay>& item)
+                      [display](const UniquePtr<IDisplay>& item)
                       {
                           return item.get() == display;
                       });

@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <string>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 namespace Garage

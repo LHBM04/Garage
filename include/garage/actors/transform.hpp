@@ -4,8 +4,8 @@
 #include <span>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 
 #include "../math/matrix4x4.hpp"
 #include "../math/quaternion.hpp"
@@ -62,7 +62,7 @@ namespace Garage
         Vector3D<Float32>   localScale    = Vector3D<Float32>::GetOne();
 
         Transform*                   parent = nullptr;
-        std::pmr::vector<Transform*> children{Allocator::GetMemoryResource()};
+        std::pmr::vector<Transform*> children{Memory::GetMemoryResource()};
 
         Matrix4x4<Float32> cachedWorldMatrix = Matrix4x4<Float32>::GetIdentity();
     };

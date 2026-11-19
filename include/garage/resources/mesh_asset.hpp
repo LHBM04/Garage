@@ -6,8 +6,8 @@
 #include <utility>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "../graphics/mesh_vertex.hpp"
@@ -59,12 +59,12 @@ namespace Garage
         IGPUDevice*                          device = nullptr;
         Vector3D<Float32>                    boundsCenter{};
         Vector3D<Float32>                    boundsExtents{};
-        std::pmr::vector<Vector3D<Float32>>  positions{Allocator::GetMemoryResource()};
-        std::pmr::vector<ColorRGBA<Float32>> colors{Allocator::GetMemoryResource()};
-        std::pmr::vector<Vector3D<Float32>>  normals{Allocator::GetMemoryResource()};
-        std::pmr::vector<Vector2D<Float32>>  textureCoords{Allocator::GetMemoryResource()};
-        std::pmr::vector<MeshVertex>         vertices{Allocator::GetMemoryResource()};
-        std::pmr::vector<UInt32>             indices{Allocator::GetMemoryResource()};
+        std::pmr::vector<Vector3D<Float32>>  positions{Memory::GetMemoryResource()};
+        std::pmr::vector<ColorRGBA<Float32>> colors{Memory::GetMemoryResource()};
+        std::pmr::vector<Vector3D<Float32>>  normals{Memory::GetMemoryResource()};
+        std::pmr::vector<Vector2D<Float32>>  textureCoords{Memory::GetMemoryResource()};
+        std::pmr::vector<MeshVertex>         vertices{Memory::GetMemoryResource()};
+        std::pmr::vector<UInt32>             indices{Memory::GetMemoryResource()};
         IGPUMesh*                            gpuMesh = nullptr;
     };
 

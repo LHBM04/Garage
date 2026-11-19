@@ -8,8 +8,8 @@
 
 #include "../actors/component.hpp"
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 #include "../math/color_rgba.hpp"
@@ -65,11 +65,11 @@ namespace Garage
         const BitmapFontAsset* font     = nullptr;
         const MaterialAsset*   material = nullptr;
 
-        std::pmr::string                                          text{"New Text!", Allocator::GetMemoryResource()};
+        std::pmr::string                                          text{"New Text!", Memory::GetMemoryResource()};
         Float32                                                   fontSize            = 32.0f;
         ETextHorizontalAlignment                                  horizontalAlignment = ETextHorizontalAlignment::LEFT;
         ColorRGBA<Float32>                                        color               = ColorRGBA<Float32>::GetWhite();
-        std::pmr::unordered_map<UInt32, const FontCharacterData*> characterMap{Allocator::GetMemoryResource()};
+        std::pmr::unordered_map<UInt32, const FontCharacterData*> characterMap{Memory::GetMemoryResource()};
     };
 
     inline const TextureAsset* TextView::GetTexture() const noexcept

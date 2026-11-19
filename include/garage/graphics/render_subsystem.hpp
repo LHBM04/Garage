@@ -5,9 +5,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
 #include "../core/engine_subsystem.hpp"
+#include "../core/memory.hpp"
 #include "../core/system_status.hpp"
 #include "../core/types.hpp"
 
@@ -50,13 +50,13 @@ namespace Garage
         [[nodiscard]] const IGPUCommandBuffer* GetGPUCommandBuffer() const noexcept;
 
     private:
-        [[nodiscard]] Result<Allocator::UniquePtr<IGPUDevice>, std::pmr::string> CreateDevice() const;
+        [[nodiscard]] Result<UniquePtr<IGPUDevice>, std::pmr::string> CreateDevice() const;
         void ReleaseDisplaySwapChain(const IDisplay* display) noexcept;
 
-        Allocator::UniquePtr<IGPUDevice>                       device;
+        UniquePtr<IGPUDevice>                                  device;
         IGPUCommandBuffer*                                     commandBuffer = nullptr;
         IGPUFence*                                             fence         = nullptr;
-        std::pmr::unordered_map<IDisplay::EId, IGPUSwapChain*> swapChains{Allocator::GetMemoryResource()};
+        std::pmr::unordered_map<IDisplay::EId, IGPUSwapChain*> swapChains{Memory::GetMemoryResource()};
         Delegate<SystemContext&>                               onRender                 = {};
         Int32                                                  displayCreateListenerId  = 0;
         Int32                                                  displayCloseListenerId   = 0;

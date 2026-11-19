@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-#include "../core/allocator.hpp"
+#include "../core/memory.hpp"
 #include "../core/types.hpp"
 
 namespace Garage
@@ -31,7 +31,7 @@ namespace Garage
             }
         }
 
-        std::pmr::string error = Allocator::MakeString("리소스 분류 디렉터리를 찾을 수 없습니다: ");
+        std::pmr::string error = Memory::MakeString("리소스 분류 디렉터리를 찾을 수 없습니다: ");
         error.append(resourcePath.generic_string());
         return Result<std::filesystem::path, std::pmr::string>::Err(std::move(error));
     }
@@ -42,10 +42,10 @@ namespace Garage
         if (relativePath.empty() || relativePath.find('\0') != std::string_view::npos)
         {
             return Result<std::filesystem::path, std::pmr::string>::Err(
-                    Allocator::MakeString("리소스 참조 경로가 비어 있거나 유효하지 않습니다."));
+                    Memory::MakeString("리소스 참조 경로가 비어 있거나 유효하지 않습니다."));
         }
 
-        const std::pmr::u8string U8_PATH(relativePath.begin(), relativePath.end(), Allocator::GetMemoryResource());
+        const std::pmr::u8string U8_PATH(relativePath.begin(), relativePath.end(), Memory::GetMemoryResource());
         std::filesystem::path    path = std::filesystem::path(U8_PATH).lexically_normal();
         if (root.filename() == "Resources" && !path.empty() && *path.begin() == "Resources")
         {
@@ -54,7 +54,7 @@ namespace Garage
 
         if (path.empty() || path.has_root_path() || *path.begin() == "..")
         {
-            std::pmr::string error = Allocator::MakeString("리소스 참조 경로는 루트 디렉터리 내부여야 합니다: ");
+            std::pmr::string error = Memory::MakeString("리소스 참조 경로는 루트 디렉터리 내부여야 합니다: ");
             error.append(relativePath);
             return Result<std::filesystem::path, std::pmr::string>::Err(std::move(error));
         }

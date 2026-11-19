@@ -6,8 +6,8 @@
 #include <string_view>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 
 #include "../math/quaternion.hpp"
 #include "../math/vector3d.hpp"
@@ -64,8 +64,8 @@ namespace Garage
         [[nodiscard]] DirectionalLight*       GetMainLight() noexcept;
         [[nodiscard]] const DirectionalLight* GetMainLight() const noexcept;
 
-        [[nodiscard]] std::pmr::vector<Allocator::UniquePtr<ActorBase>> ExtractPersistentActors();
-        void AdoptActors(std::pmr::vector<Allocator::UniquePtr<ActorBase>>&& adopted);
+        [[nodiscard]] std::pmr::vector<UniquePtr<ActorBase>> ExtractPersistentActors();
+        void AdoptActors(std::pmr::vector<UniquePtr<ActorBase>>&& adopted);
 
         [[nodiscard]] bool IsEntered() const noexcept;
 
@@ -114,9 +114,9 @@ namespace Garage
         bool isEntered      = false;
         bool isRunningPhase = false;
 
-        std::pmr::vector<Allocator::UniquePtr<ActorBase>> actors{Allocator::GetMemoryResource()};
-        std::pmr::vector<Camera*>                         activeCameras{Allocator::GetMemoryResource()};
-        std::pmr::vector<DirectionalLight*>               activeDirectionalLights{Allocator::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<ActorBase>> actors{Memory::GetMemoryResource()};
+        std::pmr::vector<Camera*>              activeCameras{Memory::GetMemoryResource()};
+        std::pmr::vector<DirectionalLight*>    activeDirectionalLights{Memory::GetMemoryResource()};
     };
 
     inline bool WorldBase::IsEntered() const noexcept
@@ -128,7 +128,7 @@ namespace Garage
     {
         return actors |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<ActorBase>& actorPtr) -> ActorBase*
+                        [](const UniquePtr<ActorBase>& actorPtr) -> ActorBase*
                         {
                             return actorPtr.get();
                         });
@@ -138,7 +138,7 @@ namespace Garage
     {
         return actors |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<ActorBase>& actorPtr) -> const ActorBase*
+                        [](const UniquePtr<ActorBase>& actorPtr) -> const ActorBase*
                         {
                             return actorPtr.get();
                         });

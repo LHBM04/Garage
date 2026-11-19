@@ -10,7 +10,7 @@
 
 #include <SDL3/SDL_gpu.h>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_types.hpp"
@@ -546,13 +546,13 @@ namespace Garage::GraphicsDetail
 
     [[nodiscard]] inline std::pmr::string MakeError(std::string_view message)
     {
-        return Allocator::MakeString(message);
+        return Memory::MakeString(message);
     }
 
     template <class... TArgs>
     [[nodiscard]] inline std::pmr::string FormatError(fmt::format_string<TArgs...> format, TArgs&&... args)
     {
-        std::pmr::string message(Allocator::GetMemoryResource());
+        std::pmr::string message(Memory::GetMemoryResource());
         fmt::format_to(std::back_inserter(message), format, std::forward<TArgs>(args)...);
         return message;
     }

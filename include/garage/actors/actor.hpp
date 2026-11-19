@@ -10,8 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/defines.hpp"
+#include "../core/memory.hpp"
 
 #include "component.hpp"
 
@@ -92,11 +92,11 @@ namespace Garage
         void DestroyComponents();
         void DestroyAllComponents();
 
-        std::pmr::string name{"New Actor", Allocator::GetMemoryResource()};
-        std::pmr::string tag{"Untagged", Allocator::GetMemoryResource()};
+        std::pmr::string name{"New Actor", Memory::GetMemoryResource()};
+        std::pmr::string tag{"Untagged", Memory::GetMemoryResource()};
 
-        std::pmr::vector<Allocator::UniquePtr<ComponentBase>>    components{Allocator::GetMemoryResource()};
-        std::pmr::unordered_map<std::type_index, ComponentBase*> componentsByType{Allocator::GetMemoryResource()};
+        std::pmr::vector<UniquePtr<ComponentBase>>               components{Memory::GetMemoryResource()};
+        std::pmr::unordered_map<std::type_index, ComponentBase*> componentsByType{Memory::GetMemoryResource()};
 
         WorldBase* world = nullptr;
 
@@ -112,15 +112,15 @@ namespace Garage
     }
 
     inline ActorBase::ActorBase(WorldBase* world, std::string_view name) noexcept
-        : name(name, Allocator::GetMemoryResource())
+        : name(name, Memory::GetMemoryResource())
         , world(world)
     {
         ASSERT(world != nullptr);
     }
 
     inline ActorBase::ActorBase(WorldBase* world, std::string_view name, std::string_view tag) noexcept
-        : name(name, Allocator::GetMemoryResource())
-        , tag(tag, Allocator::GetMemoryResource())
+        : name(name, Memory::GetMemoryResource())
+        , tag(tag, Memory::GetMemoryResource())
         , world(world)
     {
         ASSERT(world != nullptr);
@@ -194,8 +194,8 @@ namespace Garage
     template <std::derived_from<ComponentBase> TComponent>
     TComponent* ActorBase::AddComponent()
     {
-        Allocator::UniquePtr<TComponent> component    = Allocator::MakeUnique<TComponent>(this);
-        TComponent*                      componentPtr = component.get();
+        UniquePtr<TComponent> component    = MakeUnique<TComponent>(this);
+        TComponent*           componentPtr = component.get();
 
         components.push_back(std::move(component));
         componentsByType[std::type_index(typeid(TComponent))] = componentPtr;
@@ -257,7 +257,7 @@ namespace Garage
     {
         return components |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<ComponentBase>& componentPtr) -> ComponentBase*
+                        [](const UniquePtr<ComponentBase>& componentPtr) -> ComponentBase*
                         {
                             return componentPtr.get();
                         });
@@ -267,7 +267,7 @@ namespace Garage
     {
         return components |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<ComponentBase>& componentPtr) -> const ComponentBase*
+                        [](const UniquePtr<ComponentBase>& componentPtr) -> const ComponentBase*
                         {
                             return componentPtr.get();
                         });

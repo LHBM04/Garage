@@ -3,13 +3,12 @@
 
 #include <algorithm>
 #include <functional>
-#include <memory>
 #include <memory_resource>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-#include "../allocator.hpp"
+#include "../memory.hpp"
 #include "common.hpp"
 
 namespace Garage
@@ -29,7 +28,7 @@ namespace Garage
             bool       isConnected = true;
         };
 
-        using SubscriptionPtr  = std::shared_ptr<Subscription>;
+        using SubscriptionPtr  = SharedPtr<Subscription>;
         using SubscriptionList = std::pmr::vector<SubscriptionPtr>;
 
     public:
@@ -52,7 +51,7 @@ namespace Garage
         void Clear() noexcept;
 
     private:
-        SubscriptionList subscriptions{Allocator::GetMemoryResource()};
+        SubscriptionList subscriptions{Memory::GetMemoryResource()};
         ListenerId       nextListenerId = 1;
     };
 
@@ -67,7 +66,7 @@ namespace Garage
     typename Delegate<TArgs...>::ListenerId Delegate<TArgs...>::AddListener(Listener callback)
     {
         const ListenerId ID = nextListenerId++;
-        subscriptions.push_back(Allocator::MakeShared<Subscription>(Subscription{ID, std::move(callback), true}));
+        subscriptions.push_back(MakeShared<Subscription>(Subscription{ID, std::move(callback), true}));
         return ID;
     }
 
@@ -85,7 +84,7 @@ namespace Garage
     template <class... TArgs>
     void Delegate<TArgs...>::Broadcast(TArgs... args) const
     {
-        const SubscriptionList SNAPSHOT(subscriptions, Allocator::GetMemoryResource());
+        const SubscriptionList SNAPSHOT(subscriptions, Memory::GetMemoryResource());
         for (const SubscriptionPtr& subscription : SNAPSHOT)
         {
             if (subscription->isConnected && subscription->callback)

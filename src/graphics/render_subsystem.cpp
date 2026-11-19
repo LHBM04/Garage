@@ -7,7 +7,7 @@
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_gpu.h>
 
-#include "garage/core/allocator.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 #include "garage/core/types.hpp"
@@ -232,7 +232,7 @@ namespace Garage
         }
     }
 
-    Result<Allocator::UniquePtr<IGPUDevice>, std::pmr::string> RenderSubsystem::CreateDevice() const
+    Result<UniquePtr<IGPUDevice>, std::pmr::string> RenderSubsystem::CreateDevice() const
     {
         constexpr SDL_GPUShaderFormat SHADER_FORMATS =
                 SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL;
@@ -246,7 +246,7 @@ namespace Garage
         SDL_GPUDevice* sdlDevice = SDL_CreateGPUDevice(SHADER_FORMATS, DEBUG_MODE, nullptr);
         if (sdlDevice == nullptr)
         {
-            return Result<Allocator::UniquePtr<IGPUDevice>, std::pmr::string>::Err(
+            return Result<UniquePtr<IGPUDevice>, std::pmr::string>::Err(
                     GraphicsDetail::FormatError("SDL_GPU 디바이스 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
@@ -263,7 +263,7 @@ namespace Garage
         if (defaultSampler == nullptr)
         {
             SDL_DestroyGPUDevice(sdlDevice);
-            return Result<Allocator::UniquePtr<IGPUDevice>, std::pmr::string>::Err(
+            return Result<UniquePtr<IGPUDevice>, std::pmr::string>::Err(
                     GraphicsDetail::FormatError("기본 GPU 샘플러 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
@@ -282,11 +282,11 @@ namespace Garage
         {
             SDL_ReleaseGPUSampler(sdlDevice, defaultSampler);
             SDL_DestroyGPUDevice(sdlDevice);
-            return Result<Allocator::UniquePtr<IGPUDevice>, std::pmr::string>::Err(
+            return Result<UniquePtr<IGPUDevice>, std::pmr::string>::Err(
                     GraphicsDetail::FormatError("기본 폴백 GPU 텍스처 생성에 실패했습니다: {}", SDL_GetError()));
         }
 
-        return Result<Allocator::UniquePtr<IGPUDevice>, std::pmr::string>::Ok(
-                Allocator::MakeUnique<GPUDeviceImpl>(sdlDevice, defaultSampler, fallbackTexture));
+        return Result<UniquePtr<IGPUDevice>, std::pmr::string>::Ok(
+                MakeUnique<GPUDeviceImpl>(sdlDevice, defaultSampler, fallbackTexture));
     }
 } // namespace Garage
