@@ -1,7 +1,7 @@
 #ifndef GARAGE_GRAPHICS_SKYBOX_RENDERER_HPP
 #define GARAGE_GRAPHICS_SKYBOX_RENDERER_HPP
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 
 #include "renderer.hpp"
 

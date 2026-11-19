@@ -1,7 +1,7 @@
 #ifndef GARAGE_GRAPHICS_GPU_FENCE_HPP
 #define GARAGE_GRAPHICS_GPU_FENCE_HPP
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 
 namespace Garage
 {

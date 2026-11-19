@@ -4,9 +4,9 @@
 
 #include <SDL3/SDL_timer.h>
 
+#include "garage/core/common.hpp"
 #include "garage/core/engine_subsystem.hpp"
 #include "garage/core/system_status.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/utilities/logger.hpp"
 

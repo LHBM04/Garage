@@ -4,8 +4,8 @@
 #include <cmath>
 #include <vector>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 namespace Garage
 {
@@ -226,12 +226,12 @@ namespace Garage
         return parent;
     }
 
-    std::span<Transform* const> Transform::GetChildren() noexcept
+    Span<Transform* const> Transform::GetChildren() noexcept
     {
         return children;
     }
 
-    std::span<const Transform* const> Transform::GetChildren() const noexcept
+    Span<const Transform* const> Transform::GetChildren() const noexcept
     {
         return children;
     }

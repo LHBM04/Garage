@@ -1,9 +1,8 @@
 ﻿#ifndef GARAGE_PLATFORM_DISPLAY_IMPL_HPP
 #define GARAGE_PLATFORM_DISPLAY_IMPL_HPP
 
-#include <string_view>
-
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/math/vector2d.hpp"
 
@@ -30,8 +29,8 @@ namespace Garage
 
         [[nodiscard]] EId GetID() const noexcept override;
 
-        [[nodiscard]] std::string_view GetCaption() const noexcept override;
-        void                           SetCaption(std::string_view value) noexcept override;
+        [[nodiscard]] StringView GetCaption() const noexcept override;
+        void                     SetCaption(StringView value) noexcept override;
 
         [[nodiscard]] Vector2DInt GetPosition() const noexcept override;
         void                      SetPosition(const Vector2DInt& position) noexcept override;

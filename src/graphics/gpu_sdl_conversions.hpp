@@ -2,16 +2,14 @@
 #define GARAGE_GRAPHICS_GPU_SDL_CONVERSIONS_HPP
 
 #include <iterator>
-#include <string>
-#include <string_view>
 #include <utility>
 
 #include <fmt/format.h>
 
 #include <SDL3/SDL_gpu.h>
 
-#include "garage/core/allocator.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/graphics/gpu_types.hpp"
 
@@ -544,15 +542,15 @@ namespace Garage::GraphicsDetail
         }
     }
 
-    [[nodiscard]] inline std::pmr::string MakeError(std::string_view message)
+    [[nodiscard]] inline String MakeError(StringView message)
     {
-        return Allocator::MakeString(message);
+        return String(message);
     }
 
     template <class... TArgs>
-    [[nodiscard]] inline std::pmr::string FormatError(fmt::format_string<TArgs...> format, TArgs&&... args)
+    [[nodiscard]] inline String FormatError(fmt::format_string<TArgs...> format, TArgs&&... args)
     {
-        std::pmr::string message(Allocator::GetMemoryResource());
+        String message;
         fmt::format_to(std::back_inserter(message), format, std::forward<TArgs>(args)...);
         return message;
     }

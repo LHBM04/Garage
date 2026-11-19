@@ -1,5 +1,5 @@
-﻿#ifndef GARAGE_CORE_DEFINES_HPP
-#define GARAGE_CORE_DEFINES_HPP
+﻿#ifndef GARAGE_CORE_COMMON_DEFINES_HPP
+#define GARAGE_CORE_COMMON_DEFINES_HPP
 
 #include <cstdlib>
 
@@ -53,4 +53,4 @@
         while (false)
 #endif
 
-#endif // GARAGE_CORE_DEFINES_HPP
+#endif // GARAGE_CORE_COMMON_DEFINES_HPP

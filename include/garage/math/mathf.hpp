@@ -6,7 +6,7 @@
 #include <concepts>
 #include <limits>
 
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 namespace Garage
 {

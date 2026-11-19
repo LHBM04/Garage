@@ -1,16 +1,11 @@
 ﻿#ifndef GARAGE_PLATFORM_INPUT_SUBSYSTEM_HPP
 #define GARAGE_PLATFORM_INPUT_SUBSYSTEM_HPP
 
-#include <memory_resource>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-
-#include "../core/allocator.hpp"
 #include "../core/app_subsystem.hpp"
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
+#include "../core/memory.hpp"
 #include "../core/system_status.hpp"
-#include "../core/types.hpp"
 
 #include "../math/vector2d.hpp"
 
@@ -39,10 +34,10 @@ namespace Garage
         [[nodiscard]] bool IsInputEnabled() const noexcept;
         void               SetInputEnabled(bool value) noexcept;
 
-        InputAction*                     AddAction(std::string_view name);
-        void                             RemoveAction(std::string_view name) noexcept;
-        [[nodiscard]] InputAction*       GetAction(std::string_view name) noexcept;
-        [[nodiscard]] const InputAction* GetAction(std::string_view name) const noexcept;
+        InputAction*                     AddAction(StringView name);
+        void                             RemoveAction(StringView name) noexcept;
+        [[nodiscard]] InputAction*       GetAction(StringView name) noexcept;
+        [[nodiscard]] const InputAction* GetAction(StringView name) const noexcept;
 
         void OnDisplayCreate(const DisplayCreateEvent& event);
         void OnDisplayClose(const DisplayCloseEvent& event);
@@ -58,10 +53,9 @@ namespace Garage
         void PollMouse(InputProvider& targetProvider) noexcept;
         void ResetInputState() noexcept;
 
-        const IDisplay*                                                              activeDisplay = nullptr;
-        InputProvider                                                                provider{};
-        std::pmr::unordered_map<std::pmr::string, Allocator::UniquePtr<InputAction>> actions{
-                Allocator::GetMemoryResource()};
+        const IDisplay*                              activeDisplay = nullptr;
+        InputProvider                                provider{};
+        UnorderedMap<String, UniquePtr<InputAction>> actions;
 
         Delegate<const DisplayCreateEvent&>::ListenerId   displayCreateListenerId   = 0;
         Delegate<const DisplayCloseEvent&>::ListenerId    displayCloseListenerId    = 0;

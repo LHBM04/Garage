@@ -1,8 +1,7 @@
 #ifndef GARAGE_GRAPHICS_BILLBOARD_RENDERER_HPP
 #define GARAGE_GRAPHICS_BILLBOARD_RENDERER_HPP
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "../math/vector2d.hpp"
 

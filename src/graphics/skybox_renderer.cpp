@@ -1,9 +1,8 @@
 #include "garage/graphics/skybox_renderer.hpp"
 
-#include <array>
-
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/system_context.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
 #include "garage/graphics/gpu_constants.hpp"
@@ -43,7 +42,7 @@ namespace Garage
             return;
         }
 
-        const std::array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> TEXTURES{texture};
+        const Array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> TEXTURES{texture};
         if (const auto BOUND = commandBuffer->BindTextures(TEXTURES); !BOUND)
         {
             LOG_ERROR("스카이박스 텍스처를 바인딩하지 못했습니다: {}", BOUND.GetError());

@@ -1,15 +1,13 @@
 ﻿#ifndef GARAGE_PLATFORM_DISPLAY_SUBSYSTEM_HPP
 #define GARAGE_PLATFORM_DISPLAY_SUBSYSTEM_HPP
 
-#include <memory_resource>
 #include <ranges>
-#include <vector>
 
-#include "../core/allocator.hpp"
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 #include "../core/engine_subsystem.hpp"
+#include "../core/memory.hpp"
 #include "../core/system_status.hpp"
-#include "../core/types.hpp"
 
 #include "display.hpp"
 #include "display_options.hpp"
@@ -48,8 +46,8 @@ namespace Garage
         [[nodiscard]] bool IsDisplayValid(IDisplay::EId id) const noexcept;
 
     private:
-        EventSubsystem*                                  eventSubsystem = nullptr;
-        std::pmr::vector<Allocator::UniquePtr<IDisplay>> displays{Allocator::GetMemoryResource()};
+        EventSubsystem*             eventSubsystem = nullptr;
+        Vector<UniquePtr<IDisplay>> displays;
     };
 
     inline DisplaySubsystem::DisplaySubsystem() noexcept
@@ -61,7 +59,7 @@ namespace Garage
     {
         return displays |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<IDisplay>& displayPtr) noexcept -> IDisplay*
+                        [](const UniquePtr<IDisplay>& displayPtr) noexcept -> IDisplay*
                         {
                             return displayPtr.get();
                         });
@@ -71,7 +69,7 @@ namespace Garage
     {
         return displays |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<IDisplay>& displayPtr) noexcept -> const IDisplay*
+                        [](const UniquePtr<IDisplay>& displayPtr) noexcept -> const IDisplay*
                         {
                             return displayPtr.get();
                         });

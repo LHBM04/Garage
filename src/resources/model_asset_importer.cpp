@@ -1,16 +1,15 @@
 #include "garage/resources/model_asset_importer.hpp"
 
-#include <array>
 #include <filesystem>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <fmt/format.h>
 #include <rapidjson/document.h>
 
-#include "garage/core/allocator.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
+#include "garage/core/memory.hpp"
 
 #include "garage/resources/asset_subsystem.hpp"
 #include "garage/resources/material_asset.hpp"
@@ -22,33 +21,29 @@
 
 namespace Garage
 {
-    Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>
-            ModelAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<ModelAsset>, String> ModelAssetImporter::Import(const std::filesystem::path& path) const
     {
         AssetSubsystem* assets = GetOwner();
         if (assets == nullptr)
         {
-            return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(
-                    Allocator::MakeString("모델 로더의 에셋 서브시스템이 nullptr입니다."));
+            return Result<UniquePtr<ModelAsset>, String>::Err(String("모델 로더의 에셋 서브시스템이 nullptr입니다."));
         }
 
         if (!JsonUtility::HasJsonExtension(path))
         {
-            return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(
-                    Allocator::MakeString("모델 로더에는 .json 파일이 필요합니다."));
+            return Result<UniquePtr<ModelAsset>, String>::Err(String("모델 로더에는 .json 파일이 필요합니다."));
         }
 
         auto documentResult = JsonUtility::LoadDocument(path);
         if (!documentResult)
         {
-            return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(
-                    std::move(documentResult).GetError());
+            return Result<UniquePtr<ModelAsset>, String>::Err(std::move(documentResult).GetError());
         }
 
         const auto ROOT_DIR = FindResourceRoot(path, "Models");
         if (!ROOT_DIR)
         {
-            return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(ROOT_DIR.GetError());
+            return Result<UniquePtr<ModelAsset>, String>::Err(ROOT_DIR.GetError());
         }
 
         struct PendingNode final
@@ -58,9 +53,9 @@ namespace Garage
             USize                   depth       = 0;
         };
 
-        std::pmr::vector<PendingNode> pending(Allocator::GetMemoryResource());
+        Vector<PendingNode> pending;
         pending.push_back(PendingNode{.parentIndex = -1, .jsonNode = &(*documentResult), .depth = 1u});
-        std::pmr::vector<Submodel> nodes{Allocator::GetMemoryResource()};
+        Vector<Submodel> nodes;
 
         while (!pending.empty())
         {
@@ -69,15 +64,15 @@ namespace Garage
 
             if (nodes.size() >= JsonUtility::MAX_ELEMENTS || CURRENT.depth > JsonUtility::MAX_DEPTH)
             {
-                return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(
-                        Allocator::MakeString("모델 노드 수 또는 계층 깊이가 제한을 초과했습니다."));
+                return Result<UniquePtr<ModelAsset>, String>::Err(
+                        String("모델 노드 수 또는 계층 깊이가 제한을 초과했습니다."));
             }
 
             if (CURRENT.jsonNode == nullptr || !CURRENT.jsonNode->IsObject())
             {
-                std::pmr::string error = Allocator::MakeString("모델 노드 데이터가 유효하지 않습니다: ");
+                String error("모델 노드 데이터가 유효하지 않습니다: ");
                 error.append(path.generic_string());
-                return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(std::move(error));
+                return Result<UniquePtr<ModelAsset>, String>::Err(std::move(error));
             }
 
             const rapidjson::Value& NODE_VALUE = *CURRENT.jsonNode;
@@ -85,11 +80,11 @@ namespace Garage
             Submodel node{};
             node.parentIndex = CURRENT.parentIndex;
 
-            std::array<Float32, 3>  position{0.0f, 0.0f, 0.0f};
-            std::array<Float32, 4>  rotation{0.0f, 0.0f, 0.0f, 1.0f};
-            std::array<Float32, 3>  scale{1.0f, 1.0f, 1.0f};
-            std::pmr::string        meshReference{Allocator::GetMemoryResource()};
-            std::pmr::string        materialReference{Allocator::GetMemoryResource()};
+            Array<Float32, 3>       position{0.0f, 0.0f, 0.0f};
+            Array<Float32, 4>       rotation{0.0f, 0.0f, 0.0f, 1.0f};
+            Array<Float32, 3>       scale{1.0f, 1.0f, 1.0f};
+            String                  meshReference;
+            String                  materialReference;
             const rapidjson::Value* childrenArray = nullptr;
 
             if (!JsonUtility::ReadOptionalString(NODE_VALUE, "name", node.name) ||
@@ -100,9 +95,9 @@ namespace Garage
                 !JsonUtility::ReadOptionalString(NODE_VALUE, "material", materialReference) ||
                 !JsonUtility::ReadOptionalArray(NODE_VALUE, "children", childrenArray))
             {
-                std::pmr::string error = Allocator::MakeString("모델 노드 데이터가 유효하지 않습니다: ");
+                String error("모델 노드 데이터가 유효하지 않습니다: ");
                 error.append(path.generic_string());
-                return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(std::move(error));
+                return Result<UniquePtr<ModelAsset>, String>::Err(std::move(error));
             }
 
             node.localPosition.Set(position[0], position[1], position[2]);
@@ -111,10 +106,9 @@ namespace Garage
 
             if (meshReference.empty() != materialReference.empty())
             {
-                std::pmr::string error =
-                        Allocator::MakeString("모델 노드의 메시와 머티리얼 참조는 함께 지정해야 합니다: ");
+                String error("모델 노드의 메시와 머티리얼 참조는 함께 지정해야 합니다: ");
                 error.append(node.name);
-                return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(std::move(error));
+                return Result<UniquePtr<ModelAsset>, String>::Err(std::move(error));
             }
 
             if (!meshReference.empty() && !materialReference.empty())
@@ -123,8 +117,8 @@ namespace Garage
                 const auto MATERIAL_PATH = ResolveResourcePath(*ROOT_DIR, materialReference);
                 if (!MESH_PATH || !MATERIAL_PATH)
                 {
-                    return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(
-                            Allocator::MakeString("모델 리소스 참조 경로가 유효하지 않습니다."));
+                    return Result<UniquePtr<ModelAsset>, String>::Err(
+                            String("모델 리소스 참조 경로가 유효하지 않습니다."));
                 }
 
                 node.mesh     = assets->LoadAsset<MeshAsset>(*MESH_PATH);
@@ -134,7 +128,7 @@ namespace Garage
                     const std::string MSG = fmt::format("모델 리소스를 로드하지 못했습니다: {}, {}",
                                                         MESH_PATH->generic_string(),
                                                         MATERIAL_PATH->generic_string());
-                    return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Err(Allocator::MakeString(MSG));
+                    return Result<UniquePtr<ModelAsset>, String>::Err(String(MSG));
                 }
             }
 
@@ -153,7 +147,6 @@ namespace Garage
             }
         }
 
-        return Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>::Ok(
-                Allocator::MakeUnique<ModelAsset>(path, std::move(nodes)));
+        return Result<UniquePtr<ModelAsset>, String>::Ok(MakeUnique<ModelAsset>(path, std::move(nodes)));
     }
 } // namespace Garage

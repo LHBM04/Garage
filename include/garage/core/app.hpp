@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "app_subsystem.hpp"
-#include "defines.hpp"
+#include "common.hpp"
 #include "system.hpp"
 #include "system_status.hpp"
 

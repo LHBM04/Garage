@@ -6,7 +6,7 @@
 
 #include "app.hpp"
 #include "app_subsystem.hpp"
-#include "defines.hpp"
+#include "common.hpp"
 #include "engine.hpp"
 #include "engine_subsystem.hpp"
 

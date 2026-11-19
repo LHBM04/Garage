@@ -4,11 +4,10 @@
 #include <concepts>
 #include <utility>
 
-#include "defines.hpp"
+#include "common.hpp"
 #include "engine_subsystem.hpp"
 #include "system.hpp"
 #include "system_status.hpp"
-#include "types.hpp"
 
 namespace Garage
 {

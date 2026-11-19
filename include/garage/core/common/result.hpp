@@ -1,50 +1,16 @@
-﻿#ifndef GARAGE_CORE_TYPES_HPP
-#define GARAGE_CORE_TYPES_HPP
+﻿#ifndef GARAGE_CORE_COMMON_RESULT_HPP
+#define GARAGE_CORE_COMMON_RESULT_HPP
 
-#include <algorithm>
 #include <concepts>
-#include <cstddef>
-#include <cstdint>
 #include <functional>
-#include <memory>
-#include <memory_resource>
 #include <type_traits>
 #include <utility>
 #include <variant>
-#include <vector>
 
-#include "allocator.hpp"
 #include "defines.hpp"
 
 namespace Garage
 {
-    using Int8  = std::int8_t;
-    using Int16 = std::int16_t;
-    using Int32 = std::int32_t;
-    using Int64 = std::int64_t;
-
-    using UInt8  = std::uint8_t;
-    using UInt16 = std::uint16_t;
-    using UInt32 = std::uint32_t;
-    using UInt64 = std::uint64_t;
-
-    using Float32 = float;
-    using Float64 = double;
-
-    using USize = std::size_t;
-    using ISize = std::ptrdiff_t;
-
-    using Byte = std::byte;
-
-    template <class TResult, class... TArgs>
-    using Func = std::function<TResult(TArgs...)>;
-
-    template <class... TArgs>
-    using Action = std::function<void(TArgs...)>;
-
-    template <class... TArgs>
-    using Predicate = std::function<bool(TArgs...)>;
-
     struct UnexpectedTag final
     {
         explicit constexpr UnexpectedTag() noexcept = default;
@@ -1494,97 +1460,6 @@ namespace Garage
     {
         return lhs.HasValue() && lhs.GetValue() == rhs;
     }
-
-    template <class... TArgs>
-    class Delegate final
-    {
-    public:
-        using Listener   = std::function<void(TArgs...)>;
-        using ListenerId = Int32;
-
-    private:
-        struct Subscription final
-        {
-            ListenerId id          = 0;
-            Listener   callback    = {};
-            bool       isConnected = true;
-        };
-
-        using SubscriptionPtr  = std::shared_ptr<Subscription>;
-        using SubscriptionList = std::pmr::vector<SubscriptionPtr>;
-
-    public:
-        Delegate() noexcept  = default;
-        ~Delegate() noexcept = default;
-
-        Delegate(const Delegate&) noexcept            = delete;
-        Delegate& operator=(const Delegate&) noexcept = delete;
-
-        Delegate(Delegate&&) noexcept                                                                 = default;
-        Delegate& operator=(Delegate&&) noexcept(std::is_nothrow_move_assignable_v<SubscriptionList>) = default;
-
-        Delegate& operator+=(Listener callback) noexcept;
-
-        ListenerId AddListener(Listener callback);
-        void       RemoveListener(ListenerId id) noexcept;
-
-        void Broadcast(TArgs... args) const;
-
-        void Clear() noexcept;
-
-    private:
-        SubscriptionList subscriptions{Allocator::GetMemoryResource()};
-        ListenerId       nextListenerId = 1;
-    };
-
-    template <class... TArgs>
-    Delegate<TArgs...>& Delegate<TArgs...>::operator+=(Listener callback) noexcept
-    {
-        AddListener(std::move(callback));
-        return *this;
-    }
-
-    template <class... TArgs>
-    typename Delegate<TArgs...>::ListenerId Delegate<TArgs...>::AddListener(Listener callback)
-    {
-        const ListenerId ID = nextListenerId++;
-        subscriptions.push_back(Allocator::MakeShared<Subscription>(Subscription{ID, std::move(callback), true}));
-        return ID;
-    }
-
-    template <class... TArgs>
-    void Delegate<TArgs...>::RemoveListener(ListenerId id) noexcept
-    {
-        const auto SUBSCRIPTION = std::ranges::find(subscriptions, id, &Subscription::id);
-        if (SUBSCRIPTION != subscriptions.end())
-        {
-            (*SUBSCRIPTION)->isConnected = false;
-            subscriptions.erase(SUBSCRIPTION);
-        }
-    }
-
-    template <class... TArgs>
-    void Delegate<TArgs...>::Broadcast(TArgs... args) const
-    {
-        const SubscriptionList SNAPSHOT(subscriptions, Allocator::GetMemoryResource());
-        for (const SubscriptionPtr& subscription : SNAPSHOT)
-        {
-            if (subscription->isConnected && subscription->callback)
-            {
-                subscription->callback(args...);
-            }
-        }
-    }
-
-    template <class... TArgs>
-    void Delegate<TArgs...>::Clear() noexcept
-    {
-        for (const SubscriptionPtr& subscription : subscriptions)
-        {
-            subscription->isConnected = false;
-        }
-        subscriptions.clear();
-    }
 } // namespace Garage
 
-#endif // GARAGE_CORE_TYPES_HPP
+#endif // GARAGE_CORE_COMMON_RESULT_HPP

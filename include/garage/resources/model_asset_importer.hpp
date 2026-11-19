@@ -2,11 +2,10 @@
 #define GARAGE_RESOURCES_MODEL_ASSET_IMPORTER_HPP
 
 #include <filesystem>
-#include <string>
 
-#include "../core/allocator.hpp"
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
+#include "../core/memory.hpp"
 
 #include "asset_importer.hpp"
 #include "model_asset.hpp"
@@ -18,8 +17,7 @@ namespace Garage
     public:
         using AssetImporter<ModelAsset>::AssetImporter;
 
-        [[nodiscard]] Result<Allocator::UniquePtr<ModelAsset>, std::pmr::string>
-                Import(const std::filesystem::path& path) const override;
+        [[nodiscard]] Result<UniquePtr<ModelAsset>, String> Import(const std::filesystem::path& path) const override;
     };
 } // namespace Garage
 

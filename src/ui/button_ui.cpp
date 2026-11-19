@@ -8,8 +8,8 @@
 #include "garage/actors/transform.hpp"
 #include "garage/actors/world.hpp"
 
+#include "garage/core/common.hpp"
 #include "garage/core/system_context.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/camera.hpp"
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)

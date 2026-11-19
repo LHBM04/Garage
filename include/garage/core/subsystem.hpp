@@ -1,9 +1,8 @@
 ﻿#ifndef GARAGE_CORE_SUBSYSTEM_HPP
 #define GARAGE_CORE_SUBSYSTEM_HPP
 
-#include "defines.hpp"
+#include "common.hpp"
 #include "system_status.hpp"
-#include "types.hpp"
 
 namespace Garage
 {

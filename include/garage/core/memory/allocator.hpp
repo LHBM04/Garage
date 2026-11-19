@@ -1,39 +1,20 @@
-﻿#ifndef GARAGE_CORE_ALLOCATOR_HPP
-#define GARAGE_CORE_ALLOCATOR_HPP
+﻿#ifndef GARAGE_CORE_MEMORY_ALLOCATOR_HPP
+#define GARAGE_CORE_MEMORY_ALLOCATOR_HPP
 
-#include <concepts>
 #include <cstddef>
 #include <limits>
 #include <memory>
-#include <memory_resource>
-#include <string>
-#include <string_view>
+#include <new>
 #include <type_traits>
 #include <utility>
 
-#include "defines.hpp"
+#include "../common/defines.hpp"
 
 namespace Garage
 {
-    namespace Allocator
+    namespace Memory
     {
         inline constexpr std::size_t DEFAULT_ALIGNMENT = alignof(std::max_align_t);
-
-        template <class T>
-        struct Deleter final
-        {
-            constexpr Deleter() noexcept = default;
-
-            template <class U>
-                requires std::convertible_to<U*, T*>
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
-            Deleter(const Deleter<U>&) noexcept;
-
-            void operator()(T* pointer) const noexcept;
-        };
-
-        template <class T>
-        using UniquePtr = std::unique_ptr<T, Deleter<T>>;
 
         [[nodiscard]] GARAGE_API void* Allocate(std::size_t size, std::size_t alignment = DEFAULT_ALIGNMENT) noexcept;
         [[nodiscard]] GARAGE_API void* AllocateZeroed(std::size_t size,
@@ -45,8 +26,6 @@ namespace Garage
         GARAGE_API void                Deallocate(void* pointer) noexcept;
 
         [[nodiscard]] GARAGE_API std::size_t GetActiveAllocationCount() noexcept;
-        [[nodiscard]] GARAGE_API std::pmr::memory_resource* GetMemoryResource() noexcept;
-        [[nodiscard]] inline std::pmr::string               MakeString(std::string_view text);
 
         template <class T>
             requires(!std::is_void_v<T> && !std::is_reference_v<T> && !std::is_array_v<T> && !std::is_function_v<T>)
@@ -71,31 +50,35 @@ namespace Garage
             requires(!std::is_array_v<T>)
         void Delete(T* pointer) noexcept;
 
-        template <class T, class... TArgs>
-            requires(!std::is_array_v<T> && std::is_constructible_v<T, TArgs...>)
-        [[nodiscard]] UniquePtr<T> MakeUnique(TArgs&&... args) noexcept(std::is_nothrow_constructible_v<T, TArgs...>);
-
-        template <class T, class... TArgs>
-            requires(!std::is_array_v<T> && std::is_constructible_v<T, TArgs...>)
-        [[nodiscard]] std::shared_ptr<T> MakeShared(TArgs&&... args);
-
-        inline std::pmr::string MakeString(std::string_view text)
-        {
-            return std::pmr::string(text, GetMemoryResource());
-        }
-
         template <class T>
-        template <class U>
-            requires std::convertible_to<U*, T*>
-        Deleter<T>::Deleter([[maybe_unused]] const Deleter<U>& other) noexcept
+        class StdAllocator final
         {
-        }
+        public:
+            // NOLINTNEXTLINE(readability-identifier-naming)
+            using value_type = T;
+            // NOLINTNEXTLINE(readability-identifier-naming)
+            using is_always_equal = std::true_type;
+            // NOLINTNEXTLINE(readability-identifier-naming)
+            using propagate_on_container_move_assignment = std::true_type;
 
-        template <class T>
-        void Deleter<T>::operator()(T* pointer) const noexcept
-        {
-            Delete(pointer);
-        }
+            constexpr StdAllocator() noexcept = default;
+
+            template <class U>
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
+            constexpr StdAllocator(const StdAllocator<U>& other) noexcept;
+
+            // NOLINTNEXTLINE(readability-identifier-naming)
+            [[nodiscard]] T* allocate(std::size_t count) const;
+
+            // NOLINTNEXTLINE(readability-identifier-naming)
+            void deallocate(T* pointer, std::size_t count) const noexcept;
+        };
+
+        template <class T, class U>
+        [[nodiscard]] constexpr bool operator==(const StdAllocator<T>& lhs, const StdAllocator<U>& rhs) noexcept;
+
+        template <class T, class U>
+        [[nodiscard]] constexpr bool operator!=(const StdAllocator<T>& lhs, const StdAllocator<U>& rhs) noexcept;
 
         template <class T>
             requires(!std::is_void_v<T> && !std::is_reference_v<T> && !std::is_array_v<T> && !std::is_function_v<T>)
@@ -161,21 +144,54 @@ namespace Garage
             Deallocate(pointer);
         }
 
-        template <class T, class... TArgs>
-            requires(!std::is_array_v<T> && std::is_constructible_v<T, TArgs...>)
-        UniquePtr<T> MakeUnique(TArgs&&... args) noexcept(std::is_nothrow_constructible_v<T, TArgs...>)
+        template <class T>
+        template <class U>
+        constexpr StdAllocator<T>::StdAllocator([[maybe_unused]] const StdAllocator<U>& other) noexcept
         {
-            return UniquePtr<T>(New<T>(std::forward<TArgs>(args)...));
         }
 
-        template <class T, class... TArgs>
-            requires(!std::is_array_v<T> && std::is_constructible_v<T, TArgs...>)
-        std::shared_ptr<T> MakeShared(TArgs&&... args)
+        template <class T>
+        T* StdAllocator<T>::allocate(std::size_t count) const
         {
-            return std::allocate_shared<T>(std::pmr::polymorphic_allocator<T>(GetMemoryResource()),
-                                           std::forward<TArgs>(args)...);
+            if (count == 0)
+            {
+                return nullptr;
+            }
+
+            if (count > std::numeric_limits<std::size_t>::max() / sizeof(T))
+            {
+                throw std::bad_array_new_length();
+            }
+
+            void* memory = Allocate(sizeof(T) * count, alignof(T));
+            if (memory == nullptr)
+            {
+                throw std::bad_alloc();
+            }
+
+            return static_cast<T*>(memory);
         }
-    } // namespace Allocator
+
+        template <class T>
+        void StdAllocator<T>::deallocate(T* pointer, [[maybe_unused]] std::size_t count) const noexcept
+        {
+            Deallocate(static_cast<void*>(pointer));
+        }
+
+        template <class T, class U>
+        constexpr bool operator==([[maybe_unused]] const StdAllocator<T>& lhs,
+                                  [[maybe_unused]] const StdAllocator<U>& rhs) noexcept
+        {
+            return true;
+        }
+
+        template <class T, class U>
+        constexpr bool operator!=([[maybe_unused]] const StdAllocator<T>& lhs,
+                                  [[maybe_unused]] const StdAllocator<U>& rhs) noexcept
+        {
+            return false;
+        }
+    } // namespace Memory
 } // namespace Garage
 
-#endif // GARAGE_CORE_ALLOCATOR_HPP
+#endif // GARAGE_CORE_MEMORY_ALLOCATOR_HPP

@@ -1,8 +1,7 @@
 #ifndef GARAGE_GRAPHICS_GPU_TARGET_HPP
 #define GARAGE_GRAPHICS_GPU_TARGET_HPP
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "gpu_types.hpp"
 

@@ -56,7 +56,7 @@ ESystemStatus MyApp::Startup(SystemContext& context)
     }
 
     DisplayOptions options{};
-    options.title    = Allocator::MakeString("Garage Example #3 - Hello, Terrain");
+    options.title    = "Garage Example #3 - Hello, Terrain";
     options.position = Vector2DInt{100, 100};
     options.size     = Vector2DInt{1280, 720};
     options.centered = true;
@@ -91,7 +91,7 @@ void MyApp::OnWorldSubsystemAdded(WorldSubsystem* subsystem)
 {
     ASSERT(subsystem != nullptr);
 
-    WorldBase*                  world   = subsystem->AddWorld(Allocator::MakeUnique<MyWorld>());
+    WorldBase*                  world   = subsystem->AddWorld(MakeUnique<MyWorld>());
     [[maybe_unused]] const bool CHANGED = subsystem->RequestWorldChange(world);
 }
 

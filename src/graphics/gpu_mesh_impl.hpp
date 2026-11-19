@@ -1,7 +1,7 @@
 #ifndef GARAGE_GRAPHICS_GPU_MESH_IMPL_HPP
 #define GARAGE_GRAPHICS_GPU_MESH_IMPL_HPP
 
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/graphics/gpu_mesh.hpp"
 #include "garage/graphics/gpu_types.hpp"

@@ -1,11 +1,10 @@
 ﻿#ifndef GARAGE_MATH_VECTOR4D_HPP
 #define GARAGE_MATH_VECTOR4D_HPP
 
-#include <array>
 #include <compare>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "mathf.hpp"
 
@@ -159,7 +158,7 @@ namespace Garage
             requires Floatable<TScalar>;
 
     private:
-        std::array<TScalar, 4> elements = {};
+        Array<TScalar, 4> elements = {};
     };
 
     using Vector4DInt   = Vector4D<Int32>;

@@ -3,8 +3,7 @@
 
 #include <bitset>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "../math/vector2d.hpp"
 

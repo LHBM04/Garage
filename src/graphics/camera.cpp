@@ -4,8 +4,7 @@
 #include "garage/actors/transform.hpp"
 #include "garage/actors/world.hpp"
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/math/matrix4x4.hpp"
 #include "garage/math/quaternion.hpp"

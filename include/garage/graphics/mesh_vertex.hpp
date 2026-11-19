@@ -1,11 +1,10 @@
 ﻿#ifndef GARAGE_GRAPHICS_MESH_VERTEX_HPP
 #define GARAGE_GRAPHICS_MESH_VERTEX_HPP
 
-#include <array>
 #include <cstddef>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../math/color_rgba.hpp"
 #include "../math/vector2d.hpp"
@@ -23,7 +22,7 @@ namespace Garage
         Vector2DFloat  textureCoordinate{};
     };
 
-    inline constexpr std::array<GPUVertexAttribute, 4> MESH_VERTEX_ATTRIBUTES = {
+    inline constexpr Array<GPUVertexAttribute, 4> MESH_VERTEX_ATTRIBUTES = {
             GPUVertexAttribute{
                     .location   = 0,
                     .bufferSlot = 0,

@@ -3,15 +3,12 @@
 
 #include <concepts>
 #include <ranges>
-#include <string>
-#include <string_view>
 #include <typeindex>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
-#include "../core/allocator.hpp"
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
+#include "../core/memory.hpp"
 
 #include "component.hpp"
 
@@ -24,8 +21,8 @@ namespace Garage
     {
     public:
         explicit ActorBase(WorldBase* world) noexcept;
-        explicit ActorBase(WorldBase* world, std::string_view name) noexcept;
-        explicit ActorBase(WorldBase* world, std::string_view name, std::string_view tag) noexcept;
+        explicit ActorBase(WorldBase* world, StringView name) noexcept;
+        explicit ActorBase(WorldBase* world, StringView name, StringView tag) noexcept;
         virtual ~ActorBase() noexcept;
 
         ActorBase(const ActorBase&)            = delete;
@@ -44,13 +41,13 @@ namespace Garage
         void DrawGizmos(SystemContext& context);
 #endif
 
-        [[nodiscard]] const std::pmr::string& GetName() const noexcept;
-        void                                  SetName(std::string_view value) noexcept;
+        [[nodiscard]] const String& GetName() const noexcept;
+        void                        SetName(StringView value) noexcept;
 
-        [[nodiscard]] const std::pmr::string& GetTag() const noexcept;
-        void                                  SetTag(std::string_view value) noexcept;
+        [[nodiscard]] const String& GetTag() const noexcept;
+        void                        SetTag(StringView value) noexcept;
 
-        [[nodiscard]] bool CompareTag(std::string_view value) const noexcept;
+        [[nodiscard]] bool CompareTag(StringView value) const noexcept;
 
         [[nodiscard]] const WorldBase* GetWorld() const noexcept;
         [[nodiscard]] WorldBase*       GetWorld() noexcept;
@@ -92,11 +89,11 @@ namespace Garage
         void DestroyComponents();
         void DestroyAllComponents();
 
-        std::pmr::string name{"New Actor", Allocator::GetMemoryResource()};
-        std::pmr::string tag{"Untagged", Allocator::GetMemoryResource()};
+        String name{"New Actor"};
+        String tag{"Untagged"};
 
-        std::pmr::vector<Allocator::UniquePtr<ComponentBase>>    components{Allocator::GetMemoryResource()};
-        std::pmr::unordered_map<std::type_index, ComponentBase*> componentsByType{Allocator::GetMemoryResource()};
+        Vector<UniquePtr<ComponentBase>>              components;
+        UnorderedMap<std::type_index, ComponentBase*> componentsByType;
 
         WorldBase* world = nullptr;
 
@@ -111,44 +108,44 @@ namespace Garage
         ASSERT(world != nullptr);
     }
 
-    inline ActorBase::ActorBase(WorldBase* world, std::string_view name) noexcept
-        : name(name, Allocator::GetMemoryResource())
+    inline ActorBase::ActorBase(WorldBase* world, StringView name) noexcept
+        : name(name)
         , world(world)
     {
         ASSERT(world != nullptr);
     }
 
-    inline ActorBase::ActorBase(WorldBase* world, std::string_view name, std::string_view tag) noexcept
-        : name(name, Allocator::GetMemoryResource())
-        , tag(tag, Allocator::GetMemoryResource())
+    inline ActorBase::ActorBase(WorldBase* world, StringView name, StringView tag) noexcept
+        : name(name)
+        , tag(tag)
         , world(world)
     {
         ASSERT(world != nullptr);
     }
 
-    inline const std::pmr::string& ActorBase::GetName() const noexcept
+    inline const String& ActorBase::GetName() const noexcept
     {
         return name;
     }
 
-    inline void ActorBase::SetName(std::string_view value) noexcept
+    inline void ActorBase::SetName(StringView value) noexcept
     {
         name = value;
     }
 
-    inline const std::pmr::string& ActorBase::GetTag() const noexcept
+    inline const String& ActorBase::GetTag() const noexcept
     {
         return tag;
     }
 
-    inline void ActorBase::SetTag(std::string_view value) noexcept
+    inline void ActorBase::SetTag(StringView value) noexcept
     {
         tag = value;
     }
 
-    inline bool ActorBase::CompareTag(std::string_view value) const noexcept
+    inline bool ActorBase::CompareTag(StringView value) const noexcept
     {
-        return std::string_view(tag) == value;
+        return StringView(tag) == value;
     }
 
     inline const WorldBase* ActorBase::GetWorld() const noexcept
@@ -194,8 +191,8 @@ namespace Garage
     template <std::derived_from<ComponentBase> TComponent>
     TComponent* ActorBase::AddComponent()
     {
-        Allocator::UniquePtr<TComponent> component    = Allocator::MakeUnique<TComponent>(this);
-        TComponent*                      componentPtr = component.get();
+        UniquePtr<TComponent> component    = MakeUnique<TComponent>(this);
+        TComponent*           componentPtr = component.get();
 
         components.push_back(std::move(component));
         componentsByType[std::type_index(typeid(TComponent))] = componentPtr;
@@ -257,7 +254,7 @@ namespace Garage
     {
         return components |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<ComponentBase>& componentPtr) -> ComponentBase*
+                        [](const UniquePtr<ComponentBase>& componentPtr) -> ComponentBase*
                         {
                             return componentPtr.get();
                         });
@@ -267,7 +264,7 @@ namespace Garage
     {
         return components |
                 std::views::transform(
-                        [](const Allocator::UniquePtr<ComponentBase>& componentPtr) -> const ComponentBase*
+                        [](const UniquePtr<ComponentBase>& componentPtr) -> const ComponentBase*
                         {
                             return componentPtr.get();
                         });

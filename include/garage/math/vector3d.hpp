@@ -1,11 +1,10 @@
 ﻿#ifndef GARAGE_MATH_VECTOR3D_HPP
 #define GARAGE_MATH_VECTOR3D_HPP
 
-#include <array>
 #include <compare>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "mathf.hpp"
 
@@ -191,7 +190,7 @@ namespace Garage
             requires Floatable<TScalar>;
 
     private:
-        std::array<TScalar, 3> elements = {};
+        Array<TScalar, 3> elements = {};
     };
 
     using Vector3DInt   = Vector3D<Int32>;

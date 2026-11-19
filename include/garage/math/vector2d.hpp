@@ -1,11 +1,10 @@
 ﻿#ifndef GARAGE_MATH_VECTOR2D_HPP
 #define GARAGE_MATH_VECTOR2D_HPP
 
-#include <array>
 #include <compare>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "mathf.hpp"
 
@@ -171,7 +170,7 @@ namespace Garage
             requires Floatable<TScalar>;
 
     private:
-        std::array<TScalar, 2> elements = {};
+        Array<TScalar, 2> elements = {};
     };
 
     using Vector2DInt   = Vector2D<Int32>;

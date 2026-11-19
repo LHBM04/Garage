@@ -7,9 +7,9 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 
+#include "garage/core/common.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/math/vector2d.hpp"
 

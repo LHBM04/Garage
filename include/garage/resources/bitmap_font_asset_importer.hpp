@@ -2,11 +2,10 @@
 #define GARAGE_RESOURCES_BITMAP_FONT_ASSET_IMPORTER_HPP
 
 #include <filesystem>
-#include <string>
 
-#include "../core/allocator.hpp"
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
+#include "../core/memory.hpp"
 
 #include "asset_importer.hpp"
 #include "bitmap_font_asset.hpp"
@@ -18,7 +17,7 @@ namespace Garage
     public:
         using AssetImporter<BitmapFontAsset>::AssetImporter;
 
-        [[nodiscard]] Result<Allocator::UniquePtr<BitmapFontAsset>, std::pmr::string>
+        [[nodiscard]] Result<UniquePtr<BitmapFontAsset>, String>
                 Import(const std::filesystem::path& path) const override;
     };
 } // namespace Garage

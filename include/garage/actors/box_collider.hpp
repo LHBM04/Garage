@@ -3,8 +3,7 @@
 
 #include <limits>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "../math/bounding_box.hpp"
 #include "../math/bounding_oriented_box.hpp"

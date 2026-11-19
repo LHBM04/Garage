@@ -1,10 +1,9 @@
 ﻿#ifndef GARAGE_GRAPHICS_GPU_SWAP_CHAIN_IMPL_HPP
 #define GARAGE_GRAPHICS_GPU_SWAP_CHAIN_IMPL_HPP
 
-#include <string>
-
-#include "garage/core/allocator.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
+#include "garage/core/memory.hpp"
 
 #include "garage/graphics/gpu_swap_chain.hpp"
 #include "garage/graphics/gpu_target.hpp"
@@ -28,7 +27,7 @@ namespace Garage
         void Present() const noexcept override;
         void Release() noexcept;
 
-        [[nodiscard]] Result<const GPUTarget*, std::pmr::string>
+        [[nodiscard]] Result<const GPUTarget*, String>
                                         AcquireBackBufferTarget(IGPUCommandBuffer& commandBuffer) override;
         [[nodiscard]] const GPUTarget*  GetCurrentBackBufferTarget() const noexcept override;
         [[nodiscard]] const IGPUDevice* GetDevice() const noexcept override;
@@ -36,13 +35,13 @@ namespace Garage
         [[nodiscard]] EGPUTextureFormat GetBackBufferFormat() const noexcept override;
 
     private:
-        GPUDeviceImpl*                         device                     = nullptr;
-        const IDisplay*                        display                    = nullptr;
-        EGPUTextureFormat                      backBufferFormat           = EGPUTextureFormat::UNKNOWN;
-        Allocator::UniquePtr<GPUTexture2DImpl> backBufferTexture          = nullptr;
-        IGPUTexture2D*                         depthStencilTexture        = nullptr;
-        GPUTarget                              currentBackBufferTarget    = {};
-        bool                                   hasCurrentBackBufferTarget = false;
+        GPUDeviceImpl*              device                     = nullptr;
+        const IDisplay*             display                    = nullptr;
+        EGPUTextureFormat           backBufferFormat           = EGPUTextureFormat::UNKNOWN;
+        UniquePtr<GPUTexture2DImpl> backBufferTexture          = nullptr;
+        IGPUTexture2D*              depthStencilTexture        = nullptr;
+        GPUTarget                   currentBackBufferTarget    = {};
+        bool                        hasCurrentBackBufferTarget = false;
     };
 
     inline const GPUTarget* GPUSwapChainImpl::GetCurrentBackBufferTarget() const noexcept

@@ -3,7 +3,7 @@
 
 #include <filesystem>
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 
 #include "asset.hpp"
 

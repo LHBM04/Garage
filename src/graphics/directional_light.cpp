@@ -4,7 +4,7 @@
 #include "garage/actors/transform.hpp"
 #include "garage/actors/world.hpp"
 
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/graphics/gpu_constants.hpp"
 

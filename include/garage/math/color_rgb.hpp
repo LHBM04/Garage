@@ -1,10 +1,8 @@
 ﻿#ifndef GARAGE_MATH_COLOR_RGB_HPP
 #define GARAGE_MATH_COLOR_RGB_HPP
 
-#include <array>
-
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "mathf.hpp"
 #include "vector3d.hpp"
@@ -110,7 +108,7 @@ namespace Garage
             requires Floatable<TScalar>;
 
     private:
-        std::array<TScalar, 3> elements = {};
+        Array<TScalar, 3> elements = {};
     };
 
     using ColorRGBInt   = ColorRGB<Int32>;

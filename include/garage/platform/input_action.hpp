@@ -1,15 +1,10 @@
 ﻿#ifndef GARAGE_PLATFORM_INPUT_ACTION_HPP
 #define GARAGE_PLATFORM_INPUT_ACTION_HPP
 
-#include <memory_resource>
-#include <string>
-#include <string_view>
 #include <type_traits>
-#include <vector>
 
-#include "../core/allocator.hpp"
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../math/vector2d.hpp"
 
@@ -57,16 +52,15 @@ namespace Garage
         };
 
     public:
-        explicit InputAction(std::string_view name) noexcept;
+        explicit InputAction(StringView name) noexcept;
         ~InputAction() noexcept = default;
 
         InputAction(const InputAction&)            = delete;
         InputAction& operator=(const InputAction&) = delete;
 
-        InputAction(InputAction&&) noexcept = default;
-        InputAction& operator=(InputAction&&) noexcept(std::is_nothrow_move_assignable_v<std::pmr::string> &&
-                                                       std::is_nothrow_move_assignable_v<std::pmr::vector<Binding>>) =
-                default;
+        InputAction(InputAction&&) noexcept                                                                = default;
+        InputAction& operator=(InputAction&&) noexcept(std::is_nothrow_move_assignable_v<String> &&
+                                                       std::is_nothrow_move_assignable_v<Vector<Binding>>) = default;
 
         void AddButtonBinding(EKeyCode key);
         void AddMouseButtonBinding(EButtonCode button);
@@ -77,19 +71,19 @@ namespace Garage
         void Evaluate(const InputProvider& provider);
         void Reset() noexcept;
 
-        [[nodiscard]] const std::pmr::string& GetName() const noexcept;
-        [[nodiscard]] bool                    IsActive() const noexcept;
-        [[nodiscard]] const Vector2DFloat&    GetValue() const noexcept;
+        [[nodiscard]] const String&        GetName() const noexcept;
+        [[nodiscard]] bool                 IsActive() const noexcept;
+        [[nodiscard]] const Vector2DFloat& GetValue() const noexcept;
 
         [[nodiscard]] ActionCallback& OnStarted() noexcept;
         [[nodiscard]] ActionCallback& OnPerformed() noexcept;
         [[nodiscard]] ActionCallback& OnCanceled() noexcept;
 
     private:
-        std::pmr::string          name{Allocator::GetMemoryResource()};
-        std::pmr::vector<Binding> bindings{Allocator::GetMemoryResource()};
-        Vector2DFloat             currentValue = {};
-        bool                      isActive     = false;
+        String          name;
+        Vector<Binding> bindings;
+        Vector2DFloat   currentValue = {};
+        bool            isActive     = false;
 
         ActionCallback onStarted   = {};
         ActionCallback onPerformed = {};

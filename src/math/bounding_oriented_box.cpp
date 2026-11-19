@@ -1,11 +1,10 @@
 ﻿#include "garage/math/bounding_oriented_box.hpp"
 
-#include <array>
 #include <cmath>
 #include <compare>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/math/bounding_box.hpp"
 #include "garage/math/bounding_sphere.hpp"
@@ -153,15 +152,15 @@ namespace Garage
 
     void BoundingOrientedBox::GetCorners(CornerSpan corners) const noexcept
     {
-        static constexpr std::array<std::array<Float32, 3>, CORNER_COUNT> OFFSETS = {
-                std::array<Float32, 3>{-1.0f, -1.0f, 1.0f},
-                std::array<Float32, 3>{1.0f, -1.0f, 1.0f},
-                std::array<Float32, 3>{1.0f, 1.0f, 1.0f},
-                std::array<Float32, 3>{-1.0f, 1.0f, 1.0f},
-                std::array<Float32, 3>{-1.0f, -1.0f, -1.0f},
-                std::array<Float32, 3>{1.0f, -1.0f, -1.0f},
-                std::array<Float32, 3>{1.0f, 1.0f, -1.0f},
-                std::array<Float32, 3>{-1.0f, 1.0f, -1.0f},
+        static constexpr Array<Array<Float32, 3>, CORNER_COUNT> OFFSETS = {
+                Array<Float32, 3>{-1.0f, -1.0f, 1.0f},
+                Array<Float32, 3>{1.0f, -1.0f, 1.0f},
+                Array<Float32, 3>{1.0f, 1.0f, 1.0f},
+                Array<Float32, 3>{-1.0f, 1.0f, 1.0f},
+                Array<Float32, 3>{-1.0f, -1.0f, -1.0f},
+                Array<Float32, 3>{1.0f, -1.0f, -1.0f},
+                Array<Float32, 3>{1.0f, 1.0f, -1.0f},
+                Array<Float32, 3>{-1.0f, 1.0f, -1.0f},
         };
 
         const Quaternion<Float32> NORM_ROT = NormalizeRotation(orientation);
@@ -284,12 +283,12 @@ namespace Garage
         const Quaternion<Float32> ROT_A = NormalizeRotation(orientation);
         const Quaternion<Float32> ROT_B = NormalizeRotation(box.orientation);
 
-        const std::array<Vector3D<Float32>, 3> AXES_A = {ROT_A * Vector3D<Float32>::GetRight(),
-                                                         ROT_A * Vector3D<Float32>::GetUp(),
-                                                         ROT_A * Vector3D<Float32>::GetForward()};
-        const std::array<Vector3D<Float32>, 3> AXES_B = {ROT_B * Vector3D<Float32>::GetRight(),
-                                                         ROT_B * Vector3D<Float32>::GetUp(),
-                                                         ROT_B * Vector3D<Float32>::GetForward()};
+        const Array<Vector3D<Float32>, 3> AXES_A = {ROT_A * Vector3D<Float32>::GetRight(),
+                                                    ROT_A * Vector3D<Float32>::GetUp(),
+                                                    ROT_A * Vector3D<Float32>::GetForward()};
+        const Array<Vector3D<Float32>, 3> AXES_B = {ROT_B * Vector3D<Float32>::GetRight(),
+                                                    ROT_B * Vector3D<Float32>::GetUp(),
+                                                    ROT_B * Vector3D<Float32>::GetForward()};
 
         const Vector3D<Float32> DIFF = box.center - center;
 
@@ -375,11 +374,11 @@ namespace Garage
                                           const Vector4D<Float32>& plane4,
                                           const Vector4D<Float32>& plane5) const noexcept
     {
-        const std::array<Vector4D<Float32>, 6> PLANES   = {plane0, plane1, plane2, plane3, plane4, plane5};
-        const Quaternion<Float32>              NORM_ROT = NormalizeRotation(orientation);
-        const Vector3D<Float32>                AXIS_X   = NORM_ROT * Vector3D<Float32>::GetRight();
-        const Vector3D<Float32>                AXIS_Y   = NORM_ROT * Vector3D<Float32>::GetUp();
-        const Vector3D<Float32>                AXIS_Z   = NORM_ROT * Vector3D<Float32>::GetForward();
+        const Array<Vector4D<Float32>, 6> PLANES   = {plane0, plane1, plane2, plane3, plane4, plane5};
+        const Quaternion<Float32>         NORM_ROT = NormalizeRotation(orientation);
+        const Vector3D<Float32>           AXIS_X   = NORM_ROT * Vector3D<Float32>::GetRight();
+        const Vector3D<Float32>           AXIS_Y   = NORM_ROT * Vector3D<Float32>::GetUp();
+        const Vector3D<Float32>           AXIS_Z   = NORM_ROT * Vector3D<Float32>::GetForward();
 
         for (const Vector4D<Float32>& plane : PLANES)
         {

@@ -1,11 +1,10 @@
 ﻿#include "garage/actors/sphere_collider.hpp"
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/math/bounding_box.hpp"
 #include "garage/math/bounding_oriented_box.hpp"
@@ -41,10 +40,10 @@ namespace Garage
     BoundingSphere SphereCollider::GetWorldSphere() const noexcept
     {
         ASSERT(IsValid());
-        const Matrix4x4<Float32>               WORLD = GetWorldMatrix();
-        const std::array<Vector3D<Float32>, 3> AXES{WORLD.MultiplyVector(Vector3D<Float32>{1.0f, 0.0f, 0.0f}),
-                                                    WORLD.MultiplyVector(Vector3D<Float32>{0.0f, 1.0f, 0.0f}),
-                                                    WORLD.MultiplyVector(Vector3D<Float32>{0.0f, 0.0f, 1.0f})};
+        const Matrix4x4<Float32>          WORLD = GetWorldMatrix();
+        const Array<Vector3D<Float32>, 3> AXES{WORLD.MultiplyVector(Vector3D<Float32>{1.0f, 0.0f, 0.0f}),
+                                               WORLD.MultiplyVector(Vector3D<Float32>{0.0f, 1.0f, 0.0f}),
+                                               WORLD.MultiplyVector(Vector3D<Float32>{0.0f, 0.0f, 1.0f})};
 
         Float32 scaleSquared = 0.0f;
         for (const Vector3D<Float32>& axis : AXES)

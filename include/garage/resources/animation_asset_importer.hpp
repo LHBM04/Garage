@@ -2,11 +2,10 @@
 #define GARAGE_RESOURCES_ANIMATION_ASSET_IMPORTER_HPP
 
 #include <filesystem>
-#include <string>
 
-#include "../core/allocator.hpp"
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
+#include "../core/memory.hpp"
 
 #include "animation_asset.hpp"
 #include "asset_importer.hpp"
@@ -18,7 +17,7 @@ namespace Garage
     public:
         using AssetImporter<AnimationAsset>::AssetImporter;
 
-        [[nodiscard]] Result<Allocator::UniquePtr<AnimationAsset>, std::pmr::string>
+        [[nodiscard]] Result<UniquePtr<AnimationAsset>, String>
                 Import(const std::filesystem::path& path) const override;
     };
 } // namespace Garage

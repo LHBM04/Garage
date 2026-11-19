@@ -2,11 +2,10 @@
 #define GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_HPP
 
 #include <span>
-#include <string>
 #include <type_traits>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../math/color_rgba.hpp"
 
@@ -37,24 +36,23 @@ namespace Garage
         IGPUCommandBuffer(IGPUCommandBuffer&&)            = delete;
         IGPUCommandBuffer& operator=(IGPUCommandBuffer&&) = delete;
 
-        [[nodiscard]] virtual Result<void, std::pmr::string> Reset()                            = 0;
-        [[nodiscard]] virtual Result<void, std::pmr::string> Submit(IGPUFence* fence = nullptr) = 0;
+        [[nodiscard]] virtual Result<void, String> Reset()                            = 0;
+        [[nodiscard]] virtual Result<void, String> Submit(IGPUFence* fence = nullptr) = 0;
 
         template <class T>
-        [[nodiscard]] Result<void, std::pmr::string> SetGraphicsConstants(UInt32 rootSlot, const T& constants);
+            requires(!std::is_convertible_v<const T&, Span<const Byte>>)
+        [[nodiscard]] Result<void, String> SetGraphicsConstants(UInt32 rootSlot, const T& constants);
 
         template <class T>
-        [[nodiscard]] Result<void, std::pmr::string> SetGraphicsConstants(const T& constants);
+        [[nodiscard]] Result<void, String> SetGraphicsConstants(const T& constants);
 
-        [[nodiscard]] virtual Result<void, std::pmr::string> SetGraphicsConstants(UInt32                rootSlot,
-                                                                                  std::span<const Byte> bytes) = 0;
+        [[nodiscard]] virtual Result<void, String> SetGraphicsConstants(UInt32 rootSlot, Span<const Byte> bytes) = 0;
 
-        virtual void
-                SetGraphicsRootConstants(UInt32 rootSlot, std::span<const Byte> bytes, UInt32 offset = 0) noexcept = 0;
+        virtual void SetGraphicsRootConstants(UInt32 rootSlot, Span<const Byte> bytes, UInt32 offset = 0) noexcept = 0;
         virtual void SetGPUGraphicsPipelineState(const IGPUGraphicsPipelineState& pipelineState) noexcept          = 0;
 
-        [[nodiscard]] virtual Result<void, std::pmr::string>
-                BindTextures(std::span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures) = 0;
+        [[nodiscard]] virtual Result<void, String>
+                BindTextures(Span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures) = 0;
 
         virtual void CopyGPUBuffer(const IGPUBuffer& destination,
                                    UInt64            destinationOffset,
@@ -102,14 +100,15 @@ namespace Garage
     };
 
     template <class T>
-    inline Result<void, std::pmr::string> IGPUCommandBuffer::SetGraphicsConstants(UInt32 rootSlot, const T& constants)
+        requires(!std::is_convertible_v<const T&, Span<const Byte>>)
+    inline Result<void, String> IGPUCommandBuffer::SetGraphicsConstants(UInt32 rootSlot, const T& constants)
     {
         static_assert(std::is_trivially_copyable_v<T>, "상수 버퍼 타입은 trivially copyable이어야 합니다.");
-        return SetGraphicsConstants(rootSlot, std::as_bytes(std::span(&constants, 1)));
+        return SetGraphicsConstants(rootSlot, std::as_bytes(Span<const T>(&constants, 1)));
     }
 
     template <class T>
-    inline Result<void, std::pmr::string> IGPUCommandBuffer::SetGraphicsConstants(const T& constants)
+    inline Result<void, String> IGPUCommandBuffer::SetGraphicsConstants(const T& constants)
     {
         return SetGraphicsConstants(T::ROOT_SLOT, constants);
     }

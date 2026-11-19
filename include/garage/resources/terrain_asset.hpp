@@ -2,12 +2,9 @@
 #define GARAGE_RESOURCES_TERRAIN_ASSET_HPP
 
 #include <filesystem>
-#include <span>
-#include <vector>
 
-#include "../core/allocator.hpp"
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../math/vector2d.hpp"
 #include "../math/vector3d.hpp"
@@ -22,16 +19,16 @@ namespace Garage
     class GARAGE_API TerrainAsset final : public AssetBase
     {
     public:
-        explicit TerrainAsset(std::filesystem::path       path,
-                              UInt32                      width,
-                              UInt32                      height,
-                              bool                        is16Bit,
-                              Float32                     cellSize,
-                              Float32                     heightScale,
-                              const Vector2D<Float32>&    uvTiling,
-                              std::pmr::vector<Float32>&& normalizedHeights,
-                              IGPUDevice&                 device,
-                              IGPUMesh*                   gpuMesh) noexcept;
+        explicit TerrainAsset(std::filesystem::path    path,
+                              UInt32                   width,
+                              UInt32                   height,
+                              bool                     is16Bit,
+                              Float32                  cellSize,
+                              Float32                  heightScale,
+                              const Vector2D<Float32>& uvTiling,
+                              Vector<Float32>&&        normalizedHeights,
+                              IGPUDevice&              device,
+                              IGPUMesh*                gpuMesh) noexcept;
         ~TerrainAsset() noexcept override;
 
         [[nodiscard]] UInt32 GetWidth() const noexcept;
@@ -45,30 +42,30 @@ namespace Garage
         [[nodiscard]] Float32 GetLocalWidth() const noexcept;
         [[nodiscard]] Float32 GetLocalDepth() const noexcept;
 
-        [[nodiscard]] std::span<const Float32> GetNormalizedHeights() const noexcept;
+        [[nodiscard]] Span<const Float32>      GetNormalizedHeights() const noexcept;
         [[nodiscard]] Float32                  GetNormalizedHeightAt(UInt32 x, UInt32 z) const noexcept;
         [[nodiscard]] Float32                  SampleNormalizedHeight(Float32 gridX, Float32 gridZ) const noexcept;
         [[nodiscard]] Vector3D<Float32>        CalculateGridNormal(UInt32 x, UInt32 z) const noexcept;
-        [[nodiscard]] static Vector3D<Float32> CalculateGridNormal(std::span<const Float32> normalizedHeights,
-                                                                   UInt32                   width,
-                                                                   UInt32                   height,
-                                                                   UInt32                   x,
-                                                                   UInt32                   z,
-                                                                   Float32                  cellSize,
-                                                                   Float32                  heightScale) noexcept;
+        [[nodiscard]] static Vector3D<Float32> CalculateGridNormal(Span<const Float32> normalizedHeights,
+                                                                   UInt32              width,
+                                                                   UInt32              height,
+                                                                   UInt32              x,
+                                                                   UInt32              z,
+                                                                   Float32             cellSize,
+                                                                   Float32             heightScale) noexcept;
 
         [[nodiscard]] const IGPUMesh* GetGPUMesh() const noexcept;
 
     private:
-        IGPUDevice*               device      = nullptr;
-        UInt32                    width       = 0;
-        UInt32                    height      = 0;
-        bool                      is16Bit     = false;
-        Float32                   cellSize    = 4.0f;
-        Float32                   heightScale = 120.0f;
-        Vector2D<Float32>         uvTiling{1.0f, 1.0f};
-        std::pmr::vector<Float32> normalizedHeights{Allocator::GetMemoryResource()};
-        IGPUMesh*                 gpuMesh = nullptr;
+        IGPUDevice*       device      = nullptr;
+        UInt32            width       = 0;
+        UInt32            height      = 0;
+        bool              is16Bit     = false;
+        Float32           cellSize    = 4.0f;
+        Float32           heightScale = 120.0f;
+        Vector2D<Float32> uvTiling{1.0f, 1.0f};
+        Vector<Float32>   normalizedHeights;
+        IGPUMesh*         gpuMesh = nullptr;
     };
 
     inline UInt32 TerrainAsset::GetWidth() const noexcept
@@ -121,7 +118,7 @@ namespace Garage
         return static_cast<Float32>(height - 1) * cellSize;
     }
 
-    inline std::span<const Float32> TerrainAsset::GetNormalizedHeights() const noexcept
+    inline Span<const Float32> TerrainAsset::GetNormalizedHeights() const noexcept
     {
         return normalizedHeights;
     }

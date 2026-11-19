@@ -1,12 +1,11 @@
 ﻿#include "garage/math/bounding_box.hpp"
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <compare>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/math/bounding_oriented_box.hpp"
 #include "garage/math/bounding_sphere.hpp"
@@ -201,15 +200,15 @@ namespace Garage
 
     void BoundingBox::GetCorners(CornerSpan corners) const noexcept
     {
-        static constexpr std::array<std::array<Float32, 3>, CORNER_COUNT> OFFSETS = {
-                std::array<Float32, 3>{-1.0f, -1.0f, 1.0f},
-                std::array<Float32, 3>{1.0f, -1.0f, 1.0f},
-                std::array<Float32, 3>{1.0f, 1.0f, 1.0f},
-                std::array<Float32, 3>{-1.0f, 1.0f, 1.0f},
-                std::array<Float32, 3>{-1.0f, -1.0f, -1.0f},
-                std::array<Float32, 3>{1.0f, -1.0f, -1.0f},
-                std::array<Float32, 3>{1.0f, 1.0f, -1.0f},
-                std::array<Float32, 3>{-1.0f, 1.0f, -1.0f},
+        static constexpr Array<Array<Float32, 3>, CORNER_COUNT> OFFSETS = {
+                Array<Float32, 3>{-1.0f, -1.0f, 1.0f},
+                Array<Float32, 3>{1.0f, -1.0f, 1.0f},
+                Array<Float32, 3>{1.0f, 1.0f, 1.0f},
+                Array<Float32, 3>{-1.0f, 1.0f, 1.0f},
+                Array<Float32, 3>{-1.0f, -1.0f, -1.0f},
+                Array<Float32, 3>{1.0f, -1.0f, -1.0f},
+                Array<Float32, 3>{1.0f, 1.0f, -1.0f},
+                Array<Float32, 3>{-1.0f, 1.0f, -1.0f},
         };
 
         for (USize i = 0; i < CORNER_COUNT; ++i)
@@ -352,7 +351,7 @@ namespace Garage
                                  const Vector3D<Float32>& v2) const noexcept
     {
         AssertNonDegenerateTriangle(v0, v1, v2);
-        const BoundingBox TRI_BOX = CreateFromPoints(std::array<Vector3D<Float32>, 3>{v0, v1, v2});
+        const BoundingBox TRI_BOX = CreateFromPoints(Array<Vector3D<Float32>, 3>{v0, v1, v2});
         if (!Intersects(TRI_BOX))
         {
             return false;
@@ -392,7 +391,7 @@ namespace Garage
                                   const Vector4D<Float32>& plane4,
                                   const Vector4D<Float32>& plane5) const noexcept
     {
-        const std::array<Vector4D<Float32>, 6> PLANES = {plane0, plane1, plane2, plane3, plane4, plane5};
+        const Array<Vector4D<Float32>, 6> PLANES = {plane0, plane1, plane2, plane3, plane4, plane5};
         for (const Vector4D<Float32>& plane : PLANES)
         {
             const Vector4D<Float32> P = NormalizePlane(plane);

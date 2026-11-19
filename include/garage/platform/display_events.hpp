@@ -1,7 +1,7 @@
 ﻿#ifndef GARAGE_PLATFORM_DISPLAY_EVENTS_HPP
 #define GARAGE_PLATFORM_DISPLAY_EVENTS_HPP
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 
 #include "../math/vector2d.hpp"
 

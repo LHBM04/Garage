@@ -1,10 +1,8 @@
 #ifndef GARAGE_GRAPHICS_GPU_TYPES_HPP
 #define GARAGE_GRAPHICS_GPU_TYPES_HPP
 
-#include <span>
-
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 namespace Garage
 {
@@ -209,9 +207,9 @@ namespace Garage
 
     struct GARAGE_API GPUTextureSubresourceData final
     {
-        std::span<const Byte> data     = {};
-        UInt32                mipLevel = 0;
-        UInt32                layer    = 0;
+        Span<const Byte> data     = {};
+        UInt32           mipLevel = 0;
+        UInt32           layer    = 0;
     };
 } // namespace Garage
 

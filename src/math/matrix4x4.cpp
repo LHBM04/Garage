@@ -1,11 +1,10 @@
 ﻿#include "garage/math/matrix4x4.hpp"
 
-#include <array>
 #include <cmath>
 #include <compare>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/math/mathf.hpp"
 #include "garage/math/quaternion.hpp"
@@ -16,11 +15,10 @@ namespace Garage
 {
     namespace
     {
-        [[nodiscard]] bool ComputeInverse4x4(const std::array<Float32, 16>& m,
-                                             std::array<Float32, 16>&       invOut,
-                                             Float32&                       detOut) noexcept
+        [[nodiscard]] bool
+                ComputeInverse4x4(const Array<Float32, 16>& m, Array<Float32, 16>& invOut, Float32& detOut) noexcept
         {
-            std::array<Float32, 16> inv = {};
+            Array<Float32, 16> inv = {};
 
             inv[0] = m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] + m[9] * m[7] * m[14] +
                     m[13] * m[6] * m[11] - m[13] * m[7] * m[10];
@@ -243,8 +241,8 @@ namespace Garage
     Float32 Matrix4x4<TScalar>::GetDeterminant() const noexcept
         requires Floatable<TScalar>
     {
-        std::array<Float32, 16> ignored = {};
-        Float32                 det     = 0.0f;
+        Array<Float32, 16> ignored = {};
+        Float32            det     = 0.0f;
         (void)ComputeInverse4x4(elements, ignored, det);
         return det;
     }

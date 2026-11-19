@@ -5,8 +5,7 @@
 
 #include "garage/actors/actor.hpp"
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/graphics/terrain.hpp"
 

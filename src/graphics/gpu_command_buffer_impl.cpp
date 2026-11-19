@@ -1,11 +1,8 @@
 #include "gpu_command_buffer_impl.hpp"
 
 #include <algorithm>
-#include <array>
 #include <cstring>
 #include <limits>
-#include <span>
-#include <string>
 #include <utility>
 
 #include <SDL3/SDL_error.h>
@@ -13,8 +10,8 @@
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_rect.h>
 
-#include "garage/core/allocator.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/graphics/gpu_buffer.hpp"
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -48,11 +45,11 @@ namespace Garage
         Release();
     }
 
-    Result<void, std::pmr::string> GPUCommandBufferImpl::Reset()
+    Result<void, String> GPUCommandBufferImpl::Reset()
     {
         if (device == nullptr || device->GetSDLDevice() == nullptr)
         {
-            return Result<void, std::pmr::string>::Err(GraphicsDetail::MakeError("유효한 GPU 디바이스가 필요합니다."));
+            return Result<void, String>::Err(GraphicsDetail::MakeError("유효한 GPU 디바이스가 필요합니다."));
         }
 
         EndRenderPass();
@@ -77,23 +74,23 @@ namespace Garage
         commandBuffer = SDL_AcquireGPUCommandBuffer(device->GetSDLDevice());
         if (commandBuffer == nullptr)
         {
-            return Result<void, std::pmr::string>::Err(
+            return Result<void, String>::Err(
                     GraphicsDetail::FormatError("SDL_GPU 명령 버퍼 획득에 실패했습니다: {}", SDL_GetError()));
         }
 
-        return Result<void, std::pmr::string>::Ok();
+        return Result<void, String>::Ok();
     }
 
-    Result<void, std::pmr::string> GPUCommandBufferImpl::Submit(IGPUFence* fence)
+    Result<void, String> GPUCommandBufferImpl::Submit(IGPUFence* fence)
     {
         if (commandBuffer == nullptr)
         {
-            return Result<void, std::pmr::string>::Err(GraphicsDetail::MakeError("제출할 GPU 명령 버퍼가 없습니다."));
+            return Result<void, String>::Err(GraphicsDetail::MakeError("제출할 GPU 명령 버퍼가 없습니다."));
         }
 
         EndRenderPass();
 
-        std::pmr::string errorMessage(Allocator::GetMemoryResource());
+        String errorMessage;
         if (fence != nullptr)
         {
             auto*         fenceImpl = static_cast<GPUFenceImpl*>(fence);
@@ -124,41 +121,37 @@ namespace Garage
 
         if (!errorMessage.empty())
         {
-            return Result<void, std::pmr::string>::Err(std::move(errorMessage));
+            return Result<void, String>::Err(std::move(errorMessage));
         }
 
-        return Result<void, std::pmr::string>::Ok();
+        return Result<void, String>::Ok();
     }
 
-    Result<void, std::pmr::string> GPUCommandBufferImpl::SetGraphicsConstants(UInt32                rootSlot,
-                                                                              std::span<const Byte> bytes)
+    Result<void, String> GPUCommandBufferImpl::SetGraphicsConstants(UInt32 rootSlot, Span<const Byte> bytes)
     {
         if (commandBuffer == nullptr)
         {
-            return Result<void, std::pmr::string>::Err(GraphicsDetail::MakeError("유효한 GPU 명령 버퍼가 필요합니다."));
+            return Result<void, String>::Err(GraphicsDetail::MakeError("유효한 GPU 명령 버퍼가 필요합니다."));
         }
 
         if (bytes.empty())
         {
-            return Result<void, std::pmr::string>::Err(
-                    GraphicsDetail::MakeError("그래픽스 상수 버퍼 데이터가 비어 있습니다."));
+            return Result<void, String>::Err(GraphicsDetail::MakeError("그래픽스 상수 버퍼 데이터가 비어 있습니다."));
         }
 
         if (bytes.size() > std::numeric_limits<UInt32>::max())
         {
-            return Result<void, std::pmr::string>::Err(
+            return Result<void, String>::Err(
                     GraphicsDetail::MakeError("그래픽스 상수 버퍼 크기가 32비트 범위를 초과했습니다."));
         }
 
         const UInt32 BYTE_SIZE = static_cast<UInt32>(bytes.size());
         SDL_PushGPUVertexUniformData(commandBuffer, rootSlot, bytes.data(), BYTE_SIZE);
         SDL_PushGPUFragmentUniformData(commandBuffer, rootSlot, bytes.data(), BYTE_SIZE);
-        return Result<void, std::pmr::string>::Ok();
+        return Result<void, String>::Ok();
     }
 
-    void GPUCommandBufferImpl::SetGraphicsRootConstants(UInt32                rootSlot,
-                                                        std::span<const Byte> bytes,
-                                                        UInt32                offset) noexcept
+    void GPUCommandBufferImpl::SetGraphicsRootConstants(UInt32 rootSlot, Span<const Byte> bytes, UInt32 offset) noexcept
     {
         if (commandBuffer == nullptr || bytes.empty())
         {
@@ -189,29 +182,29 @@ namespace Garage
         }
     }
 
-    Result<void, std::pmr::string>
-            GPUCommandBufferImpl::BindTextures(std::span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures)
+    Result<void, String>
+            GPUCommandBufferImpl::BindTextures(Span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures)
     {
         if (!EnsureRenderPass())
         {
-            return Result<void, std::pmr::string>::Err(
+            return Result<void, String>::Err(
                     GraphicsDetail::MakeError("텍스처 바인딩을 위한 렌더 패스를 시작할 수 없습니다."));
         }
 
         if (device == nullptr)
         {
-            return Result<void, std::pmr::string>::Err(GraphicsDetail::MakeError("유효한 GPU 디바이스가 필요합니다."));
+            return Result<void, String>::Err(GraphicsDetail::MakeError("유효한 GPU 디바이스가 필요합니다."));
         }
 
         SDL_GPUSampler* defaultSampler  = device->GetDefaultSampler();
         SDL_GPUTexture* fallbackTexture = device->GetFallbackTexture();
         if (defaultSampler == nullptr || fallbackTexture == nullptr)
         {
-            return Result<void, std::pmr::string>::Err(
+            return Result<void, String>::Err(
                     GraphicsDetail::MakeError("텍스처 바인딩에 필요한 기본 샘플러 또는 폴백 텍스처가 없습니다."));
         }
 
-        std::array<SDL_GPUTextureSamplerBinding, TEXTURE_SLOT_COUNT> bindings{};
+        Array<SDL_GPUTextureSamplerBinding, TEXTURE_SLOT_COUNT> bindings{};
         for (USize index = 0; index < TEXTURE_SLOT_COUNT; ++index)
         {
             const IGPUTexture2D* texture = textures[index];
@@ -230,7 +223,7 @@ namespace Garage
         }
 
         SDL_BindGPUFragmentSamplers(renderPass, 0u, bindings.data(), TEXTURE_SLOT_COUNT);
-        return Result<void, std::pmr::string>::Ok();
+        return Result<void, String>::Ok();
     }
 
     void GPUCommandBufferImpl::CopyGPUBuffer(const IGPUBuffer& destination,

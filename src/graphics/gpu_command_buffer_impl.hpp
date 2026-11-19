@@ -1,13 +1,10 @@
 #ifndef GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_IMPL_HPP
 #define GARAGE_GRAPHICS_GPU_COMMAND_BUFFER_IMPL_HPP
 
-#include <array>
-#include <span>
-#include <string>
-
 #include <SDL3/SDL_gpu.h>
 
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
 #include "garage/graphics/gpu_target.hpp"
@@ -31,19 +28,16 @@ namespace Garage
         explicit GPUCommandBufferImpl(const GPUDeviceImpl* device) noexcept;
         ~GPUCommandBufferImpl() noexcept override;
 
-        [[nodiscard]] Result<void, std::pmr::string> Reset() override;
-        [[nodiscard]] Result<void, std::pmr::string> Submit(IGPUFence* fence = nullptr) override;
+        [[nodiscard]] Result<void, String> Reset() override;
+        [[nodiscard]] Result<void, String> Submit(IGPUFence* fence = nullptr) override;
 
-        [[nodiscard]] Result<void, std::pmr::string> SetGraphicsConstants(UInt32                rootSlot,
-                                                                          std::span<const Byte> bytes) override;
+        [[nodiscard]] Result<void, String> SetGraphicsConstants(UInt32 rootSlot, Span<const Byte> bytes) override;
 
-        void SetGraphicsRootConstants(UInt32                rootSlot,
-                                      std::span<const Byte> bytes,
-                                      UInt32                offset = 0) noexcept override;
+        void SetGraphicsRootConstants(UInt32 rootSlot, Span<const Byte> bytes, UInt32 offset = 0) noexcept override;
         void SetGPUGraphicsPipelineState(const IGPUGraphicsPipelineState& pipelineState) noexcept override;
 
-        [[nodiscard]] Result<void, std::pmr::string>
-                BindTextures(std::span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures) override;
+        [[nodiscard]] Result<void, String>
+                BindTextures(Span<const IGPUTexture2D* const, TEXTURE_SLOT_COUNT> textures) override;
 
         void CopyGPUBuffer(const IGPUBuffer& destination,
                            UInt64            destinationOffset,
@@ -97,22 +91,22 @@ namespace Garage
 
         static constexpr USize ROOT_CONSTANT_BYTE_SIZE = ROOT_CONSTANT_COUNT * sizeof(UInt32);
 
-        const GPUDeviceImpl*                      device             = nullptr;
-        SDL_GPUCommandBuffer*                     commandBuffer      = nullptr;
-        SDL_GPURenderPass*                        renderPass         = nullptr;
-        const GPUGraphicsPipelineStateImpl*       boundPipeline      = nullptr;
-        GPUTarget                                 activeTarget       = {};
-        bool                                      hasActiveTarget    = false;
-        GPURect                                   activeTargetBounds = {};
-        GPUViewport                               activeViewport     = {};
-        GPURect                                   pendingScissorRect = {};
-        bool                                      hasPendingViewport = false;
-        bool                                      hasPendingScissor  = false;
-        bool                                      pendingClearColor  = false;
-        ColorRGBAFloat                            clearColor         = ColorRGBAFloat::GetBlack();
-        bool                                      pendingClearDepth  = false;
-        Float32                                   clearDepth         = GPUTarget::DEPTH_CLEAR_VALUE;
-        std::array<Byte, ROOT_CONSTANT_BYTE_SIZE> rootConstantsData  = {};
+        const GPUDeviceImpl*                 device             = nullptr;
+        SDL_GPUCommandBuffer*                commandBuffer      = nullptr;
+        SDL_GPURenderPass*                   renderPass         = nullptr;
+        const GPUGraphicsPipelineStateImpl*  boundPipeline      = nullptr;
+        GPUTarget                            activeTarget       = {};
+        bool                                 hasActiveTarget    = false;
+        GPURect                              activeTargetBounds = {};
+        GPUViewport                          activeViewport     = {};
+        GPURect                              pendingScissorRect = {};
+        bool                                 hasPendingViewport = false;
+        bool                                 hasPendingScissor  = false;
+        bool                                 pendingClearColor  = false;
+        ColorRGBAFloat                       clearColor         = ColorRGBAFloat::GetBlack();
+        bool                                 pendingClearDepth  = false;
+        Float32                              clearDepth         = GPUTarget::DEPTH_CLEAR_VALUE;
+        Array<Byte, ROOT_CONSTANT_BYTE_SIZE> rootConstantsData  = {};
     };
 
     inline const GPURect& GPUCommandBufferImpl::GetActiveTargetBounds() const noexcept

@@ -3,11 +3,10 @@
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
-#include <span>
 #include <utility>
-#include <vector>
 
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
 #include "garage/graphics/gpu_mesh.hpp"
@@ -17,16 +16,16 @@
 
 namespace Garage
 {
-    TerrainAsset::TerrainAsset(std::filesystem::path       path,
-                               UInt32                      width,
-                               UInt32                      height,
-                               bool                        is16Bit,
-                               Float32                     cellSize,
-                               Float32                     heightScale,
-                               const Vector2D<Float32>&    uvTiling,
-                               std::pmr::vector<Float32>&& normalizedHeights,
-                               IGPUDevice&                 device,
-                               IGPUMesh*                   gpuMesh) noexcept
+    TerrainAsset::TerrainAsset(std::filesystem::path    path,
+                               UInt32                   width,
+                               UInt32                   height,
+                               bool                     is16Bit,
+                               Float32                  cellSize,
+                               Float32                  heightScale,
+                               const Vector2D<Float32>& uvTiling,
+                               Vector<Float32>&&        normalizedHeights,
+                               IGPUDevice&              device,
+                               IGPUMesh*                gpuMesh) noexcept
         : AssetBase(std::move(path))
         , device(&device)
         , width(width)
@@ -100,13 +99,13 @@ namespace Garage
         return CalculateGridNormal(normalizedHeights, width, height, x, z, cellSize, heightScale);
     }
 
-    Vector3D<Float32> TerrainAsset::CalculateGridNormal(std::span<const Float32> normalizedHeights,
-                                                        UInt32                   width,
-                                                        UInt32                   height,
-                                                        UInt32                   x,
-                                                        UInt32                   z,
-                                                        Float32                  cellSize,
-                                                        Float32                  heightScale) noexcept
+    Vector3D<Float32> TerrainAsset::CalculateGridNormal(Span<const Float32> normalizedHeights,
+                                                        UInt32              width,
+                                                        UInt32              height,
+                                                        UInt32              x,
+                                                        UInt32              z,
+                                                        Float32             cellSize,
+                                                        Float32             heightScale) noexcept
     {
         if (width < 2 || height < 2 || cellSize <= 0.0f ||
             normalizedHeights.size() < static_cast<USize>(width) * height)

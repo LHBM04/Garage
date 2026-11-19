@@ -1,7 +1,6 @@
 #include "gpu_mesh_impl.hpp"
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/graphics/gpu_buffer.hpp"
 #include "garage/graphics/gpu_types.hpp"

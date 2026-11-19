@@ -1,6 +1,6 @@
 ﻿#include "garage/platform/input_provider.hpp"
 
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/math/vector2d.hpp"
 

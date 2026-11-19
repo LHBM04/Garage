@@ -3,17 +3,14 @@
 
 #include <concepts>
 #include <filesystem>
-#include <string>
 #include <typeindex>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
-#include "../core/allocator.hpp"
 #include "../core/app_subsystem.hpp"
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
+#include "../core/memory.hpp"
 #include "../core/system_status.hpp"
-#include "../core/types.hpp"
 
 #include "../utilities/logger.hpp"
 
@@ -59,17 +56,17 @@ namespace Garage
         template <std::derived_from<AssetBase> TAsset>
         [[nodiscard]] const TAsset* GetLoadedAsset(const std::filesystem::path& path) const noexcept;
 
-        using AssetImporterList = std::pmr::vector<Allocator::UniquePtr<AssetImporter<>>>;
-        using AssetImporterDict = std::pmr::unordered_map<std::type_index, AssetImporter<>*>;
+        using AssetImporterList = Vector<UniquePtr<AssetImporter<>>>;
+        using AssetImporterDict = UnorderedMap<std::type_index, AssetImporter<>*>;
 
-        using AssetList = std::pmr::vector<Allocator::UniquePtr<AssetBase>>;
-        using AssetDict = std::pmr::unordered_map<std::filesystem::path, const AssetBase*, PathHash>;
+        using AssetList = Vector<UniquePtr<AssetBase>>;
+        using AssetDict = UnorderedMap<std::filesystem::path, const AssetBase*, PathHash>;
 
-        AssetImporterList assetImporters{Allocator::GetMemoryResource()};
-        AssetImporterDict assetImportersByType{Allocator::GetMemoryResource()};
+        AssetImporterList assetImporters;
+        AssetImporterDict assetImportersByType;
 
-        AssetList assets{Allocator::GetMemoryResource()};
-        AssetDict assetsByPath{Allocator::GetMemoryResource()};
+        AssetList assets;
+        AssetDict assetsByPath;
 
         Int32 worldExitListenerId = 0;
     };
@@ -87,9 +84,9 @@ namespace Garage
     template <std::derived_from<AssetImporter<>> TAssetImporter, class... TArgs>
     void AssetSubsystem::AddImporter(TArgs&&... args)
     {
-        const auto GET_ASSET_TYPE = []<class TImporter, std::derived_from<AssetBase> TAsset>(
-                                            Result<Allocator::UniquePtr<TAsset>, std::pmr::string> (TImporter::*)(
-                                                    const std::filesystem::path&) const) noexcept
+        const auto GET_ASSET_TYPE =
+                []<class TImporter, std::derived_from<AssetBase> TAsset>(
+                        Result<UniquePtr<TAsset>, String> (TImporter::*)(const std::filesystem::path&) const) noexcept
         {
             return std::type_index(typeid(TAsset));
         };
@@ -100,9 +97,8 @@ namespace Garage
             return;
         }
 
-        Allocator::UniquePtr<TAssetImporter> importer =
-                Allocator::MakeUnique<TAssetImporter>(this, std::forward<TArgs>(args)...);
-        AssetImporter<>* pointer = importer.get();
+        UniquePtr<TAssetImporter> importer = MakeUnique<TAssetImporter>(this, std::forward<TArgs>(args)...);
+        AssetImporter<>*          pointer  = importer.get();
         assetImporters.emplace_back(std::move(importer));
         assetImportersByType.emplace(ASSET_TYPE, pointer);
     }

@@ -1,16 +1,11 @@
 #ifndef GARAGE_RESOURCES_BITMAP_FONT_ASSET_HPP
 #define GARAGE_RESOURCES_BITMAP_FONT_ASSET_HPP
 
-#include <array>
 #include <filesystem>
-#include <span>
-#include <string>
 #include <utility>
-#include <vector>
 
-#include "../core/allocator.hpp"
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "asset.hpp"
 
@@ -18,28 +13,28 @@ namespace Garage
 {
     struct GARAGE_API FontAtlasData final
     {
-        Int32            index = 0;
-        std::pmr::string texture{Allocator::GetMemoryResource()};
-        Int32            width  = 0;
-        Int32            height = 0;
+        Int32  index = 0;
+        String texture;
+        Int32  width  = 0;
+        Int32  height = 0;
     };
 
     struct GARAGE_API FontCharacterData final
     {
-        UInt32                 unicode        = 0;
-        UInt32                 glyphIndex     = 0;
-        Int32                  atlasIndex     = 0;
-        Float32                characterScale = 0.0f;
-        Float32                glyphScale     = 0.0f;
-        std::array<Float32, 4> glyphRect{};
-        std::array<Float32, 4> sampleRect{};
-        std::array<Float32, 2> uvMin{};
-        std::array<Float32, 2> uvMax{};
-        Float32                width    = 0.0f;
-        Float32                height   = 0.0f;
-        Float32                bearingX = 0.0f;
-        Float32                bearingY = 0.0f;
-        Float32                advance  = 0.0f;
+        UInt32            unicode        = 0;
+        UInt32            glyphIndex     = 0;
+        Int32             atlasIndex     = 0;
+        Float32           characterScale = 0.0f;
+        Float32           glyphScale     = 0.0f;
+        Array<Float32, 4> glyphRect{};
+        Array<Float32, 4> sampleRect{};
+        Array<Float32, 2> uvMin{};
+        Array<Float32, 2> uvMax{};
+        Float32           width    = 0.0f;
+        Float32           height   = 0.0f;
+        Float32           bearingX = 0.0f;
+        Float32           bearingY = 0.0f;
+        Float32           advance  = 0.0f;
     };
 
     class GARAGE_API BitmapFontAsset final : public AssetBase
@@ -47,11 +42,11 @@ namespace Garage
     public:
         explicit BitmapFontAsset(std::filesystem::path path) noexcept;
 
-        [[nodiscard]] const std::pmr::string& GetName() const noexcept;
-        void                                  SetName(std::pmr::string&& value) noexcept;
+        [[nodiscard]] const String& GetName() const noexcept;
+        void                        SetName(String&& value) noexcept;
 
-        [[nodiscard]] const std::pmr::string& GetRenderMode() const noexcept;
-        void                                  SetRenderMode(std::pmr::string&& value) noexcept;
+        [[nodiscard]] const String& GetRenderMode() const noexcept;
+        void                        SetRenderMode(String&& value) noexcept;
 
         [[nodiscard]] bool IsDistanceField() const noexcept;
         void               SetDistanceField(bool value) noexcept;
@@ -74,24 +69,24 @@ namespace Garage
         [[nodiscard]] Int32 GetAtlasPadding() const noexcept;
         void                SetAtlasPadding(Int32 value) noexcept;
 
-        [[nodiscard]] std::span<const FontAtlasData> GetAtlasData() const noexcept;
-        void                                         SetAtlasData(std::pmr::vector<FontAtlasData>&& value) noexcept;
+        [[nodiscard]] Span<const FontAtlasData> GetAtlasData() const noexcept;
+        void                                    SetAtlasData(Vector<FontAtlasData>&& value) noexcept;
 
-        [[nodiscard]] std::span<const FontCharacterData> GetCharacters() const noexcept;
-        void SetCharacters(std::pmr::vector<FontCharacterData>&& value) noexcept;
+        [[nodiscard]] Span<const FontCharacterData> GetCharacters() const noexcept;
+        void                                        SetCharacters(Vector<FontCharacterData>&& value) noexcept;
 
     private:
-        std::pmr::string                    name{Allocator::GetMemoryResource()};
-        std::pmr::string                    renderMode{Allocator::GetMemoryResource()};
-        bool                                isDistanceField = false;
-        Float32                             pointSize       = 0.0f;
-        Float32                             faceScale       = 0.0f;
-        Float32                             lineHeight      = 0.0f;
-        Float32                             ascentLine      = 0.0f;
-        Float32                             descentLine     = 0.0f;
-        Int32                               atlasPadding    = 0;
-        std::pmr::vector<FontAtlasData>     atlasData{Allocator::GetMemoryResource()};
-        std::pmr::vector<FontCharacterData> characters{Allocator::GetMemoryResource()};
+        String                    name;
+        String                    renderMode;
+        bool                      isDistanceField = false;
+        Float32                   pointSize       = 0.0f;
+        Float32                   faceScale       = 0.0f;
+        Float32                   lineHeight      = 0.0f;
+        Float32                   ascentLine      = 0.0f;
+        Float32                   descentLine     = 0.0f;
+        Int32                     atlasPadding    = 0;
+        Vector<FontAtlasData>     atlasData;
+        Vector<FontCharacterData> characters;
     };
 
     inline BitmapFontAsset::BitmapFontAsset(std::filesystem::path path) noexcept
@@ -99,22 +94,22 @@ namespace Garage
     {
     }
 
-    inline const std::pmr::string& BitmapFontAsset::GetName() const noexcept
+    inline const String& BitmapFontAsset::GetName() const noexcept
     {
         return name;
     }
 
-    inline void BitmapFontAsset::SetName(std::pmr::string&& value) noexcept
+    inline void BitmapFontAsset::SetName(String&& value) noexcept
     {
         name = std::move(value);
     }
 
-    inline const std::pmr::string& BitmapFontAsset::GetRenderMode() const noexcept
+    inline const String& BitmapFontAsset::GetRenderMode() const noexcept
     {
         return renderMode;
     }
 
-    inline void BitmapFontAsset::SetRenderMode(std::pmr::string&& value) noexcept
+    inline void BitmapFontAsset::SetRenderMode(String&& value) noexcept
     {
         renderMode = std::move(value);
     }
@@ -189,22 +184,22 @@ namespace Garage
         atlasPadding = value;
     }
 
-    inline std::span<const FontAtlasData> BitmapFontAsset::GetAtlasData() const noexcept
+    inline Span<const FontAtlasData> BitmapFontAsset::GetAtlasData() const noexcept
     {
         return atlasData;
     }
 
-    inline void BitmapFontAsset::SetAtlasData(std::pmr::vector<FontAtlasData>&& value) noexcept
+    inline void BitmapFontAsset::SetAtlasData(Vector<FontAtlasData>&& value) noexcept
     {
         atlasData = std::move(value);
     }
 
-    inline std::span<const FontCharacterData> BitmapFontAsset::GetCharacters() const noexcept
+    inline Span<const FontCharacterData> BitmapFontAsset::GetCharacters() const noexcept
     {
         return characters;
     }
 
-    inline void BitmapFontAsset::SetCharacters(std::pmr::vector<FontCharacterData>&& value) noexcept
+    inline void BitmapFontAsset::SetCharacters(Vector<FontCharacterData>&& value) noexcept
     {
         characters = std::move(value);
     }

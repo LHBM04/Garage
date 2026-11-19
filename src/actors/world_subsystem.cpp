@@ -2,16 +2,15 @@
 
 #include <algorithm>
 #include <utility>
-#include <vector>
 
 #include "garage/actors/actor.hpp"
 #include "garage/actors/world.hpp"
 
-#include "garage/core/allocator.hpp"
-#include "garage/core/defines.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/render_subsystem.hpp"
 
@@ -22,7 +21,7 @@ namespace Garage
         worlds.clear();
     }
 
-    WorldBase* WorldSubsystem::AddWorld(Allocator::UniquePtr<WorldBase> world)
+    WorldBase* WorldSubsystem::AddWorld(UniquePtr<WorldBase> world)
     {
         ASSERT(world != nullptr);
         ASSERT(currentWorld == nullptr);
@@ -40,7 +39,7 @@ namespace Garage
         }
 
         const bool IS_REGISTERED = std::ranges::any_of(worlds,
-                                                       [targetWorld](const Allocator::UniquePtr<WorldBase>& world)
+                                                       [targetWorld](const UniquePtr<WorldBase>& world)
                                                        {
                                                            return world.get() == targetWorld;
                                                        });
@@ -110,7 +109,7 @@ namespace Garage
 
     ESystemStatus WorldSubsystem::OnEarlyUpdate(SystemContext& context)
     {
-        std::pmr::vector<Allocator::UniquePtr<ActorBase>> persistentActors{Allocator::GetMemoryResource()};
+        Vector<UniquePtr<ActorBase>> persistentActors;
         if (nextWorld != nullptr)
         {
             if (nextWorld != currentWorld)

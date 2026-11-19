@@ -1,10 +1,8 @@
 ﻿#ifndef GARAGE_PLATFORM_DISPLAY_HPP
 #define GARAGE_PLATFORM_DISPLAY_HPP
 
-#include <string_view>
-
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../math/vector2d.hpp"
 
@@ -26,8 +24,8 @@ namespace Garage
 
         [[nodiscard]] virtual EId GetID() const noexcept = 0;
 
-        [[nodiscard]] virtual std::string_view GetCaption() const noexcept                 = 0;
-        virtual void                           SetCaption(std::string_view value) noexcept = 0;
+        [[nodiscard]] virtual StringView GetCaption() const noexcept           = 0;
+        virtual void                     SetCaption(StringView value) noexcept = 0;
 
         [[nodiscard]] virtual Vector2DInt GetPosition() const noexcept                      = 0;
         virtual void                      SetPosition(const Vector2DInt& position) noexcept = 0;

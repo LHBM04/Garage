@@ -3,17 +3,15 @@
 #include <algorithm>
 #include <cmath>
 #include <ranges>
-#include <string_view>
 #include <utility>
-#include <vector>
 
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
-#include "garage/core/allocator.hpp"
-#include "garage/core/defines.hpp"
+#include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
+#include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/camera.hpp"
 #include "garage/graphics/directional_light.hpp"
@@ -310,8 +308,8 @@ namespace Garage
 
     ActorBase* WorldBase::Instantiate()
     {
-        Allocator::UniquePtr<ActorBase> actor  = Allocator::MakeUnique<ActorBase>(this);
-        ActorBase*                      result = actor.get();
+        UniquePtr<ActorBase> actor  = MakeUnique<ActorBase>(this);
+        ActorBase*           result = actor.get();
         actors.push_back(std::move(actor));
         return result;
     }
@@ -371,7 +369,7 @@ namespace Garage
         }
 
         const auto DESTROYED_COUNT = std::ranges::count_if(actors,
-                                                           [](const Allocator::UniquePtr<ActorBase>& actor)
+                                                           [](const UniquePtr<ActorBase>& actor)
                                                            {
                                                                return actor->IsDestroyed();
                                                            });
@@ -380,7 +378,7 @@ namespace Garage
             return;
         }
 
-        std::pmr::vector<Allocator::UniquePtr<ActorBase>> destroyed{Allocator::GetMemoryResource()};
+        Vector<UniquePtr<ActorBase>> destroyed;
         destroyed.reserve(static_cast<USize>(DESTROYED_COUNT));
 
         USize remainingCount = 0;
@@ -411,10 +409,10 @@ namespace Garage
             return;
         }
 
-        std::pmr::vector<Allocator::UniquePtr<ActorBase>> removing(std::move(actors), Allocator::GetMemoryResource());
+        Vector<UniquePtr<ActorBase>> removing(std::move(actors));
         actors.clear();
 
-        for (Allocator::UniquePtr<ActorBase>& actor : removing | std::views::reverse)
+        for (UniquePtr<ActorBase>& actor : removing | std::views::reverse)
         {
             actor->Destroy();
             actor.reset();
@@ -492,9 +490,9 @@ namespace Garage
         return nullptr;
     }
 
-    std::pmr::vector<Allocator::UniquePtr<ActorBase>> WorldBase::ExtractPersistentActors()
+    Vector<UniquePtr<ActorBase>> WorldBase::ExtractPersistentActors()
     {
-        std::pmr::vector<Allocator::UniquePtr<ActorBase>> extracted{Allocator::GetMemoryResource()};
+        Vector<UniquePtr<ActorBase>> extracted;
         for (auto actorIt = actors.begin(); actorIt != actors.end();)
         {
             ActorBase* actor = actorIt->get();
@@ -521,9 +519,9 @@ namespace Garage
         return extracted;
     }
 
-    void WorldBase::AdoptActors(std::pmr::vector<Allocator::UniquePtr<ActorBase>>&& adopted)
+    void WorldBase::AdoptActors(Vector<UniquePtr<ActorBase>>&& adopted)
     {
-        for (Allocator::UniquePtr<ActorBase>& actor : adopted)
+        for (UniquePtr<ActorBase>& actor : adopted)
         {
             if (actor == nullptr)
             {
@@ -545,9 +543,9 @@ namespace Garage
         }
     }
 
-    ActorBase* WorldBase::FindActorByName(std::string_view name) noexcept
+    ActorBase* WorldBase::FindActorByName(StringView name) noexcept
     {
-        for (const Allocator::UniquePtr<ActorBase>& actor : actors)
+        for (const UniquePtr<ActorBase>& actor : actors)
         {
             if (!actor->IsDestroyed() && actor->GetName() == name)
             {
@@ -558,9 +556,9 @@ namespace Garage
         return nullptr;
     }
 
-    const ActorBase* WorldBase::FindActorByName(std::string_view name) const noexcept
+    const ActorBase* WorldBase::FindActorByName(StringView name) const noexcept
     {
-        for (const Allocator::UniquePtr<ActorBase>& actor : actors)
+        for (const UniquePtr<ActorBase>& actor : actors)
         {
             if (!actor->IsDestroyed() && actor->GetName() == name)
             {
@@ -571,24 +569,10 @@ namespace Garage
         return nullptr;
     }
 
-    std::pmr::vector<ActorBase*> WorldBase::FindActorsByName(std::string_view name)
+    Vector<ActorBase*> WorldBase::FindActorsByName(StringView name)
     {
-        std::pmr::vector<ActorBase*> result{Allocator::GetMemoryResource()};
-        for (const Allocator::UniquePtr<ActorBase>& actor : actors)
-        {
-            if (!actor->IsDestroyed() && actor->GetName() == name)
-            {
-                result.push_back(actor.get());
-            }
-        }
-
-        return result;
-    }
-
-    std::pmr::vector<const ActorBase*> WorldBase::FindActorsByName(std::string_view name) const
-    {
-        std::pmr::vector<const ActorBase*> result{Allocator::GetMemoryResource()};
-        for (const Allocator::UniquePtr<ActorBase>& actor : actors)
+        Vector<ActorBase*> result;
+        for (const UniquePtr<ActorBase>& actor : actors)
         {
             if (!actor->IsDestroyed() && actor->GetName() == name)
             {
@@ -599,9 +583,23 @@ namespace Garage
         return result;
     }
 
-    ActorBase* WorldBase::FindActorByTag(std::string_view tag) noexcept
+    Vector<const ActorBase*> WorldBase::FindActorsByName(StringView name) const
     {
-        for (const Allocator::UniquePtr<ActorBase>& actor : actors)
+        Vector<const ActorBase*> result;
+        for (const UniquePtr<ActorBase>& actor : actors)
+        {
+            if (!actor->IsDestroyed() && actor->GetName() == name)
+            {
+                result.push_back(actor.get());
+            }
+        }
+
+        return result;
+    }
+
+    ActorBase* WorldBase::FindActorByTag(StringView tag) noexcept
+    {
+        for (const UniquePtr<ActorBase>& actor : actors)
         {
             if (!actor->IsDestroyed() && actor->CompareTag(tag))
             {
@@ -612,9 +610,9 @@ namespace Garage
         return nullptr;
     }
 
-    const ActorBase* WorldBase::FindActorByTag(std::string_view tag) const noexcept
+    const ActorBase* WorldBase::FindActorByTag(StringView tag) const noexcept
     {
-        for (const Allocator::UniquePtr<ActorBase>& actor : actors)
+        for (const UniquePtr<ActorBase>& actor : actors)
         {
             if (!actor->IsDestroyed() && actor->CompareTag(tag))
             {
@@ -625,10 +623,10 @@ namespace Garage
         return nullptr;
     }
 
-    std::pmr::vector<ActorBase*> WorldBase::FindActorsByTag(std::string_view tag)
+    Vector<ActorBase*> WorldBase::FindActorsByTag(StringView tag)
     {
-        std::pmr::vector<ActorBase*> result{Allocator::GetMemoryResource()};
-        for (const Allocator::UniquePtr<ActorBase>& actor : actors)
+        Vector<ActorBase*> result;
+        for (const UniquePtr<ActorBase>& actor : actors)
         {
             if (!actor->IsDestroyed() && actor->CompareTag(tag))
             {
@@ -639,10 +637,10 @@ namespace Garage
         return result;
     }
 
-    std::pmr::vector<const ActorBase*> WorldBase::FindActorsByTag(std::string_view tag) const
+    Vector<const ActorBase*> WorldBase::FindActorsByTag(StringView tag) const
     {
-        std::pmr::vector<const ActorBase*> result{Allocator::GetMemoryResource()};
-        for (const Allocator::UniquePtr<ActorBase>& actor : actors)
+        Vector<const ActorBase*> result;
+        for (const UniquePtr<ActorBase>& actor : actors)
         {
             if (!actor->IsDestroyed() && actor->CompareTag(tag))
             {
