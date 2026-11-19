@@ -1,5 +1,5 @@
-﻿#ifndef GARAGE_CORE_TYPES_COMMON_HPP
-#define GARAGE_CORE_TYPES_COMMON_HPP
+﻿#ifndef GARAGE_CORE_COMMON_TYPES_HPP
+#define GARAGE_CORE_COMMON_TYPES_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -35,4 +35,4 @@ namespace Garage
     using Predicate = std::function<bool(TArgs...)>;
 } // namespace Garage
 
-#endif // GARAGE_CORE_TYPES_COMMON_HPP
+#endif // GARAGE_CORE_COMMON_TYPES_HPP

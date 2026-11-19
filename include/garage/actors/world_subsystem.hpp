@@ -4,10 +4,9 @@
 #include <vector>
 
 #include "../core/app_subsystem.hpp"
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
 #include "../core/system_status.hpp"
-#include "../core/types.hpp"
 
 namespace Garage
 {

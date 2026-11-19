@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-#include "../defines.hpp"
+#include "../common/defines.hpp"
 
 namespace Garage
 {

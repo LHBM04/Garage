@@ -6,7 +6,7 @@
 #include <string_view>
 #include <utility>
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
 
 namespace Garage

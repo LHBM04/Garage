@@ -8,9 +8,8 @@
 
 #include "../actors/component.hpp"
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
-#include "../core/types.hpp"
 
 #include "../math/color_rgba.hpp"
 

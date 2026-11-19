@@ -1,7 +1,7 @@
 #ifndef GARAGE_ACTORS_COMPONENT_HPP
 #define GARAGE_ACTORS_COMPONENT_HPP
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 
 namespace Garage
 {

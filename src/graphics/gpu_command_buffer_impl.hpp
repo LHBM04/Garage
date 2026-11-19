@@ -7,7 +7,7 @@
 
 #include <SDL3/SDL_gpu.h>
 
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
 #include "garage/graphics/gpu_target.hpp"

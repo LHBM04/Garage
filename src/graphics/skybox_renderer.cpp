@@ -2,8 +2,8 @@
 
 #include <array>
 
+#include "garage/core/common.hpp"
 #include "garage/core/system_context.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
 #include "garage/graphics/gpu_constants.hpp"

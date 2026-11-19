@@ -4,8 +4,7 @@
 #include <span>
 #include <string>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "gpu_types.hpp"
 

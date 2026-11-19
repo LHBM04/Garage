@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
 #include "garage/graphics/gpu_mesh.hpp"

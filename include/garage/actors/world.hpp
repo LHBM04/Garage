@@ -6,7 +6,7 @@
 #include <string_view>
 #include <vector>
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
 
 #include "../math/quaternion.hpp"

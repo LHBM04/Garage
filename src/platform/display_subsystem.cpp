@@ -9,11 +9,10 @@
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_video.h>
 
-#include "garage/core/defines.hpp"
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/platform/display_events.hpp"
 #include "garage/platform/display_options.hpp"

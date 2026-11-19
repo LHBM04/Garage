@@ -6,7 +6,7 @@
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/math/matrix4x4.hpp"
 #include "garage/math/vector2d.hpp"

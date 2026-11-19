@@ -1,11 +1,10 @@
 ﻿#include "garage/core/engine.hpp"
 
 #include "garage/core/app.hpp"
-#include "garage/core/defines.hpp"
+#include "garage/core/common.hpp"
 #include "garage/core/engine_subsystem.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
-#include "garage/core/types.hpp"
 
 namespace Garage
 {

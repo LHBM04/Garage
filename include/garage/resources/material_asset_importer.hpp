@@ -4,9 +4,8 @@
 #include <filesystem>
 #include <string>
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
-#include "../core/types.hpp"
 
 #include "../graphics/gpu_target.hpp"
 #include "../graphics/gpu_types.hpp"

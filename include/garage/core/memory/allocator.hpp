@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "../defines.hpp"
+#include "../common/defines.hpp"
 
 namespace Garage
 {

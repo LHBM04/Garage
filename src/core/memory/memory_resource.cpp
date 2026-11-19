@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <memory_resource>
 
-#include "garage/core/defines.hpp"
+#include "garage/core/common/defines.hpp"
 #include "garage/core/memory/allocator.hpp"
 
 namespace Garage::Memory

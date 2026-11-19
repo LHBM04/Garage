@@ -9,8 +9,8 @@
 #include <fmt/format.h>
 #include <rapidjson/document.h>
 
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/resources/asset_subsystem.hpp"
 #include "garage/resources/material_asset.hpp"

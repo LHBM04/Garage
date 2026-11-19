@@ -11,10 +11,10 @@
 #include <utility>
 #include <vector>
 
+#include "common.hpp"
 #include "memory.hpp"
 #include "subsystem.hpp"
 #include "system_status.hpp"
-#include "types.hpp"
 
 namespace Garage
 {

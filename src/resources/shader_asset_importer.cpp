@@ -15,8 +15,8 @@
 
 #include <rapidjson/document.h>
 
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
 #include "garage/graphics/gpu_shader.hpp"

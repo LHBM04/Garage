@@ -10,10 +10,9 @@
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
-#include "garage/core/defines.hpp"
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/camera.hpp"
 #include "garage/graphics/directional_light.hpp"

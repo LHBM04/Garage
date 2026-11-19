@@ -3,7 +3,7 @@
 
 #include <string_view>
 
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/math/vector2d.hpp"
 

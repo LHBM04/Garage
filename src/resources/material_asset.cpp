@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <utility>
 
-#include "garage/core/defines.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
 #include "garage/graphics/gpu_graphics_pipeline_state.hpp"

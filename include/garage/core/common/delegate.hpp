@@ -1,5 +1,5 @@
-﻿#ifndef GARAGE_CORE_TYPES_DELEGATE_HPP
-#define GARAGE_CORE_TYPES_DELEGATE_HPP
+﻿#ifndef GARAGE_CORE_COMMON_DELEGATE_HPP
+#define GARAGE_CORE_COMMON_DELEGATE_HPP
 
 #include <algorithm>
 #include <functional>
@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "../memory.hpp"
-#include "common.hpp"
+#include "types.hpp"
 
 namespace Garage
 {
@@ -105,4 +105,4 @@ namespace Garage
     }
 } // namespace Garage
 
-#endif // GARAGE_CORE_TYPES_DELEGATE_HPP
+#endif // GARAGE_CORE_COMMON_DELEGATE_HPP

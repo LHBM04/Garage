@@ -6,9 +6,8 @@
 #include <utility>
 #include <vector>
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
-#include "../core/types.hpp"
 
 #include "../graphics/gpu_graphics_pipeline_state.hpp"
 #include "../graphics/gpu_target.hpp"

@@ -1,7 +1,6 @@
 ﻿#include "garage/actors/box_collider.hpp"
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/math/bounding_box.hpp"
 #include "garage/math/bounding_oriented_box.hpp"

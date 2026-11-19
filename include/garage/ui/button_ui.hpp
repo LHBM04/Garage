@@ -3,8 +3,7 @@
 
 #include "../actors/component.hpp"
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 namespace Garage
 {

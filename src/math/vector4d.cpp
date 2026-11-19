@@ -4,8 +4,7 @@
 #include <cmath>
 #include <compare>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/math/mathf.hpp"
 #include "garage/math/vector2d.hpp"

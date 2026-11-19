@@ -5,8 +5,8 @@
 #include <string>
 #include <string_view>
 
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/math/mathf.hpp"
 

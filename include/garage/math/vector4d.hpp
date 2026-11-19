@@ -4,8 +4,7 @@
 #include <array>
 #include <compare>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "mathf.hpp"
 

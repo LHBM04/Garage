@@ -3,8 +3,7 @@
 
 #include <array>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "mathf.hpp"
 #include "vector3d.hpp"

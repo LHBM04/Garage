@@ -5,8 +5,7 @@
 #include <compare>
 #include <span>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "mathf.hpp"
 #include "matrix4x4.hpp"

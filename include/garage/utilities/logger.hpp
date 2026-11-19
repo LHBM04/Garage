@@ -10,7 +10,7 @@
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 
 namespace Garage::Logger
 {

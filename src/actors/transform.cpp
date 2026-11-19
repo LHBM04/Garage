@@ -4,8 +4,7 @@
 #include <cmath>
 #include <vector>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 namespace Garage
 {

@@ -10,8 +10,8 @@
 
 #include <SDL3/SDL_gpu.h>
 
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_types.hpp"
 

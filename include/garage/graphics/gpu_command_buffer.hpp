@@ -5,8 +5,7 @@
 #include <string>
 #include <type_traits>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "../math/color_rgba.hpp"
 

@@ -13,8 +13,8 @@
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_rect.h>
 
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_buffer.hpp"
 #include "garage/graphics/gpu_command_buffer.hpp"

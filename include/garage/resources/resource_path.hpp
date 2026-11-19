@@ -5,8 +5,8 @@
 #include <string>
 #include <string_view>
 
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
-#include "../core/types.hpp"
 
 namespace Garage
 {

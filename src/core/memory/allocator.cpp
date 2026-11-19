@@ -7,7 +7,7 @@
 
 #include <SDL3/SDL_stdinc.h>
 
-#include "garage/core/defines.hpp"
+#include "garage/core/common/defines.hpp"
 
 namespace Garage::Memory
 {

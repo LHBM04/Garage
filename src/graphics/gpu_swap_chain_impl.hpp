@@ -3,8 +3,8 @@
 
 #include <string>
 
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_swap_chain.hpp"
 #include "garage/graphics/gpu_target.hpp"

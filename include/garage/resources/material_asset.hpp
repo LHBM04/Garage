@@ -4,8 +4,7 @@
 #include <array>
 #include <filesystem>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 #include "../graphics/gpu_types.hpp"
 

@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <string>
 
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
-#include "garage/core/types.hpp"
 
 namespace Garage
 {

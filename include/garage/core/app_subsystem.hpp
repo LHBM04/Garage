@@ -1,7 +1,7 @@
 ﻿#ifndef GARAGE_CORE_APP_SUBSYSTEM_HPP
 #define GARAGE_CORE_APP_SUBSYSTEM_HPP
 
-#include "defines.hpp"
+#include "common.hpp"
 #include "subsystem.hpp"
 #include "system_status.hpp"
 

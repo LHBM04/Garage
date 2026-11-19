@@ -2,8 +2,7 @@
 
 #include <cmath>
 
-#include "garage/core/defines.hpp"
-#include "garage/core/types.hpp"
+#include "garage/core/common.hpp"
 
 #include "garage/math/color_rgb.hpp"
 #include "garage/math/mathf.hpp"

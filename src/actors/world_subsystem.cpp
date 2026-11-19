@@ -7,11 +7,10 @@
 #include "garage/actors/actor.hpp"
 #include "garage/actors/world.hpp"
 
-#include "garage/core/defines.hpp"
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
-#include "garage/core/types.hpp"
 
 #include "garage/graphics/render_subsystem.hpp"
 

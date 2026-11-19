@@ -4,7 +4,7 @@
 #include <span>
 #include <vector>
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
 
 #include "../math/matrix4x4.hpp"

@@ -8,8 +8,7 @@
 
 #include <rapidjson/document.h>
 
-#include "../core/defines.hpp"
-#include "../core/types.hpp"
+#include "../core/common.hpp"
 
 namespace Garage::JsonUtility
 {

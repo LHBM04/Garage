@@ -1,5 +1,5 @@
-﻿#ifndef GARAGE_CORE_TYPES_RESULT_HPP
-#define GARAGE_CORE_TYPES_RESULT_HPP
+﻿#ifndef GARAGE_CORE_COMMON_RESULT_HPP
+#define GARAGE_CORE_COMMON_RESULT_HPP
 
 #include <concepts>
 #include <functional>
@@ -7,7 +7,7 @@
 #include <utility>
 #include <variant>
 
-#include "../defines.hpp"
+#include "defines.hpp"
 
 namespace Garage
 {
@@ -1462,4 +1462,4 @@ namespace Garage
     }
 } // namespace Garage
 
-#endif // GARAGE_CORE_TYPES_RESULT_HPP
+#endif // GARAGE_CORE_COMMON_RESULT_HPP

@@ -5,9 +5,8 @@
 #include <span>
 #include <vector>
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
-#include "../core/types.hpp"
 
 #include "../math/vector2d.hpp"
 #include "../math/vector3d.hpp"

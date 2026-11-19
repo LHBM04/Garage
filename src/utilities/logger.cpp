@@ -29,8 +29,8 @@
 #    include <spdlog/sinks/msvc_sink.h>
 #endif
 
+#include "garage/core/common.hpp"
 #include "garage/core/memory.hpp"
-#include "garage/core/types.hpp"
 
 namespace Garage::Logger
 {

@@ -5,9 +5,8 @@
 #include <filesystem>
 #include <string>
 
-#include "../core/defines.hpp"
+#include "../core/common.hpp"
 #include "../core/memory.hpp"
-#include "../core/types.hpp"
 
 #include "asset.hpp"
 
