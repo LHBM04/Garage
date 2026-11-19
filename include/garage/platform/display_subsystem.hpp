@@ -16,16 +16,19 @@
 
 namespace Garage
 {
+    class EventSubsystem;
+    class SystemContext;
+
     class GARAGE_API DisplaySubsystem final : public EngineSubsystemBase
     {
     public:
         DisplaySubsystem() noexcept;
 
-        [[nodiscard]] ESystemStatus OnStartup() override;
-        [[nodiscard]] ESystemStatus OnPreTick() override;
-        [[nodiscard]] ESystemStatus OnTick() override;
-        [[nodiscard]] ESystemStatus OnPostTick() override;
-        void                        OnShutdown() override;
+        [[nodiscard]] ESystemStatus OnStartup(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnPreTick(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnTick(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnPostTick(SystemContext& context) override;
+        void                        OnShutdown(SystemContext& context) override;
 
         [[nodiscard]] IDisplay* CreateDisplay(const DisplayOptions& options) noexcept;
         void                    DestroyDisplay(IDisplay* display) noexcept;
@@ -45,6 +48,7 @@ namespace Garage
         [[nodiscard]] bool IsDisplayValid(IDisplay::EId id) const noexcept;
 
     private:
+        EventSubsystem*                                  eventSubsystem = nullptr;
         std::pmr::vector<Allocator::UniquePtr<IDisplay>> displays{Allocator::GetMemoryResource()};
     };
 

@@ -7,6 +7,8 @@
 
 namespace Garage
 {
+    class SystemContext;
+
     class GARAGE_API SubsystemBase
     {
     public:
@@ -21,8 +23,8 @@ namespace Garage
         SubsystemBase(SubsystemBase&&)            = delete;
         SubsystemBase& operator=(SubsystemBase&&) = delete;
 
-        [[nodiscard]] virtual ESystemStatus OnStartup()  = 0;
-        virtual void                        OnShutdown() = 0;
+        [[nodiscard]] virtual ESystemStatus OnStartup(SystemContext& context)  = 0;
+        virtual void                        OnShutdown(SystemContext& context) = 0;
 
         [[nodiscard]] Priority GetPriority() const noexcept;
 

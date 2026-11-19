@@ -10,7 +10,7 @@ class CameraController final : public ComponentBase
     using ComponentBase::ComponentBase;
 
 public:
-    void OnUpdate() override;
+    void OnUpdate(SystemContext& context) override;
 
     void SetTerrain(const Terrain* value) noexcept;
 

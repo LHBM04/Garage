@@ -7,15 +7,17 @@
 
 namespace Garage
 {
+    class SystemContext;
+
     class GARAGE_API AppSubsystemBase : public SubsystemBase
     {
     public:
         using SubsystemBase::SubsystemBase;
 
-        [[nodiscard]] virtual ESystemStatus OnEarlyUpdate() = 0;
-        [[nodiscard]] virtual ESystemStatus OnFixedUpdate() = 0;
-        [[nodiscard]] virtual ESystemStatus OnUpdate()      = 0;
-        [[nodiscard]] virtual ESystemStatus OnLateUpdate()  = 0;
+        [[nodiscard]] virtual ESystemStatus OnEarlyUpdate(SystemContext& context) = 0;
+        [[nodiscard]] virtual ESystemStatus OnFixedUpdate(SystemContext& context) = 0;
+        [[nodiscard]] virtual ESystemStatus OnUpdate(SystemContext& context)      = 0;
+        [[nodiscard]] virtual ESystemStatus OnLateUpdate(SystemContext& context)  = 0;
     };
 } // namespace Garage
 

@@ -6,7 +6,7 @@
 namespace Garage
 {
     class ActorBase;
-    class IGPUCommandBuffer;
+    class SystemContext;
 
     class GARAGE_API ComponentBase
     {
@@ -33,17 +33,17 @@ namespace Garage
 
     protected:
         virtual void OnAwake();
-        virtual void OnStart();
+        virtual void OnStart(SystemContext& context);
         virtual void OnEnable();
         virtual void OnDisable();
-        virtual void OnFixedUpdate();
-        virtual void OnUpdate();
-        virtual void OnLateUpdate();
-        virtual void OnPreRender(IGPUCommandBuffer& commandBuffer);
-        virtual void OnRender(IGPUCommandBuffer& commandBuffer);
-        virtual void OnPostRender(IGPUCommandBuffer& commandBuffer);
+        virtual void OnFixedUpdate(SystemContext& context);
+        virtual void OnUpdate(SystemContext& context);
+        virtual void OnLateUpdate(SystemContext& context);
+        virtual void OnPreRender(SystemContext& context);
+        virtual void OnRender(SystemContext& context);
+        virtual void OnPostRender(SystemContext& context);
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-        virtual void OnDrawGizmos(IGPUCommandBuffer& commandBuffer);
+        virtual void OnDrawGizmos(SystemContext& context);
 #endif
         virtual void OnDestroy();
 
@@ -119,7 +119,7 @@ namespace Garage
     {
     }
 
-    inline void ComponentBase::OnStart()
+    inline void ComponentBase::OnStart([[maybe_unused]] SystemContext& context)
     {
     }
 
@@ -131,32 +131,32 @@ namespace Garage
     {
     }
 
-    inline void ComponentBase::OnFixedUpdate()
+    inline void ComponentBase::OnFixedUpdate([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void ComponentBase::OnUpdate()
+    inline void ComponentBase::OnUpdate([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void ComponentBase::OnLateUpdate()
+    inline void ComponentBase::OnLateUpdate([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void ComponentBase::OnPreRender(IGPUCommandBuffer& /*commandBuffer*/)
+    inline void ComponentBase::OnPreRender([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void ComponentBase::OnRender(IGPUCommandBuffer& /*commandBuffer*/)
+    inline void ComponentBase::OnRender([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void ComponentBase::OnPostRender(IGPUCommandBuffer& /*commandBuffer*/)
+    inline void ComponentBase::OnPostRender([[maybe_unused]] SystemContext& context)
     {
     }
 
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-    inline void ComponentBase::OnDrawGizmos(IGPUCommandBuffer& /*commandBuffer*/)
+    inline void ComponentBase::OnDrawGizmos([[maybe_unused]] SystemContext& context)
     {
     }
 #endif

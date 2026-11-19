@@ -7,7 +7,7 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 
-#include "garage/core/engine.hpp"
+#include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 #include "garage/core/types.hpp"
 
@@ -24,7 +24,7 @@
 
 namespace Garage
 {
-    ESystemStatus EventSubsystem::OnStartup()
+    ESystemStatus EventSubsystem::OnStartup([[maybe_unused]] SystemContext& context)
     {
         if (!SDL_InitSubSystem(SDL_INIT_EVENTS))
         {
@@ -35,10 +35,9 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus EventSubsystem::OnPreTick()
+    ESystemStatus EventSubsystem::OnPreTick(SystemContext& context)
     {
-        Engine*           engine           = Engine::GetInstance();
-        DisplaySubsystem* displaySubsystem = (engine != nullptr) ? engine->GetSubsystem<DisplaySubsystem>() : nullptr;
+        DisplaySubsystem* displaySubsystem = context.GetEngineSubsystem<DisplaySubsystem>();
 
         auto const FIND_DISPLAY = [displaySubsystem](UInt32 windowId) noexcept -> IDisplay*
         {
@@ -140,7 +139,7 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus EventSubsystem::OnTick()
+    ESystemStatus EventSubsystem::OnTick([[maybe_unused]] SystemContext& context)
     {
         readBuffer.swap(writeBuffer);
 
@@ -158,12 +157,12 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus EventSubsystem::OnPostTick()
+    ESystemStatus EventSubsystem::OnPostTick([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    void EventSubsystem::OnShutdown()
+    void EventSubsystem::OnShutdown([[maybe_unused]] SystemContext& context)
     {
         writeBuffer.clear();
         readBuffer.clear();

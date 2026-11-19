@@ -10,7 +10,7 @@ class MyApp final : public App
     using App::App;
 
 public:
-    [[nodiscard]] ESystemStatus Startup() override;
+    [[nodiscard]] ESystemStatus Startup(SystemContext& context) override;
 
 private:
     void OnWorldSubsystemAdded(WorldSubsystem* subsystem);

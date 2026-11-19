@@ -7,7 +7,7 @@
 #include "garage/actors/world_subsystem.hpp"
 
 #include "garage/core/allocator.hpp"
-#include "garage/core/app.hpp"
+#include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 
 #include "garage/resources/asset.hpp"
@@ -55,53 +55,47 @@ namespace Garage
         UnloadAllAssets();
     }
 
-    ESystemStatus AssetSubsystem::OnStartup()
+    ESystemStatus AssetSubsystem::OnStartup(SystemContext& context)
     {
-        if (App* app = App::GetInstance(); app != nullptr)
+        if (WorldSubsystem* worldSubsystem = context.GetAppSubsystem<WorldSubsystem>(); worldSubsystem != nullptr)
         {
-            if (WorldSubsystem* worldSubsystem = app->GetSubsystem<WorldSubsystem>(); worldSubsystem != nullptr)
-            {
-                worldExitListenerId = worldSubsystem->OnExitWorld().AddListener(
-                        [this](WorldBase* world)
-                        {
-                            OnWorldExited(world);
-                        });
-            }
+            worldExitListenerId = worldSubsystem->OnExitWorld().AddListener(
+                    [this](WorldBase* world)
+                    {
+                        OnWorldExited(world);
+                    });
         }
 
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus AssetSubsystem::OnEarlyUpdate()
+    ESystemStatus AssetSubsystem::OnEarlyUpdate([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus AssetSubsystem::OnFixedUpdate()
+    ESystemStatus AssetSubsystem::OnFixedUpdate([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus AssetSubsystem::OnUpdate()
+    ESystemStatus AssetSubsystem::OnUpdate([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus AssetSubsystem::OnLateUpdate()
+    ESystemStatus AssetSubsystem::OnLateUpdate([[maybe_unused]] SystemContext& context)
     {
         return ESystemStatus::CONTINUE;
     }
 
-    void AssetSubsystem::OnShutdown()
+    void AssetSubsystem::OnShutdown(SystemContext& context)
     {
         if (worldExitListenerId != 0)
         {
-            if (App* app = App::GetInstance(); app != nullptr)
+            if (WorldSubsystem* worldSubsystem = context.GetAppSubsystem<WorldSubsystem>(); worldSubsystem != nullptr)
             {
-                if (WorldSubsystem* worldSubsystem = app->GetSubsystem<WorldSubsystem>(); worldSubsystem != nullptr)
-                {
-                    worldSubsystem->OnExitWorld().RemoveListener(worldExitListenerId);
-                }
+                worldSubsystem->OnExitWorld().RemoveListener(worldExitListenerId);
             }
             worldExitListenerId = 0;
         }

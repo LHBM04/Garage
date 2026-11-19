@@ -14,6 +14,7 @@ namespace Garage
     class IGPUCommandBuffer;
     class IGPUGraphicsPipelineState;
     class MaterialAsset;
+    class SystemContext;
 
     class GARAGE_API RendererBase : public ComponentBase
     {
@@ -21,7 +22,7 @@ namespace Garage
         using ComponentBase::ComponentBase;
         ~RendererBase() noexcept override = default;
 
-        void OnRender(IGPUCommandBuffer& commandBuffer) override = 0;
+        void OnRender(SystemContext& context) override = 0;
 
         [[nodiscard]] const MaterialAsset* GetMaterial() const noexcept;
         void                               SetMaterial(const MaterialAsset* value) noexcept;

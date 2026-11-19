@@ -12,6 +12,7 @@
 
 #include "garage/core/allocator.hpp"
 #include "garage/core/defines.hpp"
+#include "garage/core/system_context.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/camera.hpp"
@@ -20,6 +21,7 @@
 #include "garage/graphics/gpu_constants.hpp"
 #include "garage/graphics/gpu_target.hpp"
 #include "garage/graphics/gpu_types.hpp"
+#include "garage/graphics/render_subsystem.hpp"
 
 #include "garage/math/color_rgba.hpp"
 #include "garage/math/quaternion.hpp"
@@ -61,7 +63,7 @@ namespace Garage
         }
     }
 
-    void WorldBase::Enter()
+    void WorldBase::Enter(SystemContext& context)
     {
         if (isEntered)
         {
@@ -69,14 +71,14 @@ namespace Garage
         }
 
         RunPhase(
-                [this]()
+                [this, &context]()
                 {
                     isEntered = true;
-                    OnEnter();
+                    OnEnter(context);
                 });
     }
 
-    void WorldBase::EarlyUpdate()
+    void WorldBase::EarlyUpdate([[maybe_unused]] SystemContext& context)
     {
         if (isEntered)
         {
@@ -88,42 +90,50 @@ namespace Garage
         }
     }
 
-    void WorldBase::FixedUpdate()
+    void WorldBase::FixedUpdate(SystemContext& context)
     {
-        UpdateActors(&WorldBase::OnFixedUpdate, &ActorBase::FixedUpdate);
+        UpdateActors(&WorldBase::OnFixedUpdate, &ActorBase::FixedUpdate, context);
     }
 
-    void WorldBase::Update()
+    void WorldBase::Update(SystemContext& context)
     {
-        UpdateActors(&WorldBase::OnUpdate, &ActorBase::Update);
+        UpdateActors(&WorldBase::OnUpdate, &ActorBase::Update, context);
     }
 
-    void WorldBase::LateUpdate()
+    void WorldBase::LateUpdate(SystemContext& context)
     {
-        UpdateActors(&WorldBase::OnLateUpdate, &ActorBase::LateUpdate);
+        UpdateActors(&WorldBase::OnLateUpdate, &ActorBase::LateUpdate, context);
     }
 
-    void WorldBase::PreRender(IGPUCommandBuffer& commandBuffer)
+    void WorldBase::PreRender(SystemContext& context)
     {
         if (isEntered)
         {
             RunPhase(
-                    [this, &commandBuffer]()
+                    [this, &context]()
                     {
-                        RenderActors(&ActorBase::PreRender, commandBuffer);
+                        RenderActors(&ActorBase::PreRender, context);
                     });
         }
     }
 
-    void WorldBase::Render(IGPUCommandBuffer& commandBuffer)
+    void WorldBase::Render(SystemContext& context)
     {
         if (!isEntered)
         {
             return;
         }
 
+        RenderSubsystem*   renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
+        IGPUCommandBuffer* commandBuffer =
+                (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
+        if (commandBuffer == nullptr)
+        {
+            return;
+        }
+
         RunPhase(
-                [this, &commandBuffer]()
+                [this, &context, commandBuffer]()
                 {
                     for (const Camera* activeCamera : activeCameras)
                     {
@@ -147,7 +157,7 @@ namespace Garage
                             continue;
                         }
 
-                        if (commandBuffer.GetActiveTargetFormat() == EGPUTextureFormat::UNKNOWN)
+                        if (commandBuffer->GetActiveTargetFormat() == EGPUTextureFormat::UNKNOWN)
                         {
                             LOG_ERROR("카메라를 적용하기 전에 렌더 타깃을 설정해야 합니다.");
                             continue;
@@ -155,7 +165,7 @@ namespace Garage
 
                         const GPUViewport& VIEWPORT = activeCamera->GetViewport();
                         const GPURect&     SCISSOR  = activeCamera->GetScissorRect();
-                        const GPURect&     BOUNDS   = commandBuffer.GetActiveTargetBounds();
+                        const GPURect&     BOUNDS   = commandBuffer->GetActiveTargetBounds();
                         if (VIEWPORT.width <= 0.0f || VIEWPORT.height <= 0.0f)
                         {
                             continue;
@@ -206,46 +216,46 @@ namespace Garage
                                 .lightColor        = lightColor,
                                 .ambientLightColor = ambientColor,
                         };
-                        if (const auto UPLOADED = commandBuffer.SetGraphicsConstants(CONSTANTS); !UPLOADED)
+                        if (const auto UPLOADED = commandBuffer->SetGraphicsConstants(CONSTANTS); !UPLOADED)
                         {
                             LOG_ERROR("월드의 카메라 상수 설정에 실패했습니다: {}", UPLOADED.GetError());
                             continue;
                         }
 
-                        commandBuffer.EndRenderPass();
-                        commandBuffer.SetViewport(VIEWPORT);
-                        commandBuffer.SetScissorRect(SCISSOR);
-                        commandBuffer.ClearRenderTarget(activeCamera->GetClearColor());
-                        commandBuffer.ClearDepthStencil(GPUTarget::DEPTH_CLEAR_VALUE);
+                        commandBuffer->EndRenderPass();
+                        commandBuffer->SetViewport(VIEWPORT);
+                        commandBuffer->SetScissorRect(SCISSOR);
+                        commandBuffer->ClearRenderTarget(activeCamera->GetClearColor());
+                        commandBuffer->ClearDepthStencil(GPUTarget::DEPTH_CLEAR_VALUE);
 
-                        RenderActors(&ActorBase::Render, commandBuffer);
+                        RenderActors(&ActorBase::Render, context);
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-                        RenderActors(&ActorBase::DrawGizmos, commandBuffer);
+                        RenderActors(&ActorBase::DrawGizmos, context);
 #endif
                     }
                 });
     }
 
-    void WorldBase::PostRender(IGPUCommandBuffer& commandBuffer)
+    void WorldBase::PostRender(SystemContext& context)
     {
         if (isEntered)
         {
             RunPhase(
-                    [this, &commandBuffer]()
+                    [this, &context]()
                     {
-                        RenderActors(&ActorBase::PostRender, commandBuffer);
+                        RenderActors(&ActorBase::PostRender, context);
                     });
         }
     }
 
-    void WorldBase::Exit()
+    void WorldBase::Exit(SystemContext& context)
     {
-        const auto EXIT = [this]()
+        const auto EXIT = [this, &context]()
         {
             if (isEntered)
             {
                 isEntered = false;
-                OnExit();
+                OnExit(context);
             }
         };
 
@@ -259,7 +269,7 @@ namespace Garage
         }
     }
 
-    void WorldBase::UpdateActors(WorldCallback worldCallback, ActorCallback actorCallback)
+    void WorldBase::UpdateActors(WorldCallback worldCallback, ActorCallback actorCallback, SystemContext& context)
     {
         ASSERT(worldCallback != nullptr);
         ASSERT(actorCallback != nullptr);
@@ -270,7 +280,7 @@ namespace Garage
         }
 
         RunPhase(
-                [this, worldCallback, actorCallback]()
+                [this, worldCallback, actorCallback, &context]()
                 {
                     DestroyActors();
                     if (!isEntered)
@@ -278,23 +288,23 @@ namespace Garage
                         return;
                     }
 
-                    (this->*worldCallback)();
+                    (this->*worldCallback)(context);
                     ForEachActor(
-                            [actorCallback](ActorBase& actor)
+                            [actorCallback, &context](ActorBase& actor)
                             {
-                                (actor.*actorCallback)();
+                                (actor.*actorCallback)(context);
                             });
                 });
     }
 
-    void WorldBase::RenderActors(RenderCallback callback, IGPUCommandBuffer& commandBuffer)
+    void WorldBase::RenderActors(ActorCallback callback, SystemContext& context)
     {
         ASSERT(callback != nullptr);
 
         ForEachActor(
-                [callback, &commandBuffer](ActorBase& actor)
+                [callback, &context](ActorBase& actor)
                 {
-                    (actor.*callback)(commandBuffer);
+                    (actor.*callback)(context);
                 });
     }
 

@@ -18,6 +18,8 @@
 
 namespace Garage
 {
+    class SystemContext;
+
     class GARAGE_API EventSubsystem final : public EngineSubsystemBase
     {
     public:
@@ -25,11 +27,11 @@ namespace Garage
 
         EventSubsystem() noexcept;
 
-        [[nodiscard]] ESystemStatus OnStartup() override;
-        [[nodiscard]] ESystemStatus OnPreTick() override;
-        [[nodiscard]] ESystemStatus OnTick() override;
-        [[nodiscard]] ESystemStatus OnPostTick() override;
-        void                        OnShutdown() override;
+        [[nodiscard]] ESystemStatus OnStartup(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnPreTick(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnTick(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnPostTick(SystemContext& context) override;
+        void                        OnShutdown(SystemContext& context) override;
 
         template <Eventable TEvent>
         void PushEvent(const TEvent& event);

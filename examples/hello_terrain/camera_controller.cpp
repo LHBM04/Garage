@@ -7,10 +7,9 @@ void CameraController::SetTerrain(const Terrain* value) noexcept
     terrain = value;
 }
 
-void CameraController::OnUpdate()
+void CameraController::OnUpdate(SystemContext& context)
 {
-    const App*            app   = App::GetInstance();
-    const InputSubsystem* input = (app != nullptr) ? app->GetSubsystem<InputSubsystem>() : nullptr;
+    const InputSubsystem* input = context.GetAppSubsystem<InputSubsystem>();
     if (input == nullptr)
     {
         return;
@@ -23,8 +22,7 @@ void CameraController::OnUpdate()
         return;
     }
 
-    const Engine*        engine        = Engine::GetInstance();
-    const TimeSubsystem* timeSubsystem = (engine != nullptr) ? engine->GetSubsystem<TimeSubsystem>() : nullptr;
+    const TimeSubsystem* timeSubsystem = context.GetEngineSubsystem<TimeSubsystem>();
     const Float32        DELTA_TIME    = (timeSubsystem != nullptr) ? timeSubsystem->GetDeltaTime() : (1.0f / 60.0f);
 
     if (const InputAction* lookAction = input->GetAction("Look"); lookAction != nullptr)

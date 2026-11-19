@@ -3,6 +3,7 @@
 #include "garage/core/app.hpp"
 #include "garage/core/defines.hpp"
 #include "garage/core/engine_subsystem.hpp"
+#include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
 #include "garage/core/types.hpp"
 
@@ -13,56 +14,59 @@ namespace Garage
         ASSERT(target != nullptr);
 
         app = target;
+        SystemContext context(this, app);
 
-        if (const ESystemStatus STATUS = Startup(); STATUS != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = Startup(context); STATUS != ESystemStatus::CONTINUE)
         {
-            Shutdown();
+            Shutdown(context);
+            app = nullptr;
             return static_cast<Int32>(STATUS);
         }
 
-        if (const ESystemStatus STATUS = app->Startup(); STATUS != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = app->Startup(context); STATUS != ESystemStatus::CONTINUE)
         {
-            app->Shutdown();
-            Shutdown();
+            app->Shutdown(context);
+            Shutdown(context);
+            app = nullptr;
             return static_cast<Int32>(STATUS);
         }
 
         while (true)
         {
-            if (const ESystemStatus STATUS = Routine(); STATUS != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = Routine(context); STATUS != ESystemStatus::CONTINUE)
             {
-                app->Shutdown();
-                Shutdown();
+                app->Shutdown(context);
+                Shutdown(context);
+                app = nullptr;
 
                 return static_cast<Int32>(STATUS);
             }
         }
     }
 
-    ESystemStatus Engine::Startup()
+    ESystemStatus Engine::Startup(SystemContext& context)
     {
-        instance = this;
-        return Base::Startup();
+        return Base::Startup(context);
     }
 
-    ESystemStatus Engine::Routine()
+    ESystemStatus Engine::Routine(SystemContext& context)
     {
-        if (const ESystemStatus STATUS = PreTick(); STATUS != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = PreTick(context); STATUS != ESystemStatus::CONTINUE)
         {
             return STATUS;
         }
 
-        if (const ESystemStatus STATUS = Tick(); STATUS != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = Tick(context); STATUS != ESystemStatus::CONTINUE)
         {
             return STATUS;
         }
 
-        if (const ESystemStatus STATUS = app->Routine(); STATUS != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = app->Routine(context); STATUS != ESystemStatus::CONTINUE)
         {
             return STATUS;
         }
 
-        if (const ESystemStatus STATUS = PostTick(); STATUS != ESystemStatus::CONTINUE)
+        if (const ESystemStatus STATUS = PostTick(context); STATUS != ESystemStatus::CONTINUE)
         {
             return STATUS;
         }
@@ -70,17 +74,16 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    void Engine::Shutdown()
+    void Engine::Shutdown(SystemContext& context)
     {
-        Base::Shutdown();
-        instance = nullptr;
+        Base::Shutdown(context);
     }
 
-    ESystemStatus Engine::PreTick()
+    ESystemStatus Engine::PreTick(SystemContext& context)
     {
         for (EngineSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus STATUS = subsystem->OnPreTick(); STATUS != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnPreTick(context); STATUS != ESystemStatus::CONTINUE)
             {
                 return STATUS;
             }
@@ -89,11 +92,11 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus Engine::Tick()
+    ESystemStatus Engine::Tick(SystemContext& context)
     {
         for (EngineSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus STATUS = subsystem->OnTick(); STATUS != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnTick(context); STATUS != ESystemStatus::CONTINUE)
             {
                 return STATUS;
             }
@@ -102,11 +105,11 @@ namespace Garage
         return ESystemStatus::CONTINUE;
     }
 
-    ESystemStatus Engine::PostTick()
+    ESystemStatus Engine::PostTick(SystemContext& context)
     {
         for (EngineSubsystemBase* subsystem : GetSubsystems())
         {
-            if (const ESystemStatus STATUS = subsystem->OnPostTick(); STATUS != ESystemStatus::CONTINUE)
+            if (const ESystemStatus STATUS = subsystem->OnPostTick(context); STATUS != ESystemStatus::CONTINUE)
             {
                 return STATUS;
             }

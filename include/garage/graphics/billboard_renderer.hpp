@@ -10,7 +10,7 @@
 
 namespace Garage
 {
-    class IGPUCommandBuffer;
+    class SystemContext;
     class TextureAsset;
 
     class GARAGE_API BillboardRenderer final : public RendererBase
@@ -19,8 +19,8 @@ namespace Garage
         using RendererBase::RendererBase;
         ~BillboardRenderer() noexcept override = default;
 
-        void OnUpdate() override;
-        void OnRender(IGPUCommandBuffer& commandBuffer) override;
+        void OnUpdate(SystemContext& context) override;
+        void OnRender(SystemContext& context) override;
 
         void Play(Float32 duration,
                   UInt32  columns               = 1,

@@ -2,10 +2,9 @@
 
 #include "camera_controller.hpp"
 
-void MyWorld::OnEnter()
+void MyWorld::OnEnter(SystemContext& context)
 {
-    App*            app    = App::GetInstance();
-    AssetSubsystem* assets = (app != nullptr) ? app->GetSubsystem<AssetSubsystem>() : nullptr;
+    AssetSubsystem* assets = context.GetAppSubsystem<AssetSubsystem>();
     if (assets == nullptr)
     {
         LOG_ERROR("에셋 서브시스템을 가져오지 못했습니다.");

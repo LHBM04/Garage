@@ -22,6 +22,7 @@
 
 namespace Garage
 {
+    class SystemContext;
     class WorldBase;
 
     class GARAGE_API AssetSubsystem final : public AppSubsystemBase
@@ -42,12 +43,12 @@ namespace Garage
         void OnWorldEntered(const WorldBase* world);
         void OnWorldExited(const WorldBase* world);
 
-        [[nodiscard]] ESystemStatus OnStartup() override;
-        [[nodiscard]] ESystemStatus OnEarlyUpdate() override;
-        [[nodiscard]] ESystemStatus OnFixedUpdate() override;
-        [[nodiscard]] ESystemStatus OnUpdate() override;
-        [[nodiscard]] ESystemStatus OnLateUpdate() override;
-        void                        OnShutdown() override;
+        [[nodiscard]] ESystemStatus OnStartup(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnEarlyUpdate(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnFixedUpdate(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnUpdate(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnLateUpdate(SystemContext& context) override;
+        void                        OnShutdown(SystemContext& context) override;
 
     private:
         struct PathHash final

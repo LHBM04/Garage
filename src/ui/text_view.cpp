@@ -8,6 +8,7 @@
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
+#include "garage/core/system_context.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -15,6 +16,7 @@
 #include "garage/graphics/gpu_graphics_pipeline_state.hpp"
 #include "garage/graphics/gpu_texture2d.hpp"
 #include "garage/graphics/gpu_types.hpp"
+#include "garage/graphics/render_subsystem.hpp"
 
 #include "garage/math/matrix4x4.hpp"
 #include "garage/math/vector2d.hpp"
@@ -101,9 +103,12 @@ namespace Garage
         return FOUND->second;
     }
 
-    void TextView::OnPostRender(IGPUCommandBuffer& commandBuffer)
+    void TextView::OnPostRender(SystemContext& context)
     {
-        if (texture == nullptr || font == nullptr || material == nullptr || text.empty())
+        RenderSubsystem*   renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
+        IGPUCommandBuffer* commandBuffer =
+                (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
+        if (commandBuffer == nullptr || texture == nullptr || font == nullptr || material == nullptr || text.empty())
         {
             return;
         }
@@ -141,7 +146,7 @@ namespace Garage
             objectConstants.world[5] /= SCALE_Y;
         }
 
-        if (const auto RESULT = commandBuffer.SetGraphicsConstants(objectConstants); !RESULT)
+        if (const auto RESULT = commandBuffer->SetGraphicsConstants(objectConstants); !RESULT)
         {
             LOG_ERROR("UI 텍스트 변환을 바인딩하지 못했습니다: {}", RESULT.GetError());
             return;
@@ -149,16 +154,16 @@ namespace Garage
 
         std::array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> textures{};
         textures[0] = gpuTexture;
-        if (const auto RESULT = commandBuffer.BindTextures(textures); !RESULT)
+        if (const auto RESULT = commandBuffer->BindTextures(textures); !RESULT)
         {
             LOG_ERROR("UI 텍스트 텍스처를 바인딩하지 못했습니다: {}", RESULT.GetError());
             return;
         }
 
-        commandBuffer.SetGPUGraphicsPipelineState(*pipelineState);
-        commandBuffer.SetPrimitiveTopology(material->GetPrimitive());
+        commandBuffer->SetGPUGraphicsPipelineState(*pipelineState);
+        commandBuffer->SetPrimitiveTopology(material->GetPrimitive());
 
-        const GPUViewport&  VIEWPORT      = commandBuffer.GetActiveViewport();
+        const GPUViewport&  VIEWPORT      = commandBuffer->GetActiveViewport();
         const Vector2DFloat VIEWPORT_SIZE = (VIEWPORT.width > 0.0f && VIEWPORT.height > 0.0f)
                 ? Vector2DFloat{VIEWPORT.width, VIEWPORT.height}
                 : Vector2DFloat{1280.0f, 960.0f};
@@ -240,13 +245,13 @@ namespace Garage
                         .textColor    = color,
                 };
 
-                if (const auto RESULT = commandBuffer.SetGraphicsConstants(CONSTANTS); !RESULT)
+                if (const auto RESULT = commandBuffer->SetGraphicsConstants(CONSTANTS); !RESULT)
                 {
                     LOG_ERROR("UI 텍스트 상수를 바인딩하지 못했습니다: {}", RESULT.GetError());
                     return;
                 }
 
-                commandBuffer.Draw(TEXT_VERTEX_COUNT);
+                commandBuffer->Draw(TEXT_VERTEX_COUNT);
             }
 
             cursorX += character->advance * SCALE;

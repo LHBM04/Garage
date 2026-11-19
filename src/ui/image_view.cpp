@@ -5,6 +5,7 @@
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
+#include "garage/core/system_context.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -12,6 +13,7 @@
 #include "garage/graphics/gpu_graphics_pipeline_state.hpp"
 #include "garage/graphics/gpu_texture2d.hpp"
 #include "garage/graphics/gpu_types.hpp"
+#include "garage/graphics/render_subsystem.hpp"
 
 #include "garage/math/vector2d.hpp"
 
@@ -22,9 +24,12 @@
 
 namespace Garage
 {
-    void ImageView::OnPostRender(IGPUCommandBuffer& commandBuffer)
+    void ImageView::OnPostRender(SystemContext& context)
     {
-        if (texture == nullptr || material == nullptr)
+        RenderSubsystem*   renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
+        IGPUCommandBuffer* commandBuffer =
+                (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
+        if (commandBuffer == nullptr || texture == nullptr || material == nullptr)
         {
             return;
         }
@@ -47,13 +52,13 @@ namespace Garage
         const ObjectConstants OBJECT_CONSTANTS{
                 .world = transform->GetWorldMatrix(),
         };
-        if (const auto RESULT = commandBuffer.SetGraphicsConstants(OBJECT_CONSTANTS); !RESULT)
+        if (const auto RESULT = commandBuffer->SetGraphicsConstants(OBJECT_CONSTANTS); !RESULT)
         {
             LOG_ERROR("UI 이미지 변환을 바인딩하지 못했습니다: {}", RESULT.GetError());
             return;
         }
 
-        const GPUViewport&  VIEWPORT      = commandBuffer.GetActiveViewport();
+        const GPUViewport&  VIEWPORT      = commandBuffer->GetActiveViewport();
         const Vector2DFloat VIEWPORT_SIZE = (VIEWPORT.width > 0.0f && VIEWPORT.height > 0.0f)
                 ? Vector2DFloat{VIEWPORT.width, VIEWPORT.height}
                 : Vector2DFloat{1280.0f, 960.0f};
@@ -63,7 +68,7 @@ namespace Garage
                 .padding      = Vector2DFloat{},
                 .color        = color,
         };
-        if (const auto RESULT = commandBuffer.SetGraphicsConstants(CONSTANTS); !RESULT)
+        if (const auto RESULT = commandBuffer->SetGraphicsConstants(CONSTANTS); !RESULT)
         {
             LOG_ERROR("UI 뷰포트 상수를 바인딩하지 못했습니다: {}", RESULT.GetError());
             return;
@@ -71,15 +76,15 @@ namespace Garage
 
         std::array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> textures{};
         textures[0] = gpuTexture;
-        if (const auto RESULT = commandBuffer.BindTextures(textures); !RESULT)
+        if (const auto RESULT = commandBuffer->BindTextures(textures); !RESULT)
         {
             LOG_ERROR("UI 이미지 텍스처를 바인딩하지 못했습니다: {}", RESULT.GetError());
             return;
         }
 
-        commandBuffer.SetGPUGraphicsPipelineState(*pipelineState);
-        commandBuffer.SetPrimitiveTopology(material->GetPrimitive());
+        commandBuffer->SetGPUGraphicsPipelineState(*pipelineState);
+        commandBuffer->SetPrimitiveTopology(material->GetPrimitive());
         constexpr UInt32 IMAGE_VERTEX_COUNT = 4;
-        commandBuffer.Draw(IMAGE_VERTEX_COUNT);
+        commandBuffer->Draw(IMAGE_VERTEX_COUNT);
     }
 } // namespace Garage

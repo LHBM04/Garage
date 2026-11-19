@@ -22,18 +22,19 @@
 namespace Garage
 {
     class IDisplay;
+    class SystemContext;
 
     class GARAGE_API InputSubsystem final : public AppSubsystemBase
     {
     public:
         InputSubsystem() noexcept;
 
-        [[nodiscard]] ESystemStatus OnStartup() override;
-        [[nodiscard]] ESystemStatus OnEarlyUpdate() override;
-        [[nodiscard]] ESystemStatus OnFixedUpdate() override;
-        [[nodiscard]] ESystemStatus OnUpdate() override;
-        [[nodiscard]] ESystemStatus OnLateUpdate() override;
-        void                        OnShutdown() override;
+        [[nodiscard]] ESystemStatus OnStartup(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnEarlyUpdate(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnFixedUpdate(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnUpdate(SystemContext& context) override;
+        [[nodiscard]] ESystemStatus OnLateUpdate(SystemContext& context) override;
+        void                        OnShutdown(SystemContext& context) override;
 
         [[nodiscard]] bool IsInputEnabled() const noexcept;
         void               SetInputEnabled(bool value) noexcept;

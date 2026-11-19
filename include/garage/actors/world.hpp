@@ -20,7 +20,7 @@ namespace Garage
 {
     class Camera;
     class DirectionalLight;
-    class IGPUCommandBuffer;
+    class SystemContext;
     class Transform;
 
     class GARAGE_API WorldBase
@@ -35,15 +35,15 @@ namespace Garage
         WorldBase(WorldBase&&)            = delete;
         WorldBase& operator=(WorldBase&&) = delete;
 
-        void Enter();
-        void EarlyUpdate();
-        void FixedUpdate();
-        void Update();
-        void LateUpdate();
-        void PreRender(IGPUCommandBuffer& commandBuffer);
-        void Render(IGPUCommandBuffer& commandBuffer);
-        void PostRender(IGPUCommandBuffer& commandBuffer);
-        void Exit();
+        void Enter(SystemContext& context);
+        void EarlyUpdate(SystemContext& context);
+        void FixedUpdate(SystemContext& context);
+        void Update(SystemContext& context);
+        void LateUpdate(SystemContext& context);
+        void PreRender(SystemContext& context);
+        void Render(SystemContext& context);
+        void PostRender(SystemContext& context);
+        void Exit(SystemContext& context);
 
         ActorBase* Instantiate();
         ActorBase* Instantiate(const Vector3D<Float32>& position, const Quaternion<Float32>& rotation);
@@ -89,17 +89,16 @@ namespace Garage
         [[nodiscard]] std::span<const DirectionalLight* const> GetDirectionalLights() const noexcept;
 
     protected:
-        virtual void OnEnter();
-        virtual void OnExit();
+        virtual void OnEnter(SystemContext& context);
+        virtual void OnExit(SystemContext& context);
 
-        virtual void OnFixedUpdate();
-        virtual void OnUpdate();
-        virtual void OnLateUpdate();
+        virtual void OnFixedUpdate(SystemContext& context);
+        virtual void OnUpdate(SystemContext& context);
+        virtual void OnLateUpdate(SystemContext& context);
 
     private:
-        using WorldCallback  = void (WorldBase::*)();
-        using ActorCallback  = void (ActorBase::*)();
-        using RenderCallback = void (ActorBase::*)(IGPUCommandBuffer&);
+        using WorldCallback = void (WorldBase::*)(SystemContext&);
+        using ActorCallback = void (ActorBase::*)(SystemContext&);
 
         template <class TCallback>
         void RunPhase(TCallback callback);
@@ -107,8 +106,8 @@ namespace Garage
         template <class TCallback>
         void ForEachActor(TCallback callback);
 
-        void UpdateActors(WorldCallback worldCallback, ActorCallback actorCallback);
-        void RenderActors(RenderCallback callback, IGPUCommandBuffer& commandBuffer);
+        void UpdateActors(WorldCallback worldCallback, ActorCallback actorCallback, SystemContext& context);
+        void RenderActors(ActorCallback callback, SystemContext& context);
         void DestroyActors();
         void ClearActors();
 
@@ -165,23 +164,23 @@ namespace Garage
         return activeDirectionalLights;
     }
 
-    inline void WorldBase::OnEnter()
+    inline void WorldBase::OnEnter([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void WorldBase::OnExit()
+    inline void WorldBase::OnExit([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void WorldBase::OnFixedUpdate()
+    inline void WorldBase::OnFixedUpdate([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void WorldBase::OnUpdate()
+    inline void WorldBase::OnUpdate([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void WorldBase::OnLateUpdate()
+    inline void WorldBase::OnLateUpdate([[maybe_unused]] SystemContext& context)
     {
     }
 } // namespace Garage
