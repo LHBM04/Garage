@@ -105,7 +105,7 @@ namespace Garage
 
     void TextView::OnPostRender(SystemContext& context)
     {
-        RenderSubsystem* renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
+        RenderSubsystem*   renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
         IGPUCommandBuffer* commandBuffer =
                 (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
         if (commandBuffer == nullptr || texture == nullptr || font == nullptr || material == nullptr || text.empty())

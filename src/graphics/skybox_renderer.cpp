@@ -19,7 +19,7 @@ namespace Garage
 {
     void SkyboxRenderer::OnRender(SystemContext& context)
     {
-        RenderSubsystem* renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
+        RenderSubsystem*   renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
         IGPUCommandBuffer* commandBuffer =
                 (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
         if (commandBuffer == nullptr)

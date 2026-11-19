@@ -125,7 +125,8 @@ namespace Garage
         }
 
         RenderSubsystem*   renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
-        IGPUCommandBuffer* commandBuffer   = (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
+        IGPUCommandBuffer* commandBuffer =
+                (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
         if (commandBuffer == nullptr)
         {
             return;

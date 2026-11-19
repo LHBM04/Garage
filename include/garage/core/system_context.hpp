@@ -188,7 +188,7 @@ namespace Garage
     }
 
     template <std::derived_from<AppSubsystemBase> TSubsystem, class TObject>
-    SystemContext::AppListenerId SystemContext::OnAppSubsystemAdded(TObject* object,
+    SystemContext::AppListenerId SystemContext::OnAppSubsystemAdded(TObject*                                object,
                                                                     AppSubsystemMethod<TSubsystem, TObject> method)
     {
         return (app != nullptr) ? app->OnSubsystemAdded<TSubsystem>(object, method) : 0;
@@ -201,7 +201,7 @@ namespace Garage
     }
 
     template <std::derived_from<AppSubsystemBase> TSubsystem, class TObject>
-    SystemContext::AppListenerId SystemContext::OnAppSubsystemRemoved(TObject* object,
+    SystemContext::AppListenerId SystemContext::OnAppSubsystemRemoved(TObject*                                object,
                                                                       AppSubsystemMethod<TSubsystem, TObject> method)
     {
         return (app != nullptr) ? app->OnSubsystemRemoved<TSubsystem>(object, method) : 0;
