@@ -20,7 +20,6 @@ namespace Garage
 {
     class Camera;
     class DirectionalLight;
-    class IGPUCommandBuffer;
     class SystemContext;
     class Transform;
 
@@ -41,9 +40,9 @@ namespace Garage
         void FixedUpdate(SystemContext& context);
         void Update(SystemContext& context);
         void LateUpdate(SystemContext& context);
-        void PreRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
-        void Render(SystemContext& context, IGPUCommandBuffer& commandBuffer);
-        void PostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void PreRender(SystemContext& context);
+        void Render(SystemContext& context);
+        void PostRender(SystemContext& context);
         void Exit(SystemContext& context);
 
         ActorBase* Instantiate();
@@ -98,9 +97,8 @@ namespace Garage
         virtual void OnLateUpdate(SystemContext& context);
 
     private:
-        using WorldCallback  = void (WorldBase::*)(SystemContext&);
-        using ActorCallback  = void (ActorBase::*)(SystemContext&);
-        using RenderCallback = void (ActorBase::*)(SystemContext&, IGPUCommandBuffer&);
+        using WorldCallback = void (WorldBase::*)(SystemContext&);
+        using ActorCallback = void (ActorBase::*)(SystemContext&);
 
         template <class TCallback>
         void RunPhase(TCallback callback);
@@ -109,7 +107,7 @@ namespace Garage
         void ForEachActor(TCallback callback);
 
         void UpdateActors(WorldCallback worldCallback, ActorCallback actorCallback, SystemContext& context);
-        void RenderActors(RenderCallback callback, SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void RenderActors(ActorCallback callback, SystemContext& context);
         void DestroyActors();
         void ClearActors();
 

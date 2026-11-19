@@ -18,6 +18,9 @@
 #    include "garage/graphics/gpu_graphics_pipeline_state.hpp"
 #endif
 #include "garage/graphics/gpu_types.hpp"
+#if defined(GARAGE_DEBUG) || defined(_DEBUG)
+#    include "garage/graphics/render_subsystem.hpp"
+#endif
 
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
 #    include "garage/math/color_rgba.hpp"
@@ -176,9 +179,12 @@ namespace Garage
     }
 
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-    void ButtonUI::OnPostRender([[maybe_unused]] SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void ButtonUI::OnPostRender(SystemContext& context)
     {
-        if (debugMaterial == nullptr)
+        RenderSubsystem* renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
+        IGPUCommandBuffer* commandBuffer =
+                (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
+        if (commandBuffer == nullptr || debugMaterial == nullptr)
         {
             return;
         }
@@ -199,12 +205,12 @@ namespace Garage
         const ObjectConstants OBJECT_CONSTANTS{
                 .world = transform->GetWorldMatrix(),
         };
-        if (const auto RESULT = commandBuffer.SetGraphicsConstants(OBJECT_CONSTANTS); !RESULT)
+        if (const auto RESULT = commandBuffer->SetGraphicsConstants(OBJECT_CONSTANTS); !RESULT)
         {
             return;
         }
 
-        const GPUViewport&  VIEWPORT      = commandBuffer.GetActiveViewport();
+        const GPUViewport&  VIEWPORT      = commandBuffer->GetActiveViewport();
         const Vector2DFloat VIEWPORT_SIZE = (VIEWPORT.width > 0.0f && VIEWPORT.height > 0.0f)
                 ? Vector2DFloat{VIEWPORT.width, VIEWPORT.height}
                 : Vector2DFloat{1280.0f, 960.0f};
@@ -218,15 +224,15 @@ namespace Garage
                 .padding      = Vector2DFloat{},
                 .color        = DEBUG_COLOR,
         };
-        if (const auto RESULT = commandBuffer.SetGraphicsConstants(CONSTANTS); !RESULT)
+        if (const auto RESULT = commandBuffer->SetGraphicsConstants(CONSTANTS); !RESULT)
         {
             return;
         }
 
-        commandBuffer.SetGPUGraphicsPipelineState(*pipelineState);
-        commandBuffer.SetPrimitiveTopology(debugMaterial->GetPrimitive());
+        commandBuffer->SetGPUGraphicsPipelineState(*pipelineState);
+        commandBuffer->SetPrimitiveTopology(debugMaterial->GetPrimitive());
         constexpr UInt32 DEBUG_BORDER_VERTEX_COUNT = 5;
-        commandBuffer.Draw(DEBUG_BORDER_VERTEX_COUNT);
+        commandBuffer->Draw(DEBUG_BORDER_VERTEX_COUNT);
     }
 #endif
 } // namespace Garage

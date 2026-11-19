@@ -11,7 +11,6 @@
 
 namespace Garage
 {
-    class IGPUCommandBuffer;
     class SystemContext;
     class WorldBase;
 
@@ -32,9 +31,9 @@ namespace Garage
         [[nodiscard]] WorldBase*       GetCurrentWorld() noexcept;
         [[nodiscard]] const WorldBase* GetCurrentWorld() const noexcept;
 
-        void PreRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
-        void Render(SystemContext& context, IGPUCommandBuffer& commandBuffer);
-        void PostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void PreRender(SystemContext& context);
+        void Render(SystemContext& context);
+        void PostRender(SystemContext& context);
 
         [[nodiscard]] ESystemStatus OnStartup(SystemContext& context) override;
         [[nodiscard]] ESystemStatus OnEarlyUpdate(SystemContext& context) override;

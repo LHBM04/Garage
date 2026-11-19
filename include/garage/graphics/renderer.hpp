@@ -22,7 +22,7 @@ namespace Garage
         using ComponentBase::ComponentBase;
         ~RendererBase() noexcept override = default;
 
-        void OnRender(SystemContext& context, IGPUCommandBuffer& commandBuffer) override = 0;
+        void OnRender(SystemContext& context) override = 0;
 
         [[nodiscard]] const MaterialAsset* GetMaterial() const noexcept;
         void                               SetMaterial(const MaterialAsset* value) noexcept;

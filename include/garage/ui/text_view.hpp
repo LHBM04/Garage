@@ -18,7 +18,6 @@ namespace Garage
 {
     class BitmapFontAsset;
     struct FontCharacterData;
-    class IGPUCommandBuffer;
     class MaterialAsset;
     class SystemContext;
     class TextureAsset;
@@ -36,7 +35,7 @@ namespace Garage
         using ComponentBase::ComponentBase;
         ~TextView() noexcept override = default;
 
-        void OnPostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer) override;
+        void OnPostRender(SystemContext& context) override;
 
         [[nodiscard]] const TextureAsset* GetTexture() const noexcept;
         void                              SetTexture(const TextureAsset* value) noexcept;

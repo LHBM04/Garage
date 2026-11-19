@@ -10,7 +10,6 @@
 
 namespace Garage
 {
-    class IGPUCommandBuffer;
     class MaterialAsset;
     class SystemContext;
     class TextureAsset;
@@ -21,7 +20,7 @@ namespace Garage
         using ComponentBase::ComponentBase;
         ~ImageView() noexcept override = default;
 
-        void OnPostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer) override;
+        void OnPostRender(SystemContext& context) override;
 
         [[nodiscard]] const TextureAsset* GetImage() const noexcept;
         void                              SetImage(const TextureAsset* value) noexcept;

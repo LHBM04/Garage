@@ -10,7 +10,6 @@
 
 namespace Garage
 {
-    class IGPUCommandBuffer;
     class SystemContext;
     class TextureAsset;
 
@@ -21,7 +20,7 @@ namespace Garage
         ~BillboardRenderer() noexcept override = default;
 
         void OnUpdate(SystemContext& context) override;
-        void OnRender(SystemContext& context, IGPUCommandBuffer& commandBuffer) override;
+        void OnRender(SystemContext& context) override;
 
         void Play(Float32 duration,
                   UInt32  columns               = 1,

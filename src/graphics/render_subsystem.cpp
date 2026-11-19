@@ -141,7 +141,7 @@ namespace Garage
             }
 
             commandBuffer->SetGPUTarget(*target);
-            onRender.Broadcast(context, *commandBuffer);
+            onRender.Broadcast(context);
             commandBuffer->EndRenderPass();
         }
 

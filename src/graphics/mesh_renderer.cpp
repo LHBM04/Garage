@@ -4,6 +4,7 @@
 
 #include "garage/actors/actor.hpp"
 
+#include "garage/core/system_context.hpp"
 #include "garage/core/types.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -11,6 +12,7 @@
 #include "garage/graphics/gpu_graphics_pipeline_state.hpp"
 #include "garage/graphics/gpu_mesh.hpp"
 #include "garage/graphics/gpu_texture2d.hpp"
+#include "garage/graphics/render_subsystem.hpp"
 #include "garage/graphics/terrain.hpp"
 
 #include "garage/resources/material_asset.hpp"
@@ -22,8 +24,16 @@
 
 namespace Garage
 {
-    void MeshRenderer::OnRender([[maybe_unused]] SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void MeshRenderer::OnRender(SystemContext& context)
     {
+        RenderSubsystem* renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
+        IGPUCommandBuffer* commandBuffer =
+                (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
+        if (commandBuffer == nullptr)
+        {
+            return;
+        }
+
         const MaterialAsset*             material      = GetMaterial();
         const IGPUGraphicsPipelineState* pipelineState = GetPipelineState();
         if (material == nullptr || pipelineState == nullptr)
@@ -49,7 +59,7 @@ namespace Garage
             return;
         }
 
-        if (material->GetTargetFormat() != commandBuffer.GetActiveTargetFormat())
+        if (material->GetTargetFormat() != commandBuffer->GetActiveTargetFormat())
         {
             LOG_ERROR("메시 머티리얼이 현재 렌더 타깃과 호환되지 않습니다.");
             return;
@@ -78,26 +88,26 @@ namespace Garage
             }
         }
 
-        if (const auto RESULT = commandBuffer.SetGraphicsConstants(constants); !RESULT)
+        if (const auto RESULT = commandBuffer->SetGraphicsConstants(constants); !RESULT)
         {
             LOG_ERROR("메시 머티리얼 상수를 바인딩하지 못했습니다: {}", RESULT.GetError());
             return;
         }
 
-        if (const auto RESULT = commandBuffer.BindTextures(textures); !RESULT)
+        if (const auto RESULT = commandBuffer->BindTextures(textures); !RESULT)
         {
             LOG_ERROR("메시 텍스처를 바인딩하지 못했습니다: {}", RESULT.GetError());
             return;
         }
 
-        if (!BindObjectConstants(commandBuffer, GetWorldMatrix()))
+        if (!BindObjectConstants(*commandBuffer, GetWorldMatrix()))
         {
             return;
         }
 
-        ApplyPipelineState(commandBuffer, *pipelineState);
-        commandBuffer.SetVertexBuffer(0, gpuMesh->GetVertexBufferView());
-        commandBuffer.SetIndexBuffer(gpuMesh->GetIndexBufferView());
-        commandBuffer.DrawIndexedInstanced(gpuMesh->GetIndexCount(), 1);
+        ApplyPipelineState(*commandBuffer, *pipelineState);
+        commandBuffer->SetVertexBuffer(0, gpuMesh->GetVertexBufferView());
+        commandBuffer->SetIndexBuffer(gpuMesh->GetIndexBufferView());
+        commandBuffer->DrawIndexedInstanced(gpuMesh->GetIndexCount(), 1);
     }
 } // namespace Garage

@@ -9,7 +9,6 @@
 namespace Garage
 {
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-    class IGPUCommandBuffer;
     class MaterialAsset;
 #endif
     class SystemContext;
@@ -23,7 +22,7 @@ namespace Garage
         void OnUpdate(SystemContext& context) override;
         void OnDisable() override;
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-        void OnPostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer) override;
+        void OnPostRender(SystemContext& context) override;
 
         [[nodiscard]] const MaterialAsset* GetDebugMaterial() const noexcept;
         void                               SetDebugMaterial(const MaterialAsset* value) noexcept;

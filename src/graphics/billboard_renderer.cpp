@@ -13,6 +13,7 @@
 #include "garage/graphics/gpu_constants.hpp"
 #include "garage/graphics/gpu_graphics_pipeline_state.hpp"
 #include "garage/graphics/gpu_texture2d.hpp"
+#include "garage/graphics/render_subsystem.hpp"
 
 #include "garage/math/vector3d.hpp"
 
@@ -88,8 +89,16 @@ namespace Garage
         }
     }
 
-    void BillboardRenderer::OnRender([[maybe_unused]] SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void BillboardRenderer::OnRender(SystemContext& context)
     {
+        RenderSubsystem* renderSubsystem = context.GetEngineSubsystem<RenderSubsystem>();
+        IGPUCommandBuffer* commandBuffer =
+                (renderSubsystem != nullptr) ? renderSubsystem->GetGPUCommandBuffer() : nullptr;
+        if (commandBuffer == nullptr)
+        {
+            return;
+        }
+
         const IGPUGraphicsPipelineState* pipelineState = GetPipelineState();
         const IGPUTexture2D*             gpuTexture    = (texture != nullptr) ? texture->GetTexture() : nullptr;
         if (pipelineState == nullptr || gpuTexture == nullptr)
@@ -97,7 +106,7 @@ namespace Garage
             return;
         }
 
-        if (!BindObjectConstants(commandBuffer, GetWorldMatrix()))
+        if (!BindObjectConstants(*commandBuffer, GetWorldMatrix()))
         {
             return;
         }
@@ -111,7 +120,7 @@ namespace Garage
                 .color      = GetColor(),
         };
 
-        if (const auto RESULT = commandBuffer.SetGraphicsConstants(CONSTANTS); !RESULT)
+        if (const auto RESULT = commandBuffer->SetGraphicsConstants(CONSTANTS); !RESULT)
         {
             LOG_ERROR("빌보드 상수를 바인딩하지 못했습니다: {}", RESULT.GetError());
             return;
@@ -119,15 +128,15 @@ namespace Garage
 
         std::array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> textures{};
         textures[0] = gpuTexture;
-        if (const auto RESULT = commandBuffer.BindTextures(textures); !RESULT)
+        if (const auto RESULT = commandBuffer->BindTextures(textures); !RESULT)
         {
             LOG_ERROR("빌보드 텍스처를 바인딩하지 못했습니다: {}", RESULT.GetError());
             return;
         }
 
-        ApplyPipelineState(commandBuffer, *pipelineState);
+        ApplyPipelineState(*commandBuffer, *pipelineState);
 
         constexpr UInt32 QUAD_VERTEX_COUNT = 4;
-        commandBuffer.Draw(QUAD_VERTEX_COUNT);
+        commandBuffer->Draw(QUAD_VERTEX_COUNT);
     }
 } // namespace Garage

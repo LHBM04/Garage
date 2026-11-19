@@ -17,7 +17,6 @@
 
 namespace Garage
 {
-    class IGPUCommandBuffer;
     class SystemContext;
     class WorldBase;
 
@@ -38,11 +37,11 @@ namespace Garage
         void FixedUpdate(SystemContext& context);
         void Update(SystemContext& context);
         void LateUpdate(SystemContext& context);
-        void PreRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
-        void Render(SystemContext& context, IGPUCommandBuffer& commandBuffer);
-        void PostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void PreRender(SystemContext& context);
+        void Render(SystemContext& context);
+        void PostRender(SystemContext& context);
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-        void DrawGizmos(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void DrawGizmos(SystemContext& context);
 #endif
 
         [[nodiscard]] const std::pmr::string& GetName() const noexcept;
@@ -87,10 +86,9 @@ namespace Garage
         friend class WorldBase;
 
         using ComponentCallback = void (ComponentBase::*)(SystemContext&);
-        using RenderCallback    = void (ComponentBase::*)(SystemContext&, IGPUCommandBuffer&);
 
         void UpdateComponents(ComponentCallback callback, SystemContext& context);
-        void RenderComponents(RenderCallback callback, SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        void RenderComponents(ComponentCallback callback, SystemContext& context);
         void DestroyComponents();
         void DestroyAllComponents();
 

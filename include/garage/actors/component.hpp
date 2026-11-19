@@ -6,7 +6,6 @@
 namespace Garage
 {
     class ActorBase;
-    class IGPUCommandBuffer;
     class SystemContext;
 
     class GARAGE_API ComponentBase
@@ -40,11 +39,11 @@ namespace Garage
         virtual void OnFixedUpdate(SystemContext& context);
         virtual void OnUpdate(SystemContext& context);
         virtual void OnLateUpdate(SystemContext& context);
-        virtual void OnPreRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
-        virtual void OnRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
-        virtual void OnPostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        virtual void OnPreRender(SystemContext& context);
+        virtual void OnRender(SystemContext& context);
+        virtual void OnPostRender(SystemContext& context);
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-        virtual void OnDrawGizmos(SystemContext& context, IGPUCommandBuffer& commandBuffer);
+        virtual void OnDrawGizmos(SystemContext& context);
 #endif
         virtual void OnDestroy();
 
@@ -144,24 +143,20 @@ namespace Garage
     {
     }
 
-    inline void ComponentBase::OnPreRender([[maybe_unused]] SystemContext&     context,
-                                           [[maybe_unused]] IGPUCommandBuffer& commandBuffer)
+    inline void ComponentBase::OnPreRender([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void ComponentBase::OnRender([[maybe_unused]] SystemContext&     context,
-                                        [[maybe_unused]] IGPUCommandBuffer& commandBuffer)
+    inline void ComponentBase::OnRender([[maybe_unused]] SystemContext& context)
     {
     }
 
-    inline void ComponentBase::OnPostRender([[maybe_unused]] SystemContext&     context,
-                                            [[maybe_unused]] IGPUCommandBuffer& commandBuffer)
+    inline void ComponentBase::OnPostRender([[maybe_unused]] SystemContext& context)
     {
     }
 
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-    inline void ComponentBase::OnDrawGizmos([[maybe_unused]] SystemContext&     context,
-                                            [[maybe_unused]] IGPUCommandBuffer& commandBuffer)
+    inline void ComponentBase::OnDrawGizmos([[maybe_unused]] SystemContext& context)
     {
     }
 #endif

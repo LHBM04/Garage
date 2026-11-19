@@ -13,7 +13,6 @@
 #include "garage/core/system_status.hpp"
 #include "garage/core/types.hpp"
 
-#include "garage/graphics/gpu_command_buffer.hpp"
 #include "garage/graphics/render_subsystem.hpp"
 
 namespace Garage
@@ -61,27 +60,27 @@ namespace Garage
         nextWorld = nullptr;
     }
 
-    void WorldSubsystem::PreRender(SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void WorldSubsystem::PreRender(SystemContext& context)
     {
         if (currentWorld != nullptr)
         {
-            currentWorld->PreRender(context, commandBuffer);
+            currentWorld->PreRender(context);
         }
     }
 
-    void WorldSubsystem::Render(SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void WorldSubsystem::Render(SystemContext& context)
     {
         if (currentWorld != nullptr)
         {
-            currentWorld->Render(context, commandBuffer);
+            currentWorld->Render(context);
         }
     }
 
-    void WorldSubsystem::PostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void WorldSubsystem::PostRender(SystemContext& context)
     {
         if (currentWorld != nullptr)
         {
-            currentWorld->PostRender(context, commandBuffer);
+            currentWorld->PostRender(context);
         }
     }
 
@@ -98,11 +97,11 @@ namespace Garage
             renderSubsystem != nullptr)
         {
             renderListenerId = renderSubsystem->OnRender().AddListener(
-                    [this](SystemContext& renderContext, IGPUCommandBuffer& commandBuffer)
+                    [this](SystemContext& renderContext)
                     {
-                        PreRender(renderContext, commandBuffer);
-                        Render(renderContext, commandBuffer);
-                        PostRender(renderContext, commandBuffer);
+                        PreRender(renderContext);
+                        Render(renderContext);
+                        PostRender(renderContext);
                     });
         }
 

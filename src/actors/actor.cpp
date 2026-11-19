@@ -13,8 +13,6 @@
 #include "garage/core/defines.hpp"
 #include "garage/core/types.hpp"
 
-#include "garage/graphics/gpu_command_buffer.hpp"
-
 namespace Garage
 {
     ActorBase::~ActorBase() noexcept
@@ -37,25 +35,25 @@ namespace Garage
         UpdateComponents(&ComponentBase::OnLateUpdate, context);
     }
 
-    void ActorBase::PreRender(SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void ActorBase::PreRender(SystemContext& context)
     {
-        RenderComponents(&ComponentBase::OnPreRender, context, commandBuffer);
+        RenderComponents(&ComponentBase::OnPreRender, context);
     }
 
-    void ActorBase::Render(SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void ActorBase::Render(SystemContext& context)
     {
-        RenderComponents(&ComponentBase::OnRender, context, commandBuffer);
+        RenderComponents(&ComponentBase::OnRender, context);
     }
 
-    void ActorBase::PostRender(SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void ActorBase::PostRender(SystemContext& context)
     {
-        RenderComponents(&ComponentBase::OnPostRender, context, commandBuffer);
+        RenderComponents(&ComponentBase::OnPostRender, context);
     }
 
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-    void ActorBase::DrawGizmos(SystemContext& context, IGPUCommandBuffer& commandBuffer)
+    void ActorBase::DrawGizmos(SystemContext& context)
     {
-        RenderComponents(&ComponentBase::OnDrawGizmos, context, commandBuffer);
+        RenderComponents(&ComponentBase::OnDrawGizmos, context);
     }
 #endif
 
@@ -94,9 +92,7 @@ namespace Garage
         }
     }
 
-    void ActorBase::RenderComponents(RenderCallback     callback,
-                                     SystemContext&     context,
-                                     IGPUCommandBuffer& commandBuffer)
+    void ActorBase::RenderComponents(ComponentCallback callback, SystemContext& context)
     {
         ASSERT(callback != nullptr);
 
@@ -111,7 +107,7 @@ namespace Garage
             ComponentBase* component = components[index].get();
             if (component->IsStarted() && component->IsEnabled() && !component->IsDestroyed())
             {
-                (component->*callback)(context, commandBuffer);
+                (component->*callback)(context);
             }
         }
     }
