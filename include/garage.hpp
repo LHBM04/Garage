@@ -7,6 +7,7 @@
 #include "garage/math.hpp"
 #include "garage/platform.hpp"
 #include "garage/resources.hpp"
+#include "garage/ui.hpp"
 #include "garage/utilities.hpp"
 
 #endif // GARAGE_GARAGE_HPP
