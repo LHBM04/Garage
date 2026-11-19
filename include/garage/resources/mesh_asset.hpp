@@ -2,12 +2,10 @@
 #define GARAGE_RESOURCES_MESH_ASSET_HPP
 
 #include <filesystem>
-#include <span>
 #include <utility>
-#include <vector>
 
 #include "../core/common.hpp"
-#include "../core/memory.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../graphics/mesh_vertex.hpp"
 
@@ -34,37 +32,37 @@ namespace Garage
         [[nodiscard]] const Vector3D<Float32>& GetBoundsExtents() const noexcept;
         void                                   SetBoundsExtents(const Vector3D<Float32>& value) noexcept;
 
-        [[nodiscard]] std::span<const Vector3D<Float32>> GetPositions() const noexcept;
-        void SetPositions(std::pmr::vector<Vector3D<Float32>>&& value) noexcept;
+        [[nodiscard]] Span<const Vector3D<Float32>> GetPositions() const noexcept;
+        void                                        SetPositions(Vector<Vector3D<Float32>>&& value) noexcept;
 
-        [[nodiscard]] std::span<const ColorRGBA<Float32>> GetColors() const noexcept;
-        void SetColors(std::pmr::vector<ColorRGBA<Float32>>&& value) noexcept;
+        [[nodiscard]] Span<const ColorRGBA<Float32>> GetColors() const noexcept;
+        void                                         SetColors(Vector<ColorRGBA<Float32>>&& value) noexcept;
 
-        [[nodiscard]] std::span<const Vector3D<Float32>> GetNormals() const noexcept;
-        void SetNormals(std::pmr::vector<Vector3D<Float32>>&& value) noexcept;
+        [[nodiscard]] Span<const Vector3D<Float32>> GetNormals() const noexcept;
+        void                                        SetNormals(Vector<Vector3D<Float32>>&& value) noexcept;
 
-        [[nodiscard]] std::span<const Vector2D<Float32>> GetTextureCoords() const noexcept;
-        void SetTextureCoords(std::pmr::vector<Vector2D<Float32>>&& value) noexcept;
+        [[nodiscard]] Span<const Vector2D<Float32>> GetTextureCoords() const noexcept;
+        void                                        SetTextureCoords(Vector<Vector2D<Float32>>&& value) noexcept;
 
-        [[nodiscard]] std::span<const MeshVertex> GetVertices() const noexcept;
-        void                                      SetVertices(std::pmr::vector<MeshVertex>&& value) noexcept;
+        [[nodiscard]] Span<const MeshVertex> GetVertices() const noexcept;
+        void                                 SetVertices(Vector<MeshVertex>&& value) noexcept;
 
-        [[nodiscard]] std::span<const UInt32> GetIndices() const noexcept;
-        void                                  SetIndices(std::pmr::vector<UInt32>&& value) noexcept;
+        [[nodiscard]] Span<const UInt32> GetIndices() const noexcept;
+        void                             SetIndices(Vector<UInt32>&& value) noexcept;
 
         [[nodiscard]] const IGPUMesh* GetGPUMesh() const noexcept;
 
     private:
-        IGPUDevice*                          device = nullptr;
-        Vector3D<Float32>                    boundsCenter{};
-        Vector3D<Float32>                    boundsExtents{};
-        std::pmr::vector<Vector3D<Float32>>  positions{Memory::GetMemoryResource()};
-        std::pmr::vector<ColorRGBA<Float32>> colors{Memory::GetMemoryResource()};
-        std::pmr::vector<Vector3D<Float32>>  normals{Memory::GetMemoryResource()};
-        std::pmr::vector<Vector2D<Float32>>  textureCoords{Memory::GetMemoryResource()};
-        std::pmr::vector<MeshVertex>         vertices{Memory::GetMemoryResource()};
-        std::pmr::vector<UInt32>             indices{Memory::GetMemoryResource()};
-        IGPUMesh*                            gpuMesh = nullptr;
+        IGPUDevice*                device = nullptr;
+        Vector3D<Float32>          boundsCenter{};
+        Vector3D<Float32>          boundsExtents{};
+        Vector<Vector3D<Float32>>  positions;
+        Vector<ColorRGBA<Float32>> colors;
+        Vector<Vector3D<Float32>>  normals;
+        Vector<Vector2D<Float32>>  textureCoords;
+        Vector<MeshVertex>         vertices;
+        Vector<UInt32>             indices;
+        IGPUMesh*                  gpuMesh = nullptr;
     };
 
     inline const Vector3D<Float32>& MeshAsset::GetBoundsCenter() const noexcept
@@ -87,62 +85,62 @@ namespace Garage
         boundsExtents = value;
     }
 
-    inline std::span<const Vector3D<Float32>> MeshAsset::GetPositions() const noexcept
+    inline Span<const Vector3D<Float32>> MeshAsset::GetPositions() const noexcept
     {
         return positions;
     }
 
-    inline void MeshAsset::SetPositions(std::pmr::vector<Vector3D<Float32>>&& value) noexcept
+    inline void MeshAsset::SetPositions(Vector<Vector3D<Float32>>&& value) noexcept
     {
         positions = std::move(value);
     }
 
-    inline std::span<const ColorRGBA<Float32>> MeshAsset::GetColors() const noexcept
+    inline Span<const ColorRGBA<Float32>> MeshAsset::GetColors() const noexcept
     {
         return colors;
     }
 
-    inline void MeshAsset::SetColors(std::pmr::vector<ColorRGBA<Float32>>&& value) noexcept
+    inline void MeshAsset::SetColors(Vector<ColorRGBA<Float32>>&& value) noexcept
     {
         colors = std::move(value);
     }
 
-    inline std::span<const Vector3D<Float32>> MeshAsset::GetNormals() const noexcept
+    inline Span<const Vector3D<Float32>> MeshAsset::GetNormals() const noexcept
     {
         return normals;
     }
 
-    inline void MeshAsset::SetNormals(std::pmr::vector<Vector3D<Float32>>&& value) noexcept
+    inline void MeshAsset::SetNormals(Vector<Vector3D<Float32>>&& value) noexcept
     {
         normals = std::move(value);
     }
 
-    inline std::span<const Vector2D<Float32>> MeshAsset::GetTextureCoords() const noexcept
+    inline Span<const Vector2D<Float32>> MeshAsset::GetTextureCoords() const noexcept
     {
         return textureCoords;
     }
 
-    inline void MeshAsset::SetTextureCoords(std::pmr::vector<Vector2D<Float32>>&& value) noexcept
+    inline void MeshAsset::SetTextureCoords(Vector<Vector2D<Float32>>&& value) noexcept
     {
         textureCoords = std::move(value);
     }
 
-    inline std::span<const MeshVertex> MeshAsset::GetVertices() const noexcept
+    inline Span<const MeshVertex> MeshAsset::GetVertices() const noexcept
     {
         return vertices;
     }
 
-    inline void MeshAsset::SetVertices(std::pmr::vector<MeshVertex>&& value) noexcept
+    inline void MeshAsset::SetVertices(Vector<MeshVertex>&& value) noexcept
     {
         vertices = std::move(value);
     }
 
-    inline std::span<const UInt32> MeshAsset::GetIndices() const noexcept
+    inline Span<const UInt32> MeshAsset::GetIndices() const noexcept
     {
         return indices;
     }
 
-    inline void MeshAsset::SetIndices(std::pmr::vector<UInt32>&& value) noexcept
+    inline void MeshAsset::SetIndices(Vector<UInt32>&& value) noexcept
     {
         indices = std::move(value);
     }

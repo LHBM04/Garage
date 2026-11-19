@@ -1,10 +1,10 @@
 ﻿#ifndef GARAGE_MATH_QUATERNION_HPP
 #define GARAGE_MATH_QUATERNION_HPP
 
-#include <array>
 #include <compare>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "mathf.hpp"
 #include "vector3d.hpp"
@@ -147,7 +147,7 @@ namespace Garage
             requires Floatable<TScalar>;
 
     private:
-        std::array<TScalar, 4> elements = {TScalar{0}, TScalar{0}, TScalar{0}, static_cast<TScalar>(1)};
+        Array<TScalar, 4> elements = {TScalar{0}, TScalar{0}, TScalar{0}, static_cast<TScalar>(1)};
     };
 
     using QuaternionInt   = Quaternion<Int32>;

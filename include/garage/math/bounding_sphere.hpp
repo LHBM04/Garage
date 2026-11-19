@@ -2,9 +2,9 @@
 #define GARAGE_MATH_BOUNDING_SPHERE_HPP
 
 #include <compare>
-#include <span>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "mathf.hpp"
 #include "matrix4x4.hpp"
@@ -20,7 +20,7 @@ namespace Garage
     class GARAGE_API BoundingSphere final
     {
     public:
-        using PointSpan = std::span<const Vector3D<Float32>>;
+        using PointSpan = Span<const Vector3D<Float32>>;
 
         BoundingSphere() noexcept;
         BoundingSphere(const Vector3D<Float32>& center, Float32 radius) noexcept;

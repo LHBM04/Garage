@@ -1,15 +1,11 @@
 #ifndef GARAGE_RESOURCES_ANIMATION_ASSET_HPP
 #define GARAGE_RESOURCES_ANIMATION_ASSET_HPP
 
-#include <array>
 #include <filesystem>
-#include <span>
-#include <string>
 #include <utility>
-#include <vector>
 
 #include "../core/common.hpp"
-#include "../core/memory.hpp"
+#include "../core/common/containers.hpp"
 
 #include "asset.hpp"
 
@@ -17,44 +13,44 @@ namespace Garage
 {
     struct GARAGE_API AnimationFrame final
     {
-        Float32                time = 0.0f;
-        std::array<Float32, 3> position{};
-        std::array<Float32, 4> rotation{};
-        std::array<Float32, 3> scale{};
+        Float32           time = 0.0f;
+        Array<Float32, 3> position{};
+        Array<Float32, 4> rotation{};
+        Array<Float32, 3> scale{};
     };
 
     struct GARAGE_API AnimationTransform final
     {
-        std::pmr::string                 path{Memory::GetMemoryResource()};
-        std::pmr::vector<AnimationFrame> frames{Memory::GetMemoryResource()};
+        String                 path;
+        Vector<AnimationFrame> frames;
     };
 
     class GARAGE_API AnimationAsset final : public AssetBase
     {
     public:
-        explicit AnimationAsset(std::filesystem::path                  path,
-                                std::pmr::string                       name,
-                                Float32                                length,
-                                Float32                                frameRate,
-                                std::pmr::vector<AnimationTransform>&& transforms) noexcept;
+        explicit AnimationAsset(std::filesystem::path        path,
+                                String                       name,
+                                Float32                      length,
+                                Float32                      frameRate,
+                                Vector<AnimationTransform>&& transforms) noexcept;
 
-        [[nodiscard]] const std::pmr::string&             GetName() const noexcept;
-        [[nodiscard]] Float32                             GetLength() const noexcept;
-        [[nodiscard]] Float32                             GetFrameRate() const noexcept;
-        [[nodiscard]] std::span<const AnimationTransform> GetTransforms() const noexcept;
+        [[nodiscard]] const String&                  GetName() const noexcept;
+        [[nodiscard]] Float32                        GetLength() const noexcept;
+        [[nodiscard]] Float32                        GetFrameRate() const noexcept;
+        [[nodiscard]] Span<const AnimationTransform> GetTransforms() const noexcept;
 
     private:
-        std::pmr::string                     name{Memory::GetMemoryResource()};
-        Float32                              length    = 0.0f;
-        Float32                              frameRate = 0.0f;
-        std::pmr::vector<AnimationTransform> transforms{Memory::GetMemoryResource()};
+        String                     name;
+        Float32                    length    = 0.0f;
+        Float32                    frameRate = 0.0f;
+        Vector<AnimationTransform> transforms;
     };
 
-    inline AnimationAsset::AnimationAsset(std::filesystem::path                  path,
-                                          std::pmr::string                       name,
-                                          Float32                                length,
-                                          Float32                                frameRate,
-                                          std::pmr::vector<AnimationTransform>&& transforms) noexcept
+    inline AnimationAsset::AnimationAsset(std::filesystem::path        path,
+                                          String                       name,
+                                          Float32                      length,
+                                          Float32                      frameRate,
+                                          Vector<AnimationTransform>&& transforms) noexcept
         : AssetBase(std::move(path))
         , name(std::move(name))
         , length(length)
@@ -63,7 +59,7 @@ namespace Garage
     {
     }
 
-    inline const std::pmr::string& AnimationAsset::GetName() const noexcept
+    inline const String& AnimationAsset::GetName() const noexcept
     {
         return name;
     }
@@ -78,7 +74,7 @@ namespace Garage
         return frameRate;
     }
 
-    inline std::span<const AnimationTransform> AnimationAsset::GetTransforms() const noexcept
+    inline Span<const AnimationTransform> AnimationAsset::GetTransforms() const noexcept
     {
         return transforms;
     }

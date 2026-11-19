@@ -1,11 +1,10 @@
 ﻿#ifndef GARAGE_PLATFORM_DISPLAY_SUBSYSTEM_HPP
 #define GARAGE_PLATFORM_DISPLAY_SUBSYSTEM_HPP
 
-#include <memory_resource>
 #include <ranges>
-#include <vector>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 #include "../core/engine_subsystem.hpp"
 #include "../core/memory.hpp"
 #include "../core/system_status.hpp"
@@ -47,8 +46,8 @@ namespace Garage
         [[nodiscard]] bool IsDisplayValid(IDisplay::EId id) const noexcept;
 
     private:
-        EventSubsystem*                       eventSubsystem = nullptr;
-        std::pmr::vector<UniquePtr<IDisplay>> displays{Memory::GetMemoryResource()};
+        EventSubsystem*             eventSubsystem = nullptr;
+        Vector<UniquePtr<IDisplay>> displays;
     };
 
     inline DisplaySubsystem::DisplaySubsystem() noexcept

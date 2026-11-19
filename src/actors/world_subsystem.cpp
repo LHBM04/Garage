@@ -2,12 +2,12 @@
 
 #include <algorithm>
 #include <utility>
-#include <vector>
 
 #include "garage/actors/actor.hpp"
 #include "garage/actors/world.hpp"
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/memory.hpp"
 #include "garage/core/system_context.hpp"
 #include "garage/core/system_status.hpp"
@@ -109,7 +109,7 @@ namespace Garage
 
     ESystemStatus WorldSubsystem::OnEarlyUpdate(SystemContext& context)
     {
-        std::pmr::vector<UniquePtr<ActorBase>> persistentActors{Memory::GetMemoryResource()};
+        Vector<UniquePtr<ActorBase>> persistentActors;
         if (nextWorld != nullptr)
         {
             if (nextWorld != currentWorld)

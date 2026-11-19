@@ -1,11 +1,8 @@
 #ifndef GARAGE_GRAPHICS_RENDER_SUBSYSTEM_HPP
 #define GARAGE_GRAPHICS_RENDER_SUBSYSTEM_HPP
 
-#include <memory_resource>
-#include <string>
-#include <unordered_map>
-
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 #include "../core/engine_subsystem.hpp"
 #include "../core/memory.hpp"
 #include "../core/system_status.hpp"
@@ -49,17 +46,17 @@ namespace Garage
         [[nodiscard]] const IGPUCommandBuffer* GetGPUCommandBuffer() const noexcept;
 
     private:
-        [[nodiscard]] Result<UniquePtr<IGPUDevice>, std::pmr::string> CreateDevice() const;
-        void ReleaseDisplaySwapChain(const IDisplay* display) noexcept;
+        [[nodiscard]] Result<UniquePtr<IGPUDevice>, String> CreateDevice() const;
+        void                                                ReleaseDisplaySwapChain(const IDisplay* display) noexcept;
 
-        UniquePtr<IGPUDevice>                                  device;
-        IGPUCommandBuffer*                                     commandBuffer = nullptr;
-        IGPUFence*                                             fence         = nullptr;
-        std::pmr::unordered_map<IDisplay::EId, IGPUSwapChain*> swapChains{Memory::GetMemoryResource()};
-        Delegate<SystemContext&>                               onRender                 = {};
-        Int32                                                  displayCreateListenerId  = 0;
-        Int32                                                  displayCloseListenerId   = 0;
-        Int32                                                  displayDestroyListenerId = 0;
+        UniquePtr<IGPUDevice>                       device;
+        IGPUCommandBuffer*                          commandBuffer = nullptr;
+        IGPUFence*                                  fence         = nullptr;
+        UnorderedMap<IDisplay::EId, IGPUSwapChain*> swapChains;
+        Delegate<SystemContext&>                    onRender                 = {};
+        Int32                                       displayCreateListenerId  = 0;
+        Int32                                       displayCloseListenerId   = 0;
+        Int32                                       displayDestroyListenerId = 0;
     };
 
     inline Delegate<SystemContext&>& RenderSubsystem::OnRender() noexcept

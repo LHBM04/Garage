@@ -1,10 +1,10 @@
 ﻿#ifndef GARAGE_MATH_MATRIX4X4_HPP
 #define GARAGE_MATH_MATRIX4X4_HPP
 
-#include <array>
 #include <compare>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "mathf.hpp"
 #include "vector3d.hpp"
@@ -149,7 +149,7 @@ namespace Garage
             requires Floatable<TScalar>;
 
     private:
-        std::array<TScalar, 16> elements = {};
+        Array<TScalar, 16> elements = {};
     };
 
     using Matrix4x4Int   = Matrix4x4<Int32>;

@@ -1,11 +1,10 @@
 ﻿#include "garage/ui/image_view.hpp"
 
-#include <array>
-
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/system_context.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -74,7 +73,7 @@ namespace Garage
             return;
         }
 
-        std::array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> textures{};
+        Array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> textures{};
         textures[0] = gpuTexture;
         if (const auto RESULT = commandBuffer->BindTextures(textures); !RESULT)
         {

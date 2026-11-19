@@ -3,14 +3,12 @@
 
 #include <concepts>
 #include <filesystem>
-#include <string>
 #include <typeindex>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
 #include "../core/app_subsystem.hpp"
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 #include "../core/memory.hpp"
 #include "../core/system_status.hpp"
 
@@ -58,17 +56,17 @@ namespace Garage
         template <std::derived_from<AssetBase> TAsset>
         [[nodiscard]] const TAsset* GetLoadedAsset(const std::filesystem::path& path) const noexcept;
 
-        using AssetImporterList = std::pmr::vector<UniquePtr<AssetImporter<>>>;
-        using AssetImporterDict = std::pmr::unordered_map<std::type_index, AssetImporter<>*>;
+        using AssetImporterList = Vector<UniquePtr<AssetImporter<>>>;
+        using AssetImporterDict = UnorderedMap<std::type_index, AssetImporter<>*>;
 
-        using AssetList = std::pmr::vector<UniquePtr<AssetBase>>;
-        using AssetDict = std::pmr::unordered_map<std::filesystem::path, const AssetBase*, PathHash>;
+        using AssetList = Vector<UniquePtr<AssetBase>>;
+        using AssetDict = UnorderedMap<std::filesystem::path, const AssetBase*, PathHash>;
 
-        AssetImporterList assetImporters{Memory::GetMemoryResource()};
-        AssetImporterDict assetImportersByType{Memory::GetMemoryResource()};
+        AssetImporterList assetImporters;
+        AssetImporterDict assetImportersByType;
 
-        AssetList assets{Memory::GetMemoryResource()};
-        AssetDict assetsByPath{Memory::GetMemoryResource()};
+        AssetList assets;
+        AssetDict assetsByPath;
 
         Int32 worldExitListenerId = 0;
     };
@@ -87,8 +85,8 @@ namespace Garage
     void AssetSubsystem::AddImporter(TArgs&&... args)
     {
         const auto GET_ASSET_TYPE =
-                []<class TImporter, std::derived_from<AssetBase> TAsset>(Result<UniquePtr<TAsset>, std::pmr::string> (
-                        TImporter::*)(const std::filesystem::path&) const) noexcept
+                []<class TImporter, std::derived_from<AssetBase> TAsset>(
+                        Result<UniquePtr<TAsset>, String> (TImporter::*)(const std::filesystem::path&) const) noexcept
         {
             return std::type_index(typeid(TAsset));
         };

@@ -1,14 +1,13 @@
 #ifndef GARAGE_UTILITIES_JSON_UTILITY_HPP
 #define GARAGE_UTILITIES_JSON_UTILITY_HPP
 
-#include <array>
 #include <cmath>
 #include <filesystem>
-#include <string>
 
 #include <rapidjson/document.h>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 namespace Garage::JsonUtility
 {
@@ -18,22 +17,21 @@ namespace Garage::JsonUtility
 
     [[nodiscard]] GARAGE_API bool HasJsonExtension(const std::filesystem::path& path) noexcept;
 
-    [[nodiscard]] GARAGE_API Result<rapidjson::Document, std::pmr::string>
-                             LoadDocument(const std::filesystem::path& path);
+    [[nodiscard]] GARAGE_API Result<rapidjson::Document, String> LoadDocument(const std::filesystem::path& path);
 
     [[nodiscard]] GARAGE_API const rapidjson::Value* FindMember(const rapidjson::Value& object,
                                                                 const char*             key) noexcept;
 
-    [[nodiscard]] GARAGE_API bool TryReadString(const rapidjson::Value& value, std::pmr::string& out);
+    [[nodiscard]] GARAGE_API bool TryReadString(const rapidjson::Value& value, String& out);
     [[nodiscard]] GARAGE_API bool TryReadBool(const rapidjson::Value& value, bool& out) noexcept;
     [[nodiscard]] GARAGE_API bool TryReadInt32(const rapidjson::Value& value, Int32& out) noexcept;
     [[nodiscard]] GARAGE_API bool TryReadUInt32(const rapidjson::Value& value, UInt32& out) noexcept;
     [[nodiscard]] GARAGE_API bool TryReadFloat32(const rapidjson::Value& value, Float32& out) noexcept;
 
     template <USize N>
-    [[nodiscard]] bool TryReadFloatArray(const rapidjson::Value& value, std::array<Float32, N>& out) noexcept;
+    [[nodiscard]] bool TryReadFloatArray(const rapidjson::Value& value, Array<Float32, N>& out) noexcept;
 
-    [[nodiscard]] GARAGE_API bool ReadString(const rapidjson::Value& object, const char* key, std::pmr::string& out);
+    [[nodiscard]] GARAGE_API bool ReadString(const rapidjson::Value& object, const char* key, String& out);
     [[nodiscard]] GARAGE_API bool ReadBool(const rapidjson::Value& object, const char* key, bool& out) noexcept;
     [[nodiscard]] GARAGE_API bool ReadInt32(const rapidjson::Value& object, const char* key, Int32& out) noexcept;
     [[nodiscard]] GARAGE_API bool ReadUInt32(const rapidjson::Value& object, const char* key, UInt32& out) noexcept;
@@ -42,11 +40,9 @@ namespace Garage::JsonUtility
             ReadArray(const rapidjson::Value& object, const char* key, const rapidjson::Value*& outArray) noexcept;
 
     template <USize N>
-    [[nodiscard]] bool
-            ReadFloatArray(const rapidjson::Value& object, const char* key, std::array<Float32, N>& out) noexcept;
+    [[nodiscard]] bool ReadFloatArray(const rapidjson::Value& object, const char* key, Array<Float32, N>& out) noexcept;
 
-    [[nodiscard]] GARAGE_API bool
-            ReadOptionalString(const rapidjson::Value& object, const char* key, std::pmr::string& out);
+    [[nodiscard]] GARAGE_API bool ReadOptionalString(const rapidjson::Value& object, const char* key, String& out);
     [[nodiscard]] GARAGE_API bool
             ReadOptionalUInt32(const rapidjson::Value& object, const char* key, UInt32& out) noexcept;
     [[nodiscard]] GARAGE_API bool
@@ -56,12 +52,11 @@ namespace Garage::JsonUtility
                                                     const rapidjson::Value*& outArray) noexcept;
 
     template <USize N>
-    [[nodiscard]] bool ReadOptionalFloatArray(const rapidjson::Value& object,
-                                              const char*             key,
-                                              std::array<Float32, N>& out) noexcept;
+    [[nodiscard]] bool
+            ReadOptionalFloatArray(const rapidjson::Value& object, const char* key, Array<Float32, N>& out) noexcept;
 
     template <USize N>
-    bool TryReadFloatArray(const rapidjson::Value& value, std::array<Float32, N>& out) noexcept
+    bool TryReadFloatArray(const rapidjson::Value& value, Array<Float32, N>& out) noexcept
     {
         using IndexType = decltype(value.Size());
         if (!value.IsArray() || value.Size() != static_cast<IndexType>(N))
@@ -69,7 +64,7 @@ namespace Garage::JsonUtility
             return false;
         }
 
-        std::array<Float32, N> parsed{};
+        Array<Float32, N> parsed{};
         for (USize index = 0; index < N; ++index)
         {
             if (!TryReadFloat32(value[static_cast<IndexType>(index)], parsed[index]))
@@ -83,14 +78,14 @@ namespace Garage::JsonUtility
     }
 
     template <USize N>
-    bool ReadFloatArray(const rapidjson::Value& object, const char* key, std::array<Float32, N>& out) noexcept
+    bool ReadFloatArray(const rapidjson::Value& object, const char* key, Array<Float32, N>& out) noexcept
     {
         const rapidjson::Value* member = FindMember(object, key);
         return member != nullptr && TryReadFloatArray(*member, out);
     }
 
     template <USize N>
-    bool ReadOptionalFloatArray(const rapidjson::Value& object, const char* key, std::array<Float32, N>& out) noexcept
+    bool ReadOptionalFloatArray(const rapidjson::Value& object, const char* key, Array<Float32, N>& out) noexcept
     {
         const rapidjson::Value* member = FindMember(object, key);
         if (member == nullptr)

@@ -6,21 +6,20 @@
 #include <fstream>
 #include <ios>
 #include <string>
-#include <string_view>
 #include <utility>
 
 #include <rapidjson/document.h>
 
 #include "garage/core/common.hpp"
-#include "garage/core/memory.hpp"
+#include "garage/core/common/containers.hpp"
 
 namespace Garage::JsonUtility
 {
     bool HasJsonExtension(const std::filesystem::path& path) noexcept
     {
-        const std::string          EXTENSION_TEXT = path.extension().string();
-        const std::string_view     EXTENSION      = EXTENSION_TEXT;
-        constexpr std::string_view TARGET         = ".json";
+        const std::string    EXTENSION_TEXT = path.extension().string();
+        const StringView     EXTENSION      = EXTENSION_TEXT;
+        constexpr StringView TARGET         = ".json";
         if (EXTENSION.size() != TARGET.size())
         {
             return false;
@@ -39,31 +38,31 @@ namespace Garage::JsonUtility
         return true;
     }
 
-    Result<rapidjson::Document, std::pmr::string> LoadDocument(const std::filesystem::path& path)
+    Result<rapidjson::Document, String> LoadDocument(const std::filesystem::path& path)
     {
         std::ifstream file(path, std::ios::binary | std::ios::ate);
         if (!file.is_open())
         {
-            std::pmr::string error = Memory::MakeString("리소스를 열 수 없습니다: ");
+            String error("리소스를 열 수 없습니다: ");
             error.append(path.generic_string());
-            return Result<rapidjson::Document, std::pmr::string>::Err(std::move(error));
+            return Result<rapidjson::Document, String>::Err(std::move(error));
         }
 
         const std::streamsize FILE_SIZE = file.tellg();
         if (FILE_SIZE <= 0 || static_cast<USize>(FILE_SIZE) > MAX_FILE_SIZE)
         {
-            std::pmr::string error = Memory::MakeString("JSON 파일 크기가 유효하지 않습니다: ");
+            String error("JSON 파일 크기가 유효하지 않습니다: ");
             error.append(path.generic_string());
-            return Result<rapidjson::Document, std::pmr::string>::Err(std::move(error));
+            return Result<rapidjson::Document, String>::Err(std::move(error));
         }
 
         file.seekg(0, std::ios::beg);
-        std::pmr::string jsonText(static_cast<USize>(FILE_SIZE), '\0', Memory::GetMemoryResource());
+        String jsonText(static_cast<USize>(FILE_SIZE), '\0');
         if (!file.read(jsonText.data(), FILE_SIZE))
         {
-            std::pmr::string error = Memory::MakeString("JSON 파일을 읽지 못했습니다: ");
+            String error("JSON 파일을 읽지 못했습니다: ");
             error.append(path.generic_string());
-            return Result<rapidjson::Document, std::pmr::string>::Err(std::move(error));
+            return Result<rapidjson::Document, String>::Err(std::move(error));
         }
 
         const char* parseBegin  = jsonText.data();
@@ -79,12 +78,12 @@ namespace Garage::JsonUtility
         document.Parse(parseBegin, parseLength);
         if (document.HasParseError() || !document.IsObject())
         {
-            std::pmr::string error = Memory::MakeString("JSON 구문 분석에 실패했습니다: ");
+            String error("JSON 구문 분석에 실패했습니다: ");
             error.append(path.generic_string());
-            return Result<rapidjson::Document, std::pmr::string>::Err(std::move(error));
+            return Result<rapidjson::Document, String>::Err(std::move(error));
         }
 
-        return Result<rapidjson::Document, std::pmr::string>::Ok(std::move(document));
+        return Result<rapidjson::Document, String>::Ok(std::move(document));
     }
 
     const rapidjson::Value* FindMember(const rapidjson::Value& object, const char* key) noexcept
@@ -103,7 +102,7 @@ namespace Garage::JsonUtility
         return &ITERATOR->value;
     }
 
-    bool TryReadString(const rapidjson::Value& value, std::pmr::string& out)
+    bool TryReadString(const rapidjson::Value& value, String& out)
     {
         if (!value.IsString())
         {
@@ -164,7 +163,7 @@ namespace Garage::JsonUtility
         return true;
     }
 
-    bool ReadString(const rapidjson::Value& object, const char* key, std::pmr::string& out)
+    bool ReadString(const rapidjson::Value& object, const char* key, String& out)
     {
         const rapidjson::Value* member = FindMember(object, key);
         return member != nullptr && TryReadString(*member, out);
@@ -206,7 +205,7 @@ namespace Garage::JsonUtility
         return true;
     }
 
-    bool ReadOptionalString(const rapidjson::Value& object, const char* key, std::pmr::string& out)
+    bool ReadOptionalString(const rapidjson::Value& object, const char* key, String& out)
     {
         const rapidjson::Value* member = FindMember(object, key);
         if (member == nullptr)

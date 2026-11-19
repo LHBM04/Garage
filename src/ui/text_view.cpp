@@ -1,14 +1,12 @@
 ﻿#include "garage/ui/text_view.hpp"
 
-#include <array>
 #include <cmath>
-#include <span>
-#include <string_view>
 
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/system_context.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -32,7 +30,7 @@ namespace Garage
 {
     namespace
     {
-        [[nodiscard]] UInt32 DecodeUTF8(std::string_view text, USize& index) noexcept
+        [[nodiscard]] UInt32 DecodeUTF8(StringView text, USize& index) noexcept
         {
             const UInt8 LEAD = static_cast<UInt8>(text[index]);
             if (LEAD < 0x80u)
@@ -83,7 +81,7 @@ namespace Garage
             return;
         }
 
-        const std::span<const FontCharacterData> CHARACTERS = font->GetCharacters();
+        const Span<const FontCharacterData> CHARACTERS = font->GetCharacters();
         characterMap.reserve(CHARACTERS.size());
 
         for (const FontCharacterData& character : CHARACTERS)
@@ -152,7 +150,7 @@ namespace Garage
             return;
         }
 
-        std::array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> textures{};
+        Array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> textures{};
         textures[0] = gpuTexture;
         if (const auto RESULT = commandBuffer->BindTextures(textures); !RESULT)
         {

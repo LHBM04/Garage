@@ -1,12 +1,9 @@
 ﻿#include "platform/display_impl.hpp"
 
-#include <string_view>
-#include <string>
-
 #include <SDL3/SDL_video.h>
 
 #include "garage/core/common.hpp"
-#include "garage/core/memory.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/math/vector2d.hpp"
 
@@ -46,7 +43,7 @@ namespace Garage
         return id;
     }
 
-    std::string_view DisplayImpl::GetCaption() const noexcept
+    StringView DisplayImpl::GetCaption() const noexcept
     {
         ASSERT(window != nullptr);
 
@@ -56,14 +53,14 @@ namespace Garage
             return {};
         }
 
-        return std::string_view{title};
+        return StringView{title};
     }
 
-    void DisplayImpl::SetCaption(std::string_view value) noexcept
+    void DisplayImpl::SetCaption(StringView value) noexcept
     {
         ASSERT(window != nullptr);
 
-        const std::pmr::string TITLE(value, Memory::GetMemoryResource());
+        const String TITLE(value);
         SDL_SetWindowTitle(window, TITLE.c_str());
     }
 

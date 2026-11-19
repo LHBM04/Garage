@@ -2,9 +2,9 @@
 #define GARAGE_RESOURCES_ANIMATION_ASSET_IMPORTER_HPP
 
 #include <filesystem>
-#include <string>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 #include "../core/memory.hpp"
 
 #include "animation_asset.hpp"
@@ -17,7 +17,7 @@ namespace Garage
     public:
         using AssetImporter<AnimationAsset>::AssetImporter;
 
-        [[nodiscard]] Result<UniquePtr<AnimationAsset>, std::pmr::string>
+        [[nodiscard]] Result<UniquePtr<AnimationAsset>, String>
                 Import(const std::filesystem::path& path) const override;
     };
 } // namespace Garage

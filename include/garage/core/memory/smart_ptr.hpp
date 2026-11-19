@@ -3,12 +3,10 @@
 
 #include <concepts>
 #include <memory>
-#include <memory_resource>
 #include <type_traits>
 #include <utility>
 
 #include "allocator.hpp"
-#include "memory_resource.hpp"
 
 namespace Garage
 {
@@ -69,8 +67,7 @@ namespace Garage
         requires(!std::is_array_v<T> && std::is_constructible_v<T, TArgs...>)
     SharedPtr<T> MakeShared(TArgs&&... args)
     {
-        return std::allocate_shared<T>(std::pmr::polymorphic_allocator<T>(Memory::GetMemoryResource()),
-                                       std::forward<TArgs>(args)...);
+        return std::allocate_shared<T>(Memory::StdAllocator<T>(), std::forward<TArgs>(args)...);
     }
 } // namespace Garage
 

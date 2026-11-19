@@ -1,14 +1,10 @@
 #ifndef GARAGE_GRAPHICS_GPU_DEVICE_IMPL_HPP
 #define GARAGE_GRAPHICS_GPU_DEVICE_IMPL_HPP
 
-#include <memory_resource>
-#include <span>
-#include <string>
-#include <vector>
-
 #include <SDL3/SDL_gpu.h>
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/memory.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
@@ -45,46 +41,43 @@ namespace Garage
         GPUDeviceImpl(SDL_GPUDevice* device, SDL_GPUSampler* defaultSampler, SDL_GPUTexture* fallbackTexture) noexcept;
         ~GPUDeviceImpl() noexcept override;
 
-        [[nodiscard]] Result<IGPUBuffer*, std::pmr::string> CreateBuffer(EGPUBufferUsage usage,
-                                                                         UInt64          sizeInBytes) override;
-        [[nodiscard]] Result<IGPUBuffer*, std::pmr::string> CreateUploadBuffer(std::span<const Byte> data) override;
-        void                                                DestroyBuffer(IGPUBuffer* buffer) noexcept override;
+        [[nodiscard]] Result<IGPUBuffer*, String> CreateBuffer(EGPUBufferUsage usage, UInt64 sizeInBytes) override;
+        [[nodiscard]] Result<IGPUBuffer*, String> CreateUploadBuffer(Span<const Byte> data) override;
+        void                                      DestroyBuffer(IGPUBuffer* buffer) noexcept override;
 
-        [[nodiscard]] Result<IGPUShader*, std::pmr::string>
-                CreateShader(const GPUShaderCreateInfo& createInfo) override;
-        void    DestroyShader(IGPUShader* shader) noexcept override;
+        [[nodiscard]] Result<IGPUShader*, String> CreateShader(const GPUShaderCreateInfo& createInfo) override;
+        void                                      DestroyShader(IGPUShader* shader) noexcept override;
 
-        [[nodiscard]] Result<IGPUTexture2D*, std::pmr::string>
-                CreateTexture2D(const GPUTexture2DCreateInfo& createInfo) override;
-        [[nodiscard]] Result<IGPUTexture2D*, std::pmr::string>
-                CreateTexture2D(const GPUTexture2DCreateInfo&              createInfo,
-                                std::span<const GPUTextureSubresourceData> subresources) override;
+        [[nodiscard]] Result<IGPUTexture2D*, String> CreateTexture2D(const GPUTexture2DCreateInfo& createInfo) override;
+        [[nodiscard]] Result<IGPUTexture2D*, String>
+                CreateTexture2D(const GPUTexture2DCreateInfo&         createInfo,
+                                Span<const GPUTextureSubresourceData> subresources) override;
         void    DestroyTexture2D(IGPUTexture2D* texture) noexcept override;
 
-        [[nodiscard]] Result<IGPUCommandBuffer*, std::pmr::string> CreateCommandBuffer() override;
+        [[nodiscard]] Result<IGPUCommandBuffer*, String> CreateCommandBuffer() override;
         void DestroyCommandBuffer(IGPUCommandBuffer* commandBuffer) noexcept override;
 
-        [[nodiscard]] Result<IGPUFence*, std::pmr::string> CreateFence() override;
-        void                                               DestroyFence(IGPUFence* fence) noexcept override;
+        [[nodiscard]] Result<IGPUFence*, String> CreateFence() override;
+        void                                     DestroyFence(IGPUFence* fence) noexcept override;
 
-        [[nodiscard]] Result<IGPUSwapChain*, std::pmr::string> CreateSwapChain(const IDisplay* display) override;
-        void DestroySwapChain(IGPUSwapChain* swapChain) noexcept override;
+        [[nodiscard]] Result<IGPUSwapChain*, String> CreateSwapChain(const IDisplay* display) override;
+        void                                         DestroySwapChain(IGPUSwapChain* swapChain) noexcept override;
 
-        [[nodiscard]] Result<IGPUGraphicsPipelineState*, std::pmr::string>
+        [[nodiscard]] Result<IGPUGraphicsPipelineState*, String>
                 CreateGraphicsPipelineState(const GPUGraphicsPipelineDesc& description) override;
         void    DestroyGraphicsPipelineState(IGPUGraphicsPipelineState* pipelineState) noexcept override;
 
-        [[nodiscard]] Result<IGPUMesh*, std::pmr::string> CreateMesh(const IGPUBuffer*     vertexBuffer,
-                                                                     UInt32                vertexStride,
-                                                                     const IGPUBuffer*     indexBuffer,
-                                                                     EGPUIndexFormat       indexFormat,
-                                                                     EGPUPrimitiveTopology primitive) override;
-        [[nodiscard]] Result<IGPUMesh*, std::pmr::string> CreateMesh(std::span<const Byte> vertexData,
-                                                                     UInt32                vertexStride,
-                                                                     std::span<const Byte> indexData,
-                                                                     EGPUIndexFormat       indexFormat,
-                                                                     EGPUPrimitiveTopology primitive) override;
-        void                                              DestroyMesh(IGPUMesh* mesh) noexcept override;
+        [[nodiscard]] Result<IGPUMesh*, String> CreateMesh(const IGPUBuffer*     vertexBuffer,
+                                                           UInt32                vertexStride,
+                                                           const IGPUBuffer*     indexBuffer,
+                                                           EGPUIndexFormat       indexFormat,
+                                                           EGPUPrimitiveTopology primitive) override;
+        [[nodiscard]] Result<IGPUMesh*, String> CreateMesh(Span<const Byte>      vertexData,
+                                                           UInt32                vertexStride,
+                                                           Span<const Byte>      indexData,
+                                                           EGPUIndexFormat       indexFormat,
+                                                           EGPUPrimitiveTopology primitive) override;
+        void                                    DestroyMesh(IGPUMesh* mesh) noexcept override;
 
         void Release() noexcept;
 
@@ -93,17 +86,17 @@ namespace Garage
         [[nodiscard]] SDL_GPUTexture* GetFallbackTexture() const noexcept;
 
     private:
-        SDL_GPUDevice*                                            device          = nullptr;
-        SDL_GPUSampler*                                           defaultSampler  = nullptr;
-        SDL_GPUTexture*                                           fallbackTexture = nullptr;
-        std::pmr::vector<UniquePtr<GPUBufferImpl>>                buffers{Memory::GetMemoryResource()};
-        std::pmr::vector<UniquePtr<GPUShaderImpl>>                shaders{Memory::GetMemoryResource()};
-        std::pmr::vector<UniquePtr<GPUTexture2DImpl>>             textures{Memory::GetMemoryResource()};
-        std::pmr::vector<UniquePtr<GPUCommandBufferImpl>>         commandBuffers{Memory::GetMemoryResource()};
-        std::pmr::vector<UniquePtr<GPUFenceImpl>>                 fences{Memory::GetMemoryResource()};
-        std::pmr::vector<UniquePtr<GPUSwapChainImpl>>             swapChains{Memory::GetMemoryResource()};
-        std::pmr::vector<UniquePtr<GPUGraphicsPipelineStateImpl>> pipelineStates{Memory::GetMemoryResource()};
-        std::pmr::vector<UniquePtr<GPUMeshImpl>>                  meshes{Memory::GetMemoryResource()};
+        SDL_GPUDevice*                                  device          = nullptr;
+        SDL_GPUSampler*                                 defaultSampler  = nullptr;
+        SDL_GPUTexture*                                 fallbackTexture = nullptr;
+        Vector<UniquePtr<GPUBufferImpl>>                buffers;
+        Vector<UniquePtr<GPUShaderImpl>>                shaders;
+        Vector<UniquePtr<GPUTexture2DImpl>>             textures;
+        Vector<UniquePtr<GPUCommandBufferImpl>>         commandBuffers;
+        Vector<UniquePtr<GPUFenceImpl>>                 fences;
+        Vector<UniquePtr<GPUSwapChainImpl>>             swapChains;
+        Vector<UniquePtr<GPUGraphicsPipelineStateImpl>> pipelineStates;
+        Vector<UniquePtr<GPUMeshImpl>>                  meshes;
     };
 
     inline SDL_GPUDevice* GPUDeviceImpl::GetSDLDevice() const noexcept

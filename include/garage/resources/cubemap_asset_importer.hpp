@@ -2,9 +2,9 @@
 #define GARAGE_RESOURCES_CUBEMAP_ASSET_IMPORTER_HPP
 
 #include <filesystem>
-#include <string>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 #include "../core/memory.hpp"
 
 #include "asset_importer.hpp"
@@ -20,8 +20,7 @@ namespace Garage
     public:
         explicit CubemapAssetImporter(AssetSubsystem* owner, IGPUDevice& device) noexcept;
 
-        [[nodiscard]] Result<UniquePtr<CubemapAsset>, std::pmr::string>
-                Import(const std::filesystem::path& path) const override;
+        [[nodiscard]] Result<UniquePtr<CubemapAsset>, String> Import(const std::filesystem::path& path) const override;
 
     private:
         IGPUDevice& device;

@@ -2,12 +2,10 @@
 #define GARAGE_RESOURCES_SHADER_ASSET_HPP
 
 #include <filesystem>
-#include <span>
 #include <utility>
-#include <vector>
 
 #include "../core/common.hpp"
-#include "../core/memory.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../graphics/gpu_graphics_pipeline_state.hpp"
 #include "../graphics/gpu_target.hpp"
@@ -28,8 +26,8 @@ namespace Garage
 
         [[nodiscard]] const IGPUShader* GetShader() const noexcept;
 
-        [[nodiscard]] std::span<const GPUVertexAttribute> GetVertexAttributes() const noexcept;
-        void SetVertexAttributes(std::pmr::vector<GPUVertexAttribute>&& value) noexcept;
+        [[nodiscard]] Span<const GPUVertexAttribute> GetVertexAttributes() const noexcept;
+        void                                         SetVertexAttributes(Vector<GPUVertexAttribute>&& value) noexcept;
 
         [[nodiscard]] UInt32 GetVertexStride() const noexcept;
         void                 SetVertexStride(UInt32 value) noexcept;
@@ -67,24 +65,24 @@ namespace Garage
                 EGPUTextureFormat  depthStencilFormat = GPUTarget::DEPTH_FORMAT) const noexcept;
 
     private:
-        IGPUDevice*                          device = nullptr;
-        IGPUShader*                          shader = nullptr;
-        std::pmr::vector<GPUVertexAttribute> vertexAttributes{Memory::GetMemoryResource()};
-        UInt32                               vertexStride        = 0u;
-        EGPUPrimitiveTopology                primitive           = EGPUPrimitiveTopology::TRIANGLE_LIST;
-        EGPUFillMode                         fillMode            = EGPUFillMode::FILL;
-        EGPUCullMode                         cullMode            = EGPUCullMode::BACK;
-        EGPUFrontFace                        frontFace           = EGPUFrontFace::CLOCKWISE;
-        bool                                 enableDepthTest     = true;
-        bool                                 enableDepthWrite    = true;
-        EGPUCompareOp                        depthCompareOp      = EGPUCompareOp::LESS_OR_EQUAL;
-        bool                                 enableBlend         = false;
-        EGPUBlendFactor                      srcColorBlendFactor = EGPUBlendFactor::ONE;
-        EGPUBlendFactor                      dstColorBlendFactor = EGPUBlendFactor::ZERO;
-        EGPUBlendOp                          colorBlendOp        = EGPUBlendOp::ADD;
-        EGPUBlendFactor                      srcAlphaBlendFactor = EGPUBlendFactor::ONE;
-        EGPUBlendFactor                      dstAlphaBlendFactor = EGPUBlendFactor::ZERO;
-        EGPUBlendOp                          alphaBlendOp        = EGPUBlendOp::ADD;
+        IGPUDevice*                device = nullptr;
+        IGPUShader*                shader = nullptr;
+        Vector<GPUVertexAttribute> vertexAttributes;
+        UInt32                     vertexStride        = 0u;
+        EGPUPrimitiveTopology      primitive           = EGPUPrimitiveTopology::TRIANGLE_LIST;
+        EGPUFillMode               fillMode            = EGPUFillMode::FILL;
+        EGPUCullMode               cullMode            = EGPUCullMode::BACK;
+        EGPUFrontFace              frontFace           = EGPUFrontFace::CLOCKWISE;
+        bool                       enableDepthTest     = true;
+        bool                       enableDepthWrite    = true;
+        EGPUCompareOp              depthCompareOp      = EGPUCompareOp::LESS_OR_EQUAL;
+        bool                       enableBlend         = false;
+        EGPUBlendFactor            srcColorBlendFactor = EGPUBlendFactor::ONE;
+        EGPUBlendFactor            dstColorBlendFactor = EGPUBlendFactor::ZERO;
+        EGPUBlendOp                colorBlendOp        = EGPUBlendOp::ADD;
+        EGPUBlendFactor            srcAlphaBlendFactor = EGPUBlendFactor::ONE;
+        EGPUBlendFactor            dstAlphaBlendFactor = EGPUBlendFactor::ZERO;
+        EGPUBlendOp                alphaBlendOp        = EGPUBlendOp::ADD;
     };
 
     inline const IGPUShader* ShaderAsset::GetShader() const noexcept
@@ -92,12 +90,12 @@ namespace Garage
         return shader;
     }
 
-    inline std::span<const GPUVertexAttribute> ShaderAsset::GetVertexAttributes() const noexcept
+    inline Span<const GPUVertexAttribute> ShaderAsset::GetVertexAttributes() const noexcept
     {
         return vertexAttributes;
     }
 
-    inline void ShaderAsset::SetVertexAttributes(std::pmr::vector<GPUVertexAttribute>&& value) noexcept
+    inline void ShaderAsset::SetVertexAttributes(Vector<GPUVertexAttribute>&& value) noexcept
     {
         vertexAttributes = std::move(value);
     }

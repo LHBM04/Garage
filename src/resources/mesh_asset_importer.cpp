@@ -1,15 +1,13 @@
 #include "garage/resources/mesh_asset_importer.hpp"
 
-#include <array>
 #include <filesystem>
 #include <span>
-#include <string>
 #include <utility>
-#include <vector>
 
 #include <rapidjson/document.h>
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/memory.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
@@ -30,15 +28,14 @@ namespace Garage
     namespace
     {
         template <USize N, class TElement, class TFactory>
-        [[nodiscard]] bool ReadComponentVectorArray(const rapidjson::Value&     arrayValue,
-                                                    std::pmr::vector<TElement>& out,
-                                                    TFactory                    factory)
+        [[nodiscard]] bool
+                ReadComponentVectorArray(const rapidjson::Value& arrayValue, Vector<TElement>& out, TFactory factory)
         {
             out.clear();
             out.reserve(arrayValue.Size());
             for (const rapidjson::Value& item : arrayValue.GetArray())
             {
-                std::array<Float32, N> components{};
+                Array<Float32, N> components{};
                 if (!JsonUtility::TryReadFloatArray(item, components))
                 {
                     return false;
@@ -51,18 +48,17 @@ namespace Garage
         }
     } // namespace
 
-    Result<UniquePtr<MeshAsset>, std::pmr::string> MeshAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<MeshAsset>, String> MeshAssetImporter::Import(const std::filesystem::path& path) const
     {
         if (!JsonUtility::HasJsonExtension(path))
         {
-            return Result<UniquePtr<MeshAsset>, std::pmr::string>::Err(
-                    Memory::MakeString("메시 로더에는 .json 파일이 필요합니다."));
+            return Result<UniquePtr<MeshAsset>, String>::Err(String("메시 로더에는 .json 파일이 필요합니다."));
         }
 
         auto documentResult = JsonUtility::LoadDocument(path);
         if (!documentResult)
         {
-            return Result<UniquePtr<MeshAsset>, std::pmr::string>::Err(std::move(documentResult).GetError());
+            return Result<UniquePtr<MeshAsset>, String>::Err(std::move(documentResult).GetError());
         }
 
         const rapidjson::Value& ROOT           = *documentResult;
@@ -78,36 +74,34 @@ namespace Garage
             !JsonUtility::ReadOptionalArray(ROOT, "colors", colorsArray) ||
             !JsonUtility::ReadArray(ROOT, "indices", indicesArray))
         {
-            return Result<UniquePtr<MeshAsset>, std::pmr::string>::Err(
-                    Memory::MakeString("메시 속성 데이터가 유효하지 않습니다."));
+            return Result<UniquePtr<MeshAsset>, String>::Err(String("메시 속성 데이터가 유효하지 않습니다."));
         }
 
-        auto makeVector3 = [](const std::array<Float32, 3>& components) noexcept
+        auto makeVector3 = [](const Array<Float32, 3>& components) noexcept
         {
             return Vector3D<Float32>{components[0], components[1], components[2]};
         };
-        auto makeVector2 = [](const std::array<Float32, 2>& components) noexcept
+        auto makeVector2 = [](const Array<Float32, 2>& components) noexcept
         {
             return Vector2D<Float32>{components[0], components[1]};
         };
-        auto makeColor = [](const std::array<Float32, 4>& components) noexcept
+        auto makeColor = [](const Array<Float32, 4>& components) noexcept
         {
             return ColorRGBA<Float32>{components[0], components[1], components[2], components[3]};
         };
 
-        std::pmr::vector<Vector3D<Float32>>  parsedPositions{Memory::GetMemoryResource()};
-        std::pmr::vector<Vector3D<Float32>>  parsedNormals{Memory::GetMemoryResource()};
-        std::pmr::vector<Vector2D<Float32>>  parsedUVs{Memory::GetMemoryResource()};
-        std::pmr::vector<ColorRGBA<Float32>> parsedColors{Memory::GetMemoryResource()};
-        std::pmr::vector<UInt32>             parsedIndices{Memory::GetMemoryResource()};
+        Vector<Vector3D<Float32>>  parsedPositions;
+        Vector<Vector3D<Float32>>  parsedNormals;
+        Vector<Vector2D<Float32>>  parsedUVs;
+        Vector<ColorRGBA<Float32>> parsedColors;
+        Vector<UInt32>             parsedIndices;
 
         if (!ReadComponentVectorArray<3>(*positionsArray, parsedPositions, makeVector3) ||
             !ReadComponentVectorArray<3>(*normalsArray, parsedNormals, makeVector3) ||
             (uvsArray != nullptr && !ReadComponentVectorArray<2>(*uvsArray, parsedUVs, makeVector2)) ||
             (colorsArray != nullptr && !ReadComponentVectorArray<4>(*colorsArray, parsedColors, makeColor)))
         {
-            return Result<UniquePtr<MeshAsset>, std::pmr::string>::Err(
-                    Memory::MakeString("메시 속성 데이터가 유효하지 않습니다."));
+            return Result<UniquePtr<MeshAsset>, String>::Err(String("메시 속성 데이터가 유효하지 않습니다."));
         }
 
         parsedIndices.reserve(indicesArray->Size());
@@ -116,8 +110,7 @@ namespace Garage
             UInt32 index = 0;
             if (!JsonUtility::TryReadUInt32(indexValue, index) || index >= parsedPositions.size())
             {
-                return Result<UniquePtr<MeshAsset>, std::pmr::string>::Err(
-                        Memory::MakeString("메시 인덱스가 정점 범위를 벗어났습니다."));
+                return Result<UniquePtr<MeshAsset>, String>::Err(String("메시 인덱스가 정점 범위를 벗어났습니다."));
             }
 
             parsedIndices.push_back(index);
@@ -128,8 +121,8 @@ namespace Garage
             (!parsedColors.empty() && parsedColors.size() != parsedPositions.size()) || parsedIndices.empty() ||
             parsedIndices.size() % 3 != 0)
         {
-            return Result<UniquePtr<MeshAsset>, std::pmr::string>::Err(
-                    Memory::MakeString("메시 정점 속성 또는 인덱스 개수가 유효하지 않습니다."));
+            return Result<UniquePtr<MeshAsset>, String>::Err(
+                    String("메시 정점 속성 또는 인덱스 개수가 유효하지 않습니다."));
         }
 
         Vector3D<Float32> boundsMin = parsedPositions.front();
@@ -144,7 +137,7 @@ namespace Garage
         const Vector3D<Float32> PARSED_BOUNDS_EXTENTS = boundsMax * 0.5f - boundsMin * 0.5f;
         const USize             VERTEX_COUNT          = parsedPositions.size();
 
-        std::pmr::vector<MeshVertex> builtVertices(VERTEX_COUNT, Memory::GetMemoryResource());
+        Vector<MeshVertex> builtVertices(VERTEX_COUNT);
         for (USize i = 0; i < VERTEX_COUNT; ++i)
         {
             const Vector3D<Float32>& POS   = parsedPositions[i];
@@ -163,14 +156,14 @@ namespace Garage
             };
         }
 
-        auto gpuMeshResult = device.CreateMesh(std::as_bytes(std::span<const MeshVertex>(builtVertices)),
+        auto gpuMeshResult = device.CreateMesh(std::as_bytes(Span<const MeshVertex>(builtVertices)),
                                                sizeof(MeshVertex),
-                                               std::as_bytes(std::span<const UInt32>(parsedIndices)),
+                                               std::as_bytes(Span<const UInt32>(parsedIndices)),
                                                EGPUIndexFormat::UINT32,
                                                EGPUPrimitiveTopology::TRIANGLE_LIST);
         if (!gpuMeshResult)
         {
-            return Result<UniquePtr<MeshAsset>, std::pmr::string>::Err(std::move(gpuMeshResult).GetError());
+            return Result<UniquePtr<MeshAsset>, String>::Err(std::move(gpuMeshResult).GetError());
         }
 
         UniquePtr<MeshAsset> mesh = MakeUnique<MeshAsset>(path, device, gpuMeshResult.GetValue());
@@ -183,6 +176,6 @@ namespace Garage
         mesh->SetVertices(std::move(builtVertices));
         mesh->SetIndices(std::move(parsedIndices));
 
-        return Result<UniquePtr<MeshAsset>, std::pmr::string>::Ok(std::move(mesh));
+        return Result<UniquePtr<MeshAsset>, String>::Ok(std::move(mesh));
     }
 } // namespace Garage

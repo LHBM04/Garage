@@ -2,9 +2,9 @@
 #define GARAGE_RESOURCES_MATERIAL_ASSET_IMPORTER_HPP
 
 #include <filesystem>
-#include <string>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 #include "../core/memory.hpp"
 
 #include "../graphics/gpu_target.hpp"
@@ -26,8 +26,7 @@ namespace Garage
                                        EGPUTextureFormat targetFormat = EGPUTextureFormat::R8G8B8A8_UNORM,
                                        EGPUTextureFormat depthFormat  = GPUTarget::DEPTH_FORMAT) noexcept;
 
-        [[nodiscard]] Result<UniquePtr<MaterialAsset>, std::pmr::string>
-                Import(const std::filesystem::path& path) const override;
+        [[nodiscard]] Result<UniquePtr<MaterialAsset>, String> Import(const std::filesystem::path& path) const override;
 
     private:
         IGPUDevice&       device;

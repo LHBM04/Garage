@@ -1,11 +1,10 @@
 ﻿#ifndef GARAGE_MATH_BOUNDING_BOX_HPP
 #define GARAGE_MATH_BOUNDING_BOX_HPP
 
-#include <array>
 #include <compare>
-#include <span>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "mathf.hpp"
 #include "matrix4x4.hpp"
@@ -23,9 +22,9 @@ namespace Garage
     public:
         static constexpr USize CORNER_COUNT = 8;
 
-        using CornerArray = std::array<Vector3D<Float32>, CORNER_COUNT>;
-        using CornerSpan  = std::span<Vector3D<Float32>, CORNER_COUNT>;
-        using PointSpan   = std::span<const Vector3D<Float32>>;
+        using CornerArray = Array<Vector3D<Float32>, CORNER_COUNT>;
+        using CornerSpan  = Span<Vector3D<Float32>, CORNER_COUNT>;
+        using PointSpan   = Span<const Vector3D<Float32>>;
 
         BoundingBox() noexcept;
         BoundingBox(const Vector3D<Float32>& center, const Vector3D<Float32>& extents) noexcept;

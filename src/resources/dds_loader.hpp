@@ -2,10 +2,9 @@
 #define GARAGE_RESOURCES_DDS_LOADER_HPP
 
 #include <filesystem>
-#include <string>
 
 #include "garage/core/common.hpp"
-#include "garage/core/memory.hpp"
+#include "garage/core/common/containers.hpp"
 
 namespace Garage
 {
@@ -14,7 +13,7 @@ namespace Garage
 
     namespace ResourcesDetail
     {
-        [[nodiscard]] Result<IGPUTexture2D*, std::pmr::string>
+        [[nodiscard]] Result<IGPUTexture2D*, String>
                 LoadDDSTexture(const std::filesystem::path& path, bool expectCubemap, IGPUDevice& device);
     } // namespace ResourcesDetail
 } // namespace Garage

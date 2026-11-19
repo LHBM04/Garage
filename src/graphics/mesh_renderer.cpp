@@ -1,10 +1,9 @@
 #include "garage/graphics/mesh_renderer.hpp"
 
-#include <array>
-
 #include "garage/actors/actor.hpp"
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/system_context.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -74,8 +73,8 @@ namespace Garage
         };
 
         static_assert(IGPUCommandBuffer::TEXTURE_SLOT_COUNT == static_cast<UInt32>(EMaterialTextureSlot::COUNT));
-        std::array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> textures{};
-        const MaterialTextures& MATERIAL_TEXTURES = material->GetTextures();
+        Array<const IGPUTexture2D*, IGPUCommandBuffer::TEXTURE_SLOT_COUNT> textures{};
+        const MaterialTextures&                                            MATERIAL_TEXTURES = material->GetTextures();
         for (UInt32 index = 0; index < textures.size(); ++index)
         {
             if (const TextureAsset* textureAsset = MATERIAL_TEXTURES[index]; textureAsset != nullptr)

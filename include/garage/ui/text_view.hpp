@@ -1,15 +1,10 @@
 ﻿#ifndef GARAGE_UI_TEXT_VIEW_HPP
 #define GARAGE_UI_TEXT_VIEW_HPP
 
-#include <memory_resource>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-
 #include "../actors/component.hpp"
 
 #include "../core/common.hpp"
-#include "../core/memory.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../math/color_rgba.hpp"
 
@@ -45,8 +40,8 @@ namespace Garage
         [[nodiscard]] const MaterialAsset* GetMaterial() const noexcept;
         void                               SetMaterial(const MaterialAsset* value) noexcept;
 
-        [[nodiscard]] const std::pmr::string& GetText() const noexcept;
-        void                                  SetText(std::string_view value) noexcept;
+        [[nodiscard]] const String& GetText() const noexcept;
+        void                        SetText(StringView value) noexcept;
 
         [[nodiscard]] Float32 GetFontSize() const noexcept;
         void                  SetFontSize(Float32 value) noexcept;
@@ -64,11 +59,11 @@ namespace Garage
         const BitmapFontAsset* font     = nullptr;
         const MaterialAsset*   material = nullptr;
 
-        std::pmr::string                                          text{"New Text!", Memory::GetMemoryResource()};
-        Float32                                                   fontSize            = 32.0f;
-        ETextHorizontalAlignment                                  horizontalAlignment = ETextHorizontalAlignment::LEFT;
-        ColorRGBA<Float32>                                        color               = ColorRGBA<Float32>::GetWhite();
-        std::pmr::unordered_map<UInt32, const FontCharacterData*> characterMap{Memory::GetMemoryResource()};
+        String                                         text{"New Text!"};
+        Float32                                        fontSize            = 32.0f;
+        ETextHorizontalAlignment                       horizontalAlignment = ETextHorizontalAlignment::LEFT;
+        ColorRGBA<Float32>                             color               = ColorRGBA<Float32>::GetWhite();
+        UnorderedMap<UInt32, const FontCharacterData*> characterMap;
     };
 
     inline const TextureAsset* TextView::GetTexture() const noexcept
@@ -96,12 +91,12 @@ namespace Garage
         material = value;
     }
 
-    inline const std::pmr::string& TextView::GetText() const noexcept
+    inline const String& TextView::GetText() const noexcept
     {
         return text;
     }
 
-    inline void TextView::SetText(std::string_view value) noexcept
+    inline void TextView::SetText(StringView value) noexcept
     {
         text = value;
     }

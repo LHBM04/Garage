@@ -1,10 +1,10 @@
 #ifndef GARAGE_RESOURCES_MATERIAL_ASSET_HPP
 #define GARAGE_RESOURCES_MATERIAL_ASSET_HPP
 
-#include <array>
 #include <filesystem>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../graphics/gpu_types.hpp"
 
@@ -32,7 +32,7 @@ namespace Garage
         COUNT,
     };
 
-    using MaterialTextures = std::array<const TextureAsset*, static_cast<USize>(EMaterialTextureSlot::COUNT)>;
+    using MaterialTextures = Array<const TextureAsset*, static_cast<USize>(EMaterialTextureSlot::COUNT)>;
 
     class GARAGE_API MaterialAsset final : public AssetBase
     {

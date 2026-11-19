@@ -2,11 +2,9 @@
 
 #include <algorithm>
 #include <cmath>
-#include <string>
-#include <string_view>
 
 #include "garage/core/common.hpp"
-#include "garage/core/memory.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/math/mathf.hpp"
 
@@ -15,8 +13,8 @@
 
 namespace Garage
 {
-    InputAction::InputAction(std::string_view name) noexcept
-        : name(name, Memory::GetMemoryResource())
+    InputAction::InputAction(StringView name) noexcept
+        : name(name)
     {
     }
 
@@ -140,7 +138,7 @@ namespace Garage
         }
     }
 
-    const std::pmr::string& InputAction::GetName() const noexcept
+    const String& InputAction::GetName() const noexcept
     {
         return name;
     }

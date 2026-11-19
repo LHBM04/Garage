@@ -1,10 +1,8 @@
 #ifndef GARAGE_GRAPHICS_GPU_SHADER_HPP
 #define GARAGE_GRAPHICS_GPU_SHADER_HPP
 
-#include <span>
-#include <string_view>
-
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "gpu_types.hpp"
 
@@ -14,14 +12,14 @@ namespace Garage
 
     struct GARAGE_API GPUShaderCreateInfo final
     {
-        std::span<const Byte> code                = {};
-        std::string_view      entryPoint          = "main";
-        EGPUShaderFormat      format              = EGPUShaderFormat::INVALID;
-        EGPUShaderStage       stage               = EGPUShaderStage::VERTEX;
-        UInt32                samplerCount        = 0;
-        UInt32                storageTextureCount = 0;
-        UInt32                storageBufferCount  = 0;
-        UInt32                uniformBufferCount  = 0;
+        Span<const Byte> code                = {};
+        StringView       entryPoint          = "main";
+        EGPUShaderFormat format              = EGPUShaderFormat::INVALID;
+        EGPUShaderStage  stage               = EGPUShaderStage::VERTEX;
+        UInt32           samplerCount        = 0;
+        UInt32           storageTextureCount = 0;
+        UInt32           storageBufferCount  = 0;
+        UInt32           uniformBufferCount  = 0;
     };
 
     class GARAGE_API IGPUShader

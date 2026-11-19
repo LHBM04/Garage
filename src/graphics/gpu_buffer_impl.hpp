@@ -1,12 +1,10 @@
 ﻿#ifndef GARAGE_GRAPHICS_GPU_BUFFER_IMPL_HPP
 #define GARAGE_GRAPHICS_GPU_BUFFER_IMPL_HPP
 
-#include <span>
-#include <string>
-
 #include <SDL3/SDL_gpu.h>
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 
 #include "garage/graphics/gpu_buffer.hpp"
 #include "garage/graphics/gpu_types.hpp"
@@ -25,10 +23,10 @@ namespace Garage
                       SDL_GPUTransferBuffer* transferBuffer) noexcept;
         ~GPUBufferImpl() noexcept override;
 
-        [[nodiscard]] Result<void, std::pmr::string> Write(std::span<const UInt8> data, UInt64 offset = 0) override;
-        [[nodiscard]] Result<void, std::pmr::string> Write(std::span<const Byte> data, UInt64 offset = 0) override;
-        [[nodiscard]] Result<void, std::pmr::string> Read(std::span<UInt8> data, UInt64 offset = 0) const override;
-        [[nodiscard]] Result<void, std::pmr::string> Read(std::span<Byte> data, UInt64 offset = 0) const override;
+        [[nodiscard]] Result<void, String> Write(Span<const UInt8> data, UInt64 offset = 0) override;
+        [[nodiscard]] Result<void, String> Write(Span<const Byte> data, UInt64 offset = 0) override;
+        [[nodiscard]] Result<void, String> Read(Span<UInt8> data, UInt64 offset = 0) const override;
+        [[nodiscard]] Result<void, String> Read(Span<Byte> data, UInt64 offset = 0) const override;
 
         void Release() noexcept;
 

@@ -3,12 +3,12 @@
 
 #include <algorithm>
 #include <functional>
-#include <memory_resource>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-#include "../memory.hpp"
+#include "../memory/allocator.hpp"
+#include "../memory/smart_ptr.hpp"
 #include "types.hpp"
 
 namespace Garage
@@ -29,7 +29,7 @@ namespace Garage
         };
 
         using SubscriptionPtr  = SharedPtr<Subscription>;
-        using SubscriptionList = std::pmr::vector<SubscriptionPtr>;
+        using SubscriptionList = std::vector<SubscriptionPtr, Memory::StdAllocator<SubscriptionPtr>>;
 
     public:
         Delegate() noexcept  = default;
@@ -51,7 +51,7 @@ namespace Garage
         void Clear() noexcept;
 
     private:
-        SubscriptionList subscriptions{Memory::GetMemoryResource()};
+        SubscriptionList subscriptions;
         ListenerId       nextListenerId = 1;
     };
 
@@ -84,7 +84,7 @@ namespace Garage
     template <class... TArgs>
     void Delegate<TArgs...>::Broadcast(TArgs... args) const
     {
-        const SubscriptionList SNAPSHOT(subscriptions, Memory::GetMemoryResource());
+        const SubscriptionList SNAPSHOT(subscriptions);
         for (const SubscriptionPtr& subscription : SNAPSHOT)
         {
             if (subscription->isConnected && subscription->callback)

@@ -3,9 +3,9 @@
 
 #include <concepts>
 #include <filesystem>
-#include <string>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 #include "../core/memory.hpp"
 
 #include "asset.hpp"
@@ -44,8 +44,7 @@ namespace Garage
     public:
         using AssetImporter<>::AssetImporter;
 
-        [[nodiscard]] virtual Result<UniquePtr<TAsset>, std::pmr::string>
-                Import(const std::filesystem::path& path) const = 0;
+        [[nodiscard]] virtual Result<UniquePtr<TAsset>, String> Import(const std::filesystem::path& path) const = 0;
     };
 
     inline AssetImporter<AssetBase>::AssetImporter(AssetSubsystem* owner) noexcept

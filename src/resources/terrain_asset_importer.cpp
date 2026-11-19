@@ -1,15 +1,13 @@
 #include "garage/resources/terrain_asset_importer.hpp"
 
-#include <array>
 #include <filesystem>
 #include <span>
-#include <string>
 #include <utility>
-#include <vector>
 
 #include <rapidjson/document.h>
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/memory.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
@@ -39,14 +37,14 @@ namespace Garage
             Vector2D<Float32> uvTiling{1.0f, 1.0f};
         };
 
-        void BuildTerrainMeshData(std::span<const Float32>      normalizedHeights,
-                                  UInt32                        width,
-                                  UInt32                        height,
-                                  Float32                       cellSize,
-                                  Float32                       heightScale,
-                                  const Vector2D<Float32>&      uvTiling,
-                                  std::pmr::vector<MeshVertex>& outVertices,
-                                  std::pmr::vector<UInt32>&     outIndices)
+        void BuildTerrainMeshData(Span<const Float32>      normalizedHeights,
+                                  UInt32                   width,
+                                  UInt32                   height,
+                                  Float32                  cellSize,
+                                  Float32                  heightScale,
+                                  const Vector2D<Float32>& uvTiling,
+                                  Vector<MeshVertex>&      outVertices,
+                                  Vector<UInt32>&          outIndices)
         {
             const USize VERTEX_COUNT = static_cast<USize>(width) * height;
             const USize INDEX_COUNT  = static_cast<USize>(width - 1) * (height - 1) * 6;
@@ -103,25 +101,24 @@ namespace Garage
         }
     } // namespace
 
-    Result<UniquePtr<TerrainAsset>, std::pmr::string>
-            TerrainAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<TerrainAsset>, String> TerrainAssetImporter::Import(const std::filesystem::path& path) const
     {
         if (!JsonUtility::HasJsonExtension(path))
         {
-            return Result<UniquePtr<TerrainAsset>, std::pmr::string>::Err(
-                    Memory::MakeString("지형 로더에는 .json 높이맵 파일이 필요합니다."));
+            return Result<UniquePtr<TerrainAsset>, String>::Err(
+                    String("지형 로더에는 .json 높이맵 파일이 필요합니다."));
         }
 
         auto documentResult = JsonUtility::LoadDocument(path);
         if (!documentResult)
         {
-            return Result<UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(documentResult).GetError());
+            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(documentResult).GetError());
         }
 
         const rapidjson::Value& ROOT = *documentResult;
 
-        TerrainImportSettings  settings{};
-        std::array<Float32, 2> uvTiling{1.0f, 1.0f};
+        TerrainImportSettings settings{};
+        Array<Float32, 2>     uvTiling{1.0f, 1.0f};
         if (!JsonUtility::ReadUInt32(ROOT, "width", settings.width) ||
             !JsonUtility::ReadUInt32(ROOT, "height", settings.height) ||
             !JsonUtility::ReadOptionalUInt32(ROOT, "bitDepth", settings.bitDepth) ||
@@ -129,17 +126,17 @@ namespace Garage
             !JsonUtility::ReadOptionalFloat32(ROOT, "heightScale", settings.heightScale) ||
             !JsonUtility::ReadOptionalFloatArray(ROOT, "uvTiling", uvTiling))
         {
-            std::pmr::string error = Memory::MakeString("지형 헤더를 읽지 못했습니다: ");
+            String error("지형 헤더를 읽지 못했습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(error));
         }
 
         if (settings.width < 2 || settings.height < 2 || (settings.bitDepth != 8 && settings.bitDepth != 16) ||
             settings.cellSize <= 0.0f || settings.heightScale < 0.0f || uvTiling[0] <= 0.0f || uvTiling[1] <= 0.0f)
         {
-            std::pmr::string error = Memory::MakeString("지형 헤더의 설정값이 유효하지 않습니다: ");
+            String error("지형 헤더의 설정값이 유효하지 않습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(error));
         }
         settings.uvTiling = Vector2D<Float32>{uvTiling[0], uvTiling[1]};
 
@@ -152,28 +149,28 @@ namespace Garage
         if (!JsonUtility::ReadArray(ROOT, "heights", heightsArray) || SAMPLE_COUNT_64 > JsonUtility::MAX_ELEMENTS ||
             heightsArray->Size() != static_cast<USize>(SAMPLE_COUNT_64))
         {
-            std::pmr::string error = Memory::MakeString("지형 높이 데이터 개수가 해상도와 일치하지 않습니다: ");
+            String error("지형 높이 데이터 개수가 해상도와 일치하지 않습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(error));
         }
 
-        std::pmr::vector<Float32> normalizedHeights{Memory::GetMemoryResource()};
+        Vector<Float32> normalizedHeights;
         normalizedHeights.reserve(static_cast<USize>(SAMPLE_COUNT_64));
         for (const rapidjson::Value& sampleValue : heightsArray->GetArray())
         {
             Float32 heightSample = 0.0f;
             if (!JsonUtility::TryReadFloat32(sampleValue, heightSample) || heightSample < 0.0f || heightSample > 1.0f)
             {
-                std::pmr::string error = Memory::MakeString("지형 높이 샘플 값이 유효하지 않습니다: ");
+                String error("지형 높이 샘플 값이 유효하지 않습니다: ");
                 error.append(path.generic_string());
-                return Result<UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(error));
+                return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(error));
             }
 
             normalizedHeights.push_back(heightSample);
         }
 
-        std::pmr::vector<MeshVertex> vertices{Memory::GetMemoryResource()};
-        std::pmr::vector<UInt32>     indices{Memory::GetMemoryResource()};
+        Vector<MeshVertex> vertices;
+        Vector<UInt32>     indices;
         BuildTerrainMeshData(normalizedHeights,
                              WIDTH,
                              HEIGHT,
@@ -183,26 +180,25 @@ namespace Garage
                              vertices,
                              indices);
 
-        auto gpuMeshResult = device.CreateMesh(std::as_bytes(std::span<const MeshVertex>(vertices)),
+        auto gpuMeshResult = device.CreateMesh(std::as_bytes(Span<const MeshVertex>(vertices)),
                                                sizeof(MeshVertex),
-                                               std::as_bytes(std::span<const UInt32>(indices)),
+                                               std::as_bytes(Span<const UInt32>(indices)),
                                                EGPUIndexFormat::UINT32,
                                                EGPUPrimitiveTopology::TRIANGLE_LIST);
         if (!gpuMeshResult)
         {
-            return Result<UniquePtr<TerrainAsset>, std::pmr::string>::Err(std::move(gpuMeshResult).GetError());
+            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(gpuMeshResult).GetError());
         }
 
-        return Result<UniquePtr<TerrainAsset>, std::pmr::string>::Ok(
-                MakeUnique<TerrainAsset>(path,
-                                         WIDTH,
-                                         HEIGHT,
-                                         IS_16_BIT,
-                                         settings.cellSize,
-                                         settings.heightScale,
-                                         settings.uvTiling,
-                                         std::move(normalizedHeights),
-                                         device,
-                                         gpuMeshResult.GetValue()));
+        return Result<UniquePtr<TerrainAsset>, String>::Ok(MakeUnique<TerrainAsset>(path,
+                                                                                    WIDTH,
+                                                                                    HEIGHT,
+                                                                                    IS_16_BIT,
+                                                                                    settings.cellSize,
+                                                                                    settings.heightScale,
+                                                                                    settings.uvTiling,
+                                                                                    std::move(normalizedHeights),
+                                                                                    device,
+                                                                                    gpuMeshResult.GetValue()));
     }
 } // namespace Garage

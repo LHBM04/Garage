@@ -1,10 +1,9 @@
 #ifndef GARAGE_ACTORS_WORLD_SUBSYSTEM_HPP
 #define GARAGE_ACTORS_WORLD_SUBSYSTEM_HPP
 
-#include <vector>
-
 #include "../core/app_subsystem.hpp"
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 #include "../core/memory.hpp"
 #include "../core/system_status.hpp"
 
@@ -45,9 +44,9 @@ namespace Garage
         void ExitCurrentWorld(SystemContext& context);
         void NotifyIfWorldExited(WorldBase* world);
 
-        std::pmr::vector<UniquePtr<WorldBase>> worlds{Memory::GetMemoryResource()};
-        WorldBase*                             currentWorld = nullptr;
-        WorldBase*                             nextWorld    = nullptr;
+        Vector<UniquePtr<WorldBase>> worlds;
+        WorldBase*                   currentWorld = nullptr;
+        WorldBase*                   nextWorld    = nullptr;
 
         Delegate<WorldBase*> onEnterWorld     = {};
         Delegate<WorldBase*> onExitWorld      = {};

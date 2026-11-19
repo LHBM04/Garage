@@ -4,6 +4,7 @@
 #include "core/app.hpp"
 #include "core/app_subsystem.hpp"
 #include "core/common.hpp"
+#include "core/common/containers.hpp"
 #include "core/engine.hpp"
 #include "core/engine_subsystem.hpp"
 #include "core/memory.hpp"

@@ -2,11 +2,7 @@
 
 #include <cstddef>
 #include <memory>
-#include <memory_resource>
 #include <source_location>
-#include <string>
-#include <string_view>
-#include <vector>
 
 #if !defined(_WIN32)
 #    include <cstdint>
@@ -30,6 +26,7 @@
 #endif
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/memory.hpp"
 
 namespace Garage::Logger
@@ -57,7 +54,7 @@ namespace Garage::Logger
 
         [[nodiscard]] std::shared_ptr<spdlog::logger> CreateLogger()
         {
-            std::pmr::vector<spdlog::sink_ptr> sinks(Memory::GetMemoryResource());
+            Vector<spdlog::sink_ptr> sinks;
             sinks.push_back(MakeShared<spdlog::sinks::stdout_color_sink_mt>());
 #if defined(_WIN32)
             sinks.push_back(MakeShared<spdlog::sinks::msvc_sink_mt>());
@@ -75,11 +72,11 @@ namespace Garage::Logger
             return *LOGGER;
         }
 
-        [[nodiscard]] std::pmr::string WideToUtf8(std::wstring_view wide)
+        [[nodiscard]] String WideToUtf8(WStringView wide)
         {
             if (wide.empty())
             {
-                return std::pmr::string(Memory::GetMemoryResource());
+                return String();
             }
 
 #if defined(_WIN32)
@@ -88,15 +85,15 @@ namespace Garage::Logger
                     WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, wide.data(), SIZE, nullptr, 0, nullptr, nullptr);
             if (LENGTH <= 0)
             {
-                return std::pmr::string(Memory::GetMemoryResource());
+                return String();
             }
 
-            std::pmr::string utf8(static_cast<USize>(LENGTH), '\0', Memory::GetMemoryResource());
+            String utf8(static_cast<USize>(LENGTH), '\0');
             WideCharToMultiByte(
                     CP_UTF8, WC_ERR_INVALID_CHARS, wide.data(), SIZE, utf8.data(), LENGTH, nullptr, nullptr);
             return utf8;
 #else
-            std::pmr::string utf8(Memory::GetMemoryResource());
+            String utf8;
             utf8.reserve(wide.size());
             for (const wchar_t WC : wide)
             {
@@ -129,14 +126,14 @@ namespace Garage::Logger
         }
     } // namespace
 
-    void Log(ECategory level, std::string_view message, const std::source_location& location)
+    void Log(ECategory level, StringView message, const std::source_location& location)
     {
         const spdlog::source_loc SOURCE_LOC{
                 location.file_name(), static_cast<int>(location.line()), location.function_name()};
         GetLogger().log(SOURCE_LOC, ToSpdlogLevel(level), message);
     }
 
-    void Log(ECategory level, std::wstring_view message, const std::source_location& location)
+    void Log(ECategory level, WStringView message, const std::source_location& location)
     {
         Log(level, WideToUtf8(message), location);
     }

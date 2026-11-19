@@ -1,11 +1,8 @@
 ﻿#ifndef GARAGE_ACTORS_TRANSFORM_HPP
 #define GARAGE_ACTORS_TRANSFORM_HPP
 
-#include <span>
-#include <vector>
-
 #include "../core/common.hpp"
-#include "../core/memory.hpp"
+#include "../core/common/containers.hpp"
 
 #include "../math/matrix4x4.hpp"
 #include "../math/quaternion.hpp"
@@ -49,8 +46,8 @@ namespace Garage
         [[nodiscard]] const Transform* GetParent() const noexcept;
         void                           SetParent(Transform* nextParent) noexcept;
 
-        [[nodiscard]] std::span<Transform* const>       GetChildren() noexcept;
-        [[nodiscard]] std::span<const Transform* const> GetChildren() const noexcept;
+        [[nodiscard]] Span<Transform* const>       GetChildren() noexcept;
+        [[nodiscard]] Span<const Transform* const> GetChildren() const noexcept;
 
         void OnDestroy() override;
 
@@ -61,8 +58,8 @@ namespace Garage
         Quaternion<Float32> localRotation = Quaternion<Float32>::GetIdentity();
         Vector3D<Float32>   localScale    = Vector3D<Float32>::GetOne();
 
-        Transform*                   parent = nullptr;
-        std::pmr::vector<Transform*> children{Memory::GetMemoryResource()};
+        Transform*         parent = nullptr;
+        Vector<Transform*> children;
 
         Matrix4x4<Float32> cachedWorldMatrix = Matrix4x4<Float32>::GetIdentity();
     };

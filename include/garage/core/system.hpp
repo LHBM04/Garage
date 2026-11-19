@@ -4,14 +4,12 @@
 #include <algorithm>
 #include <concepts>
 #include <functional>
-#include <memory_resource>
 #include <ranges>
 #include <typeindex>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
 #include "common.hpp"
+#include "common/containers.hpp"
 #include "memory.hpp"
 #include "subsystem.hpp"
 #include "system_status.hpp"
@@ -27,11 +25,11 @@ namespace Garage
         using SubsystemPtr      = TSubsystem*;
         using ConstSubsystemPtr = const TSubsystem*;
         using SubsystemOwner    = UniquePtr<TSubsystem>;
-        using SubsystemList     = std::pmr::vector<SubsystemOwner>;
-        using SubsystemMap      = std::pmr::unordered_map<std::type_index, SubsystemPtr>;
+        using SubsystemList     = Vector<SubsystemOwner>;
+        using SubsystemMap      = UnorderedMap<std::type_index, SubsystemPtr>;
         using SubsystemDelegate = Delegate<SubsystemPtr>;
         using ListenerId        = typename SubsystemDelegate::ListenerId;
-        using DelegateMap       = std::pmr::unordered_map<std::type_index, SubsystemDelegate>;
+        using DelegateMap       = UnorderedMap<std::type_index, SubsystemDelegate>;
 
         template <std::derived_from<TSubsystem> TResult>
         using SubsystemCallback = Action<TResult*>;
@@ -81,10 +79,10 @@ namespace Garage
         ListenerId OnSubsystemRemoved(TObject* object, SubsystemMethod<TResult, TObject> method);
 
     private:
-        SubsystemList subsystems{Memory::GetMemoryResource()};
-        SubsystemMap  subsystemsByType{Memory::GetMemoryResource()};
-        DelegateMap   onSubsystemAdded{Memory::GetMemoryResource()};
-        DelegateMap   onSubsystemRemoved{Memory::GetMemoryResource()};
+        SubsystemList subsystems;
+        SubsystemMap  subsystemsByType;
+        DelegateMap   onSubsystemAdded;
+        DelegateMap   onSubsystemRemoved;
     };
 
     template <std::derived_from<SubsystemBase> TSubsystem>

@@ -56,7 +56,7 @@ ESystemStatus MyApp::Startup(SystemContext& context)
     }
 
     DisplayOptions options{};
-    options.title    = Memory::MakeString("Garage Example #3 - Hello, Terrain");
+    options.title    = "Garage Example #3 - Hello, Terrain";
     options.position = Vector2DInt{100, 100};
     options.size     = Vector2DInt{1280, 720};
     options.centered = true;

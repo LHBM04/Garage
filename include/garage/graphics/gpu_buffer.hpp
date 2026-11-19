@@ -1,10 +1,8 @@
 ﻿#ifndef GARAGE_GRAPHICS_GPU_BUFFER_HPP
 #define GARAGE_GRAPHICS_GPU_BUFFER_HPP
 
-#include <span>
-#include <string>
-
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 #include "gpu_types.hpp"
 
@@ -24,10 +22,10 @@ namespace Garage
         IGPUBuffer(IGPUBuffer&&)            = delete;
         IGPUBuffer& operator=(IGPUBuffer&&) = delete;
 
-        [[nodiscard]] virtual Result<void, std::pmr::string> Write(std::span<const UInt8> data, UInt64 offset = 0) = 0;
-        [[nodiscard]] virtual Result<void, std::pmr::string> Write(std::span<const Byte> data, UInt64 offset = 0)  = 0;
-        [[nodiscard]] virtual Result<void, std::pmr::string> Read(std::span<UInt8> data, UInt64 offset = 0) const  = 0;
-        [[nodiscard]] virtual Result<void, std::pmr::string> Read(std::span<Byte> data, UInt64 offset = 0) const   = 0;
+        [[nodiscard]] virtual Result<void, String> Write(Span<const UInt8> data, UInt64 offset = 0) = 0;
+        [[nodiscard]] virtual Result<void, String> Write(Span<const Byte> data, UInt64 offset = 0)  = 0;
+        [[nodiscard]] virtual Result<void, String> Read(Span<UInt8> data, UInt64 offset = 0) const  = 0;
+        [[nodiscard]] virtual Result<void, String> Read(Span<Byte> data, UInt64 offset = 0) const   = 0;
 
         [[nodiscard]] virtual const IGPUDevice* GetDevice() const noexcept      = 0;
         [[nodiscard]] virtual UInt64            GetSizeInBytes() const noexcept = 0;

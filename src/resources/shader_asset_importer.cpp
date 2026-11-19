@@ -1,21 +1,17 @@
 #include "garage/resources/shader_asset_importer.hpp"
 
-#include <array>
 #include <charconv>
 #include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <ios>
 #include <optional>
-#include <span>
-#include <string>
-#include <string_view>
 #include <utility>
-#include <vector>
 
 #include <rapidjson/document.h>
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/memory.hpp"
 
 #include "garage/graphics/gpu_device.hpp"
@@ -33,23 +29,23 @@ namespace Garage
     {
         struct ShaderMetadata final
         {
-            std::optional<EGPUShaderStage>       stage = std::nullopt;
-            std::pmr::string                     entryPoint{"main", Memory::GetMemoryResource()};
-            UInt32                               samplerCount        = 0u;
-            UInt32                               storageTextureCount = 0u;
-            UInt32                               storageBufferCount  = 0u;
-            UInt32                               uniformBufferCount  = 0u;
-            EGPUCullMode                         cullMode            = EGPUCullMode::BACK;
-            EGPUFillMode                         fillMode            = EGPUFillMode::FILL;
-            EGPUFrontFace                        frontFace           = EGPUFrontFace::CLOCKWISE;
-            bool                                 enableDepthTest     = true;
-            bool                                 enableDepthWrite    = true;
-            EGPUCompareOp                        depthCompareOp      = EGPUCompareOp::LESS_OR_EQUAL;
-            bool                                 alphaBlend          = false;
-            EGPUPrimitiveTopology                primitive           = EGPUPrimitiveTopology::TRIANGLE_LIST;
-            std::pmr::vector<GPUVertexAttribute> vertexAttributes{Memory::GetMemoryResource()};
-            UInt32                               vertexStride        = sizeof(MeshVertex);
-            bool                                 hasCustomVertexDecl = false;
+            std::optional<EGPUShaderStage> stage = std::nullopt;
+            String                         entryPoint{"main"};
+            UInt32                         samplerCount        = 0u;
+            UInt32                         storageTextureCount = 0u;
+            UInt32                         storageBufferCount  = 0u;
+            UInt32                         uniformBufferCount  = 0u;
+            EGPUCullMode                   cullMode            = EGPUCullMode::BACK;
+            EGPUFillMode                   fillMode            = EGPUFillMode::FILL;
+            EGPUFrontFace                  frontFace           = EGPUFrontFace::CLOCKWISE;
+            bool                           enableDepthTest     = true;
+            bool                           enableDepthWrite    = true;
+            EGPUCompareOp                  depthCompareOp      = EGPUCompareOp::LESS_OR_EQUAL;
+            bool                           alphaBlend          = false;
+            EGPUPrimitiveTopology          primitive           = EGPUPrimitiveTopology::TRIANGLE_LIST;
+            Vector<GPUVertexAttribute>     vertexAttributes;
+            UInt32                         vertexStride        = sizeof(MeshVertex);
+            bool                           hasCustomVertexDecl = false;
         };
 
         [[nodiscard]] constexpr bool IsAsciiWhitespace(char ch) noexcept
@@ -57,9 +53,9 @@ namespace Garage
             return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
         }
 
-        [[nodiscard]] std::string_view Trim(std::string_view text) noexcept
+        [[nodiscard]] StringView Trim(StringView text) noexcept
         {
-            constexpr std::string_view UTF8_BOM = "\xEF\xBB\xBF";
+            constexpr StringView UTF8_BOM = "\xEF\xBB\xBF";
             if (text.starts_with(UTF8_BOM))
             {
                 text.remove_prefix(UTF8_BOM.size());
@@ -75,7 +71,7 @@ namespace Garage
             return text;
         }
 
-        [[nodiscard]] bool EqualsIgnoreCase(std::string_view lhs, std::string_view rhs) noexcept
+        [[nodiscard]] bool EqualsIgnoreCase(StringView lhs, StringView rhs) noexcept
         {
             if (lhs.size() != rhs.size())
             {
@@ -95,9 +91,8 @@ namespace Garage
         }
 
         template <class TValue, USize N>
-        [[nodiscard]] bool TryMapValue(std::string_view                                          name,
-                                       const std::array<std::pair<std::string_view, TValue>, N>& table,
-                                       TValue&                                                   out) noexcept
+        [[nodiscard]] bool
+                TryMapValue(StringView name, const Array<std::pair<StringView, TValue>, N>& table, TValue& out) noexcept
         {
             for (const auto& [key, value] : table)
             {
@@ -111,7 +106,7 @@ namespace Garage
             return false;
         }
 
-        [[nodiscard]] bool TryParseUInt32(std::string_view text, UInt32& out) noexcept
+        [[nodiscard]] bool TryParseUInt32(StringView text, UInt32& out) noexcept
         {
             UInt32 parsed        = 0u;
             const auto [ptr, ec] = std::from_chars(text.data(), text.data() + text.size(), parsed);
@@ -126,7 +121,7 @@ namespace Garage
 
         [[nodiscard]] EGPUShaderFormat DetectShaderFormat(const std::filesystem::path& path)
         {
-            std::pmr::string extension(path.extension().string(), Memory::GetMemoryResource());
+            String extension(path.extension().string());
             for (char& ch : extension)
             {
                 ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
@@ -158,14 +153,13 @@ namespace Garage
 
         [[nodiscard]] std::optional<EGPUShaderStage> InferStageFromFilename(const std::filesystem::path& path)
         {
-            const std::pmr::string STEM(path.stem().string(), Memory::GetMemoryResource());
-            const std::string_view VIEW(STEM);
+            const String     STEM(path.stem().string());
+            const StringView VIEW(STEM);
 
-            static constexpr std::array<std::string_view, 4> VERTEX_SUFFIXES{".vs", "_vs", ".vert", "_vert"};
-            static constexpr std::array<std::string_view, 6> FRAGMENT_SUFFIXES{
-                    ".ps", "_ps", ".fs", "_fs", ".frag", "_frag"};
+            static constexpr Array<StringView, 4> VERTEX_SUFFIXES{".vs", "_vs", ".vert", "_vert"};
+            static constexpr Array<StringView, 6> FRAGMENT_SUFFIXES{".ps", "_ps", ".fs", "_fs", ".frag", "_frag"};
 
-            for (const std::string_view SUFFIX : VERTEX_SUFFIXES)
+            for (const StringView SUFFIX : VERTEX_SUFFIXES)
             {
                 if (VIEW.size() >= SUFFIX.size() && EqualsIgnoreCase(VIEW.substr(VIEW.size() - SUFFIX.size()), SUFFIX))
                 {
@@ -173,7 +167,7 @@ namespace Garage
                 }
             }
 
-            for (const std::string_view SUFFIX : FRAGMENT_SUFFIXES)
+            for (const StringView SUFFIX : FRAGMENT_SUFFIXES)
             {
                 if (VIEW.size() >= SUFFIX.size() && EqualsIgnoreCase(VIEW.substr(VIEW.size() - SUFFIX.size()), SUFFIX))
                 {
@@ -184,7 +178,7 @@ namespace Garage
             return std::nullopt;
         }
 
-        void ParseVertexInputSpec(std::string_view value, ShaderMetadata& metadata)
+        void ParseVertexInputSpec(StringView value, ShaderMetadata& metadata)
         {
             metadata.hasCustomVertexDecl = true;
             metadata.vertexAttributes.clear();
@@ -205,10 +199,9 @@ namespace Garage
             USize cursor = 0u;
             while (cursor <= value.size())
             {
-                const USize            COMMA = value.find(',', cursor);
-                const std::string_view TOKEN =
-                        Trim((COMMA == std::string_view::npos) ? value.substr(cursor)
-                                                               : value.substr(cursor, COMMA - cursor));
+                const USize      COMMA = value.find(',', cursor);
+                const StringView TOKEN =
+                        Trim((COMMA == StringView::npos) ? value.substr(cursor) : value.substr(cursor, COMMA - cursor));
 
                 if (EqualsIgnoreCase(TOKEN, "Position"))
                 {
@@ -227,7 +220,7 @@ namespace Garage
                     metadata.vertexAttributes.push_back(MESH_VERTEX_ATTRIBUTES[3]);
                 }
 
-                if (COMMA == std::string_view::npos)
+                if (COMMA == StringView::npos)
                 {
                     break;
                 }
@@ -240,24 +233,24 @@ namespace Garage
             }
         }
 
-        void ApplyMetadataEntry(std::string_view key, std::string_view value, ShaderMetadata& metadata)
+        void ApplyMetadataEntry(StringView key, StringView value, ShaderMetadata& metadata)
         {
-            static constexpr std::array<std::pair<std::string_view, EGPUCullMode>, 3>          CULL_MODES{{
+            static constexpr Array<std::pair<StringView, EGPUCullMode>, 3>          CULL_MODES{{
                     {"Back", EGPUCullMode::BACK},
                     {"Front", EGPUCullMode::FRONT},
                     {"None", EGPUCullMode::NONE},
             }};
-            static constexpr std::array<std::pair<std::string_view, EGPUFillMode>, 4>          FILL_ALIASES{{
+            static constexpr Array<std::pair<StringView, EGPUFillMode>, 4>          FILL_ALIASES{{
                     {"Solid", EGPUFillMode::FILL},
                     {"Fill", EGPUFillMode::FILL},
                     {"Wireframe", EGPUFillMode::LINE},
                     {"Line", EGPUFillMode::LINE},
             }};
-            static constexpr std::array<std::pair<std::string_view, EGPUFrontFace>, 2>         FRONT_FACES{{
+            static constexpr Array<std::pair<StringView, EGPUFrontFace>, 2>         FRONT_FACES{{
                     {"Clockwise", EGPUFrontFace::CLOCKWISE},
                     {"CounterClockwise", EGPUFrontFace::COUNTER_CLOCKWISE},
             }};
-            static constexpr std::array<std::pair<std::string_view, EGPUCompareOp>, 8>         DEPTH_FUNCS{{
+            static constexpr Array<std::pair<StringView, EGPUCompareOp>, 8>         DEPTH_FUNCS{{
                     {"Never", EGPUCompareOp::NEVER},
                     {"Less", EGPUCompareOp::LESS},
                     {"Equal", EGPUCompareOp::EQUAL},
@@ -267,14 +260,14 @@ namespace Garage
                     {"GreaterEqual", EGPUCompareOp::GREATER_OR_EQUAL},
                     {"Always", EGPUCompareOp::ALWAYS},
             }};
-            static constexpr std::array<std::pair<std::string_view, EGPUPrimitiveTopology>, 5> TOPOLOGIES{{
+            static constexpr Array<std::pair<StringView, EGPUPrimitiveTopology>, 5> TOPOLOGIES{{
                     {"TriangleList", EGPUPrimitiveTopology::TRIANGLE_LIST},
                     {"TriangleStrip", EGPUPrimitiveTopology::TRIANGLE_STRIP},
                     {"LineList", EGPUPrimitiveTopology::LINE_LIST},
                     {"LineStrip", EGPUPrimitiveTopology::LINE_STRIP},
                     {"PointList", EGPUPrimitiveTopology::POINT_LIST},
             }};
-            static constexpr std::array<std::pair<std::string_view, EGPUShaderStage>, 5>       STAGES{{
+            static constexpr Array<std::pair<StringView, EGPUShaderStage>, 5>       STAGES{{
                     {"Vertex", EGPUShaderStage::VERTEX},
                     {"VS", EGPUShaderStage::VERTEX},
                     {"Fragment", EGPUShaderStage::FRAGMENT},
@@ -389,10 +382,10 @@ namespace Garage
             const rapidjson::Document& DOCUMENT = *documentResult;
             for (auto it = DOCUMENT.MemberBegin(); it != DOCUMENT.MemberEnd(); ++it)
             {
-                const std::string_view KEY(it->name.GetString(), it->name.GetStringLength());
+                const StringView KEY(it->name.GetString(), it->name.GetStringLength());
                 if (it->value.IsString())
                 {
-                    const std::string_view VALUE(it->value.GetString(), it->value.GetStringLength());
+                    const StringView VALUE(it->value.GetString(), it->value.GetStringLength());
                     ApplyMetadataEntry(KEY, VALUE, metadata);
                 }
                 else if (it->value.IsUint())
@@ -442,39 +435,38 @@ namespace Garage
         }
     } // namespace
 
-    Result<UniquePtr<ShaderAsset>, std::pmr::string>
-            ShaderAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<ShaderAsset>, String> ShaderAssetImporter::Import(const std::filesystem::path& path) const
     {
         const EGPUShaderFormat FORMAT = DetectShaderFormat(path);
         if (FORMAT == EGPUShaderFormat::INVALID)
         {
-            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(
-                    Memory::MakeString("셰이더 로더에는 .spv, .dxil, .msl, .dxbc 또는 .metallib 파일이 필요합니다."));
+            return Result<UniquePtr<ShaderAsset>, String>::Err(
+                    String("셰이더 로더에는 .spv, .dxil, .msl, .dxbc 또는 .metallib 파일이 필요합니다."));
         }
 
         std::ifstream file(path, std::ios::binary | std::ios::ate);
         if (!file.is_open())
         {
-            std::pmr::string error = Memory::MakeString("셰이더 파일을 열 수 없습니다: ");
+            String error("셰이더 파일을 열 수 없습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(error));
         }
 
         const std::streamsize FILE_SIZE = file.tellg();
         if (FILE_SIZE <= 0)
         {
-            std::pmr::string error = Memory::MakeString("셰이더 파일이 비어 있습니다: ");
+            String error("셰이더 파일이 비어 있습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(error));
         }
 
         file.seekg(0, std::ios::beg);
-        std::pmr::vector<Byte> bytecode(static_cast<USize>(FILE_SIZE), Memory::GetMemoryResource());
+        Vector<Byte> bytecode(static_cast<USize>(FILE_SIZE));
         if (!file.read(reinterpret_cast<char*>(bytecode.data()), FILE_SIZE))
         {
-            std::pmr::string error = Memory::MakeString("셰이더 바이트코드 읽기에 실패했습니다: ");
+            String error("셰이더 바이트코드 읽기에 실패했습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(error));
         }
 
         ShaderMetadata metadata{};
@@ -487,9 +479,9 @@ namespace Garage
 
         if (!metadata.stage.has_value())
         {
-            std::pmr::string error = Memory::MakeString("셰이더 스테이지(Vertex/Fragment)를 판별할 수 없습니다: ");
+            String error("셰이더 스테이지(Vertex/Fragment)를 판별할 수 없습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(error));
+            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(error));
         }
 
         if (*metadata.stage == EGPUShaderStage::VERTEX && !metadata.hasCustomVertexDecl)
@@ -512,7 +504,7 @@ namespace Garage
         auto shaderResult = device.CreateShader(CREATE_INFO);
         if (!shaderResult)
         {
-            return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Err(std::move(shaderResult).GetError());
+            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(shaderResult).GetError());
         }
 
         UniquePtr<ShaderAsset> asset = MakeUnique<ShaderAsset>(path, device, shaderResult.GetValue());
@@ -534,6 +526,6 @@ namespace Garage
         }
         asset->SetPrimitive(metadata.primitive);
 
-        return Result<UniquePtr<ShaderAsset>, std::pmr::string>::Ok(std::move(asset));
+        return Result<UniquePtr<ShaderAsset>, String>::Ok(std::move(asset));
     }
 } // namespace Garage

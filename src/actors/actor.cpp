@@ -4,12 +4,12 @@
 #include <ranges>
 #include <typeindex>
 #include <utility>
-#include <vector>
 
 #include "garage/actors/component.hpp"
 #include "garage/actors/world.hpp"
 
 #include "garage/core/common.hpp"
+#include "garage/core/common/containers.hpp"
 #include "garage/core/memory.hpp"
 
 namespace Garage
@@ -123,7 +123,7 @@ namespace Garage
             return;
         }
 
-        std::pmr::vector<UniquePtr<ComponentBase>> destroyed{Memory::GetMemoryResource()};
+        Vector<UniquePtr<ComponentBase>> destroyed;
         destroyed.reserve(static_cast<USize>(DESTROYED_COUNT));
         std::erase_if(componentsByType,
                       [](const auto& entry)
@@ -172,7 +172,7 @@ namespace Garage
         }
 
         componentsByType.clear();
-        std::pmr::vector<UniquePtr<ComponentBase>> removing(std::move(components), Memory::GetMemoryResource());
+        Vector<UniquePtr<ComponentBase>> removing(std::move(components));
         components.clear();
 
         for (const UniquePtr<ComponentBase>& component : removing | std::views::reverse)

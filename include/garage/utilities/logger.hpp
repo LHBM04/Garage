@@ -4,13 +4,13 @@
 #include <concepts>
 #include <cstdint>
 #include <source_location>
-#include <string_view>
 #include <type_traits>
 
 #include <fmt/format.h>
 #include <fmt/xchar.h>
 
 #include "../core/common.hpp"
+#include "../core/common/containers.hpp"
 
 namespace Garage::Logger
 {
@@ -26,7 +26,7 @@ namespace Garage::Logger
     template <class TChar, class... TArgs>
     struct Format final
     {
-        using StringView = std::basic_string_view<TChar>;
+        using StringView = BasicStringView<TChar>;
         using FormatStr  = fmt::basic_format_string<TChar, TArgs...>;
 
         template <std::convertible_to<StringView> TText>
@@ -47,10 +47,10 @@ namespace Garage::Logger
     using FormatWide = Format<wchar_t, std::type_identity_t<TArgs>...>;
 
     GARAGE_API void Log(ECategory                   level,
-                        std::string_view            message,
+                        StringView                  message,
                         const std::source_location& location = std::source_location::current());
     GARAGE_API void Log(ECategory                   level,
-                        std::wstring_view           message,
+                        WStringView                 message,
                         const std::source_location& location = std::source_location::current());
 
     template <class... TArgs>
