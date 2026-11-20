@@ -50,6 +50,9 @@ if(GARAGE_SOURCES)
     add_library(Garage ${GARAGE_SOURCES} ${GARAGE_HEADERS})
     add_library(Garage::Garage ALIAS Garage)
     add_dependencies(Garage garage-clangd)
+    target_compile_definitions(Garage PUBLIC
+        $<IF:$<BOOL:${BUILD_SHARED_LIBS}>,GARAGE_DYNAMIC,GARAGE_STATIC>
+    )
 
     target_include_directories(Garage
         PUBLIC

@@ -8,6 +8,7 @@
 #include "core/engine.hpp"
 #include "core/engine_subsystem.hpp"
 #include "core/memory.hpp"
+#include "core/objectable.hpp"
 #include "core/subsystem.hpp"
 #include "core/system.hpp"
 #include "core/system_context.hpp"

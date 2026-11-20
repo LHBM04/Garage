@@ -1,5 +1,6 @@
 ﻿#include "garage/platform/input_subsystem.hpp"
 
+#include <array>
 #include <ranges>
 
 #include <SDL3/SDL_keyboard.h>
@@ -29,7 +30,7 @@ namespace Garage
             SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
         };
 
-        constexpr Array KEY_MAPPINGS = {
+        constexpr std::array KEY_MAPPINGS = {
                 KeyMapping{.key = EKeyCode::BACKSPACE, .scancode = SDL_SCANCODE_BACKSPACE},
                 KeyMapping{.key = EKeyCode::TAB, .scancode = SDL_SCANCODE_TAB},
                 KeyMapping{.key = EKeyCode::ENTER, .scancode = SDL_SCANCODE_RETURN},

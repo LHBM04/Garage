@@ -6,14 +6,15 @@
 
 #include "../core/common.hpp"
 #include "../core/common/containers.hpp"
+#include "../core/objectable.hpp"
 
 namespace Garage
 {
-    class GARAGE_API AssetBase
+    class GARAGE_API AssetBase : public IObjectable
     {
     public:
         explicit AssetBase(std::filesystem::path path) noexcept;
-        virtual ~AssetBase() noexcept = default;
+        ~AssetBase() noexcept override = default;
 
         AssetBase(const AssetBase&)            = delete;
         AssetBase& operator=(const AssetBase&) = delete;

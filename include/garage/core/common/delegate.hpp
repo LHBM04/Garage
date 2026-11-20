@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include "../memory/allocator.hpp"
+#include "../memory/stl_allocator.hpp"
 #include "../memory/smart_ptr.hpp"
 #include "types.hpp"
 
@@ -29,7 +29,7 @@ namespace Garage
         };
 
         using SubscriptionPtr  = SharedPtr<Subscription>;
-        using SubscriptionList = std::vector<SubscriptionPtr, Memory::StdAllocator<SubscriptionPtr>>;
+        using SubscriptionList = std::vector<SubscriptionPtr, Memory::StlAllocator<SubscriptionPtr>>;
 
     public:
         Delegate() noexcept  = default;

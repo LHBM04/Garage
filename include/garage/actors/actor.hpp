@@ -9,6 +9,7 @@
 #include "../core/common.hpp"
 #include "../core/common/containers.hpp"
 #include "../core/memory.hpp"
+#include "../core/objectable.hpp"
 
 #include "component.hpp"
 
@@ -17,13 +18,13 @@ namespace Garage
     class SystemContext;
     class WorldBase;
 
-    class GARAGE_API ActorBase
+    class GARAGE_API ActorBase : public IObjectable
     {
     public:
         explicit ActorBase(WorldBase* world) noexcept;
         explicit ActorBase(WorldBase* world, StringView name) noexcept;
         explicit ActorBase(WorldBase* world, StringView name, StringView tag) noexcept;
-        virtual ~ActorBase() noexcept;
+        ~ActorBase() noexcept override;
 
         ActorBase(const ActorBase&)            = delete;
         ActorBase& operator=(const ActorBase&) = delete;
