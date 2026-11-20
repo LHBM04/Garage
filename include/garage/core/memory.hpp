@@ -1,6 +1,7 @@
 ﻿#ifndef GARAGE_CORE_MEMORY_HPP
 #define GARAGE_CORE_MEMORY_HPP
 
+#include "memory/allocation_trace.hpp"
 #include "memory/allocator.hpp"
 #include "memory/fixed_allocator.hpp"
 #include "memory/general_allocator.hpp"

@@ -6,6 +6,8 @@
 #include <limits>
 #include <memory>
 
+#include "garage/core/memory/allocation_trace.hpp"
+
 namespace Garage::Memory
 {
     PoolAllocator::PoolAllocator(std::size_t blockSize, std::size_t blockCount, std::size_t blockAlignment) noexcept
@@ -37,6 +39,9 @@ namespace Garage::Memory
 
     void* PoolAllocator::Allocate(std::size_t size, std::size_t alignment)
     {
+#if defined(GARAGE_DEBUG)
+        Detail::RecordAllocationRequest(this, "PoolAllocator", size, alignment);
+#endif
         ASSERT(size <= blockSize);
         ASSERT(std::has_single_bit(alignment) && alignment <= blockAlignment);
         if (freeList == nullptr)

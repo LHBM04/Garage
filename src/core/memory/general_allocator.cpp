@@ -4,6 +4,8 @@
 #include <bit>
 #include <new>
 
+#include "garage/core/memory/allocation_trace.hpp"
+
 namespace Garage::Memory
 {
     GeneralAllocator::GeneralAllocator() noexcept  = default;
@@ -11,6 +13,9 @@ namespace Garage::Memory
 
     void* GeneralAllocator::Allocate(std::size_t size, std::size_t alignment)
     {
+#if defined(GARAGE_DEBUG)
+        Detail::RecordAllocationRequest(this, "GeneralAllocator", size, alignment);
+#endif
         ASSERT(std::has_single_bit(alignment));
         return ::operator new(std::max(size, std::size_t{1}),
                               static_cast<std::align_val_t>(std::max(alignment, DEFAULT_ALIGNMENT)));

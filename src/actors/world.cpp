@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <ranges>
+#include <source_location>
 #include <utility>
 
 #include "garage/actors/actor.hpp"
@@ -308,7 +309,7 @@ namespace Garage
 
     ActorBase* WorldBase::Instantiate()
     {
-        UniquePtr<ActorBase> actor  = MakeUnique<ActorBase>(this);
+        UniquePtr<ActorBase> actor  = MakeUniqueAt<ActorBase>(std::source_location::current(), this);
         ActorBase*           result = actor.get();
         actors.push_back(std::move(actor));
         return result;

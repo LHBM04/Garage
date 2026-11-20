@@ -2,9 +2,11 @@
 #define GARAGE_CORE_MEMORY_SMART_PTR_HPP
 
 #include <memory>
+#include <source_location>
 #include <type_traits>
 #include <utility>
 
+#include "allocation_trace.hpp"
 #include "stl_allocator.hpp"
 
 namespace Garage
@@ -128,6 +130,39 @@ namespace Garage
     [[nodiscard]] SharedPtr<T> MakeShared(TArgs&&... args)
     {
         return MakeShared<T>(Memory::GetDefaultAllocator(), std::forward<TArgs>(args)...);
+    }
+    template <class T, class... TArgs>
+        requires(!std::is_array_v<T> && std::is_constructible_v<T, TArgs...>)
+    [[nodiscard]] UniquePtr<T> MakeUniqueAt(std::source_location location, Memory::IAllocatable* allocator,
+                                            TArgs&&... args)
+    {
+        const Memory::AllocationTraceScope scope(location);
+        return MakeUnique<T>(allocator, std::forward<TArgs>(args)...);
+    }
+
+    template <class T, class... TArgs>
+        requires(!std::is_array_v<T> && !Memory::FIRST_ARG_IS_ALLOCATOR<TArgs...> &&
+                 std::is_constructible_v<T, TArgs...>)
+    [[nodiscard]] UniquePtr<T> MakeUniqueAt(std::source_location location, TArgs&&... args)
+    {
+        return MakeUniqueAt<T>(location, Memory::GetDefaultAllocator(), std::forward<TArgs>(args)...);
+    }
+
+    template <class T, class... TArgs>
+        requires(!std::is_array_v<T> && std::is_constructible_v<T, TArgs...>)
+    [[nodiscard]] SharedPtr<T> MakeSharedAt(std::source_location location, Memory::IAllocatable* allocator,
+                                            TArgs&&... args)
+    {
+        const Memory::AllocationTraceScope scope(location);
+        return MakeShared<T>(allocator, std::forward<TArgs>(args)...);
+    }
+
+    template <class T, class... TArgs>
+        requires(!std::is_array_v<T> && !Memory::FIRST_ARG_IS_ALLOCATOR<TArgs...> &&
+                 std::is_constructible_v<T, TArgs...>)
+    [[nodiscard]] SharedPtr<T> MakeSharedAt(std::source_location location, TArgs&&... args)
+    {
+        return MakeSharedAt<T>(location, Memory::GetDefaultAllocator(), std::forward<TArgs>(args)...);
     }
 } // namespace Garage
 

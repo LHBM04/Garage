@@ -1,5 +1,7 @@
 #include "my_world.hpp"
 
+#include "garage/core/memory/allocation_trace.hpp"
+
 #include "camera_controller.hpp"
 
 void MyWorld::OnEnter(SystemContext& context)
@@ -16,6 +18,9 @@ void MyWorld::OnEnter(SystemContext& context)
     const CubemapAsset*  skyboxCubemap =
             assets->LoadAsset<CubemapAsset>("Resources/Cubemaps/Polyverse Skies - Blue Sky.dds");
     const MaterialAsset* skyboxMaterial = assets->LoadAsset<MaterialAsset>("Resources/Materials/Skybox.json");
+#if defined(GARAGE_DEBUG)
+    Memory::DumpAllocationTrace();
+#endif
     if (terrainAsset == nullptr || terrainMaterial == nullptr || skyboxCubemap == nullptr || skyboxMaterial == nullptr)
     {
         LOG_ERROR("터레인 또는 스카이박스 에셋을 로드하지 못했습니다.");

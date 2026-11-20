@@ -3,6 +3,7 @@
 
 #include <concepts>
 #include <ranges>
+#include <source_location>
 #include <typeindex>
 #include <utility>
 
@@ -192,7 +193,7 @@ namespace Garage
     template <std::derived_from<ComponentBase> TComponent>
     TComponent* ActorBase::AddComponent()
     {
-        UniquePtr<TComponent> component    = MakeUnique<TComponent>(this);
+        UniquePtr<TComponent> component    = MakeUniqueAt<TComponent>(std::source_location::current(), this);
         TComponent*           componentPtr = component.get();
 
         components.push_back(std::move(component));

@@ -4,6 +4,8 @@
 #include <bit>
 #include <memory>
 
+#include "garage/core/memory/allocation_trace.hpp"
+
 namespace Garage::Memory
 {
     FixedAllocator::FixedAllocator(void* buffer, std::size_t capacity) noexcept
@@ -17,6 +19,9 @@ namespace Garage::Memory
 
     void* FixedAllocator::Allocate(std::size_t size, std::size_t alignment)
     {
+#if defined(GARAGE_DEBUG)
+        Detail::RecordAllocationRequest(this, "FixedAllocator", size, alignment);
+#endif
         ASSERT(std::has_single_bit(alignment));
         if (offset == capacity)
         {
