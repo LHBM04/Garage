@@ -24,7 +24,8 @@
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "BUILD_SHARED_LIBS": "ON"
+        "BUILD_SHARED_LIBS": "ON",
+        "GARAGE_ENABLE_TRACY": "ON"
       }
     },
     {
@@ -32,7 +33,8 @@
       "displayName": "Debug (Static)",
       "inherits": "debug",
       "cacheVariables": {
-        "BUILD_SHARED_LIBS": "OFF"
+        "BUILD_SHARED_LIBS": "OFF",
+        "GARAGE_ENABLE_TRACY": "ON"
       }
     },
     {

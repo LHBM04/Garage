@@ -8,8 +8,17 @@
 
 #include "garage/core/memory/allocation_trace.hpp"
 
+#include "tracy_allocation.hpp"
+
 namespace Garage::Memory
 {
+#if defined(TRACY_ENABLE) || defined(GARAGE_DEBUG)
+    namespace
+    {
+        constexpr char MEMORY_POOL_NAME[] = "PoolAllocator";
+    } // namespace
+#endif
+
     PoolAllocator::PoolAllocator(std::size_t blockSize, std::size_t blockCount, std::size_t blockAlignment) noexcept
         : blockSize(blockSize)
         , blockAlignment(blockAlignment)
@@ -34,13 +43,16 @@ namespace Garage::Memory
 
     PoolAllocator::~PoolAllocator() noexcept
     {
+#if defined(TRACY_ENABLE)
+        Detail::ProfileSuballocationReset(this, MEMORY_POOL_NAME);
+#endif
         GetDefaultAllocator()->Deallocate(buffer, capacity, std::max(blockAlignment, alignof(FreeBlock)));
     }
 
     void* PoolAllocator::Allocate(std::size_t size, std::size_t alignment)
     {
 #if defined(GARAGE_DEBUG)
-        Detail::RecordAllocationRequest(this, "PoolAllocator", size, alignment);
+        Detail::RecordAllocationRequest(this, MEMORY_POOL_NAME, size, alignment);
 #endif
         ASSERT(size <= blockSize);
         ASSERT(std::has_single_bit(alignment) && alignment <= blockAlignment);
@@ -50,7 +62,10 @@ namespace Garage::Memory
         }
 
         FreeBlock* block = freeList;
-        freeList         = block->next;
+#if defined(TRACY_ENABLE)
+        Detail::ProfileSuballocation(this, block, size, MEMORY_POOL_NAME);
+#endif
+        freeList = block->next;
         std::destroy_at(block);
         return block;
     }
@@ -67,6 +82,9 @@ namespace Garage::Memory
         const auto address = reinterpret_cast<std::uintptr_t>(pointer);
         const auto start   = reinterpret_cast<std::uintptr_t>(buffer);
         ASSERT(address >= start && address - start < capacity && (address - start) % stride == 0);
+#if defined(TRACY_ENABLE)
+        Detail::ProfileSuballocationFree(this, pointer, MEMORY_POOL_NAME);
+#endif
         freeList = std::construct_at(static_cast<FreeBlock*>(pointer), FreeBlock{freeList});
     }
 } // namespace Garage::Memory
