@@ -100,6 +100,20 @@ FetchContent_MakeAvailable(
     rapidjson
 )
 
+if(GARAGE_ENABLE_TRACY)
+    set(TRACY_ENABLE ON CACHE BOOL "" FORCE)
+    set(TRACY_ONLY_LOCALHOST ON CACHE BOOL "" FORCE)
+    set(TRACY_NO_BROADCAST ON CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        tracy
+        GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+        GIT_TAG v0.15.0
+        GIT_SHALLOW TRUE
+        ${GARAGE_FETCHCONTENT_SYSTEM}
+    )
+    FetchContent_MakeAvailable(tracy)
+endif()
+
 add_library(imgui STATIC
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_demo.cpp

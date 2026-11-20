@@ -6,6 +6,7 @@
 #include "../core/common.hpp"
 #include "../core/common/containers.hpp"
 #include "../core/memory.hpp"
+#include "../core/objectable.hpp"
 
 #include "../math/quaternion.hpp"
 #include "../math/vector3d.hpp"
@@ -21,11 +22,11 @@ namespace Garage
     class SystemContext;
     class Transform;
 
-    class GARAGE_API WorldBase
+    class GARAGE_API WorldBase : public IObjectable
     {
     public:
-        WorldBase() noexcept          = default;
-        virtual ~WorldBase() noexcept = default;
+        WorldBase() noexcept           = default;
+        ~WorldBase() noexcept override = default;
 
         WorldBase(const WorldBase&)            = delete;
         WorldBase& operator=(const WorldBase&) = delete;

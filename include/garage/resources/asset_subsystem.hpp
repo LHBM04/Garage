@@ -146,7 +146,7 @@ namespace Garage
 
         assets.emplace_back(std::move(*asset));
         assetsByPath.emplace(NORMALIZED_PATH, result);
-        LOG_TRACE("에셋을 로드했습니다: {}", NORMALIZED_PATH.generic_string());
+        LOG_INFO("에셋을 로드했습니다: {}", NORMALIZED_PATH.generic_string());
         return result;
     }
 } // namespace Garage

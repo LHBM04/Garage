@@ -2,17 +2,18 @@
 #define GARAGE_ACTORS_COMPONENT_HPP
 
 #include "../core/common.hpp"
+#include "../core/objectable.hpp"
 
 namespace Garage
 {
     class ActorBase;
     class SystemContext;
 
-    class GARAGE_API ComponentBase
+    class GARAGE_API ComponentBase : public IObjectable
     {
     public:
         explicit ComponentBase(ActorBase* owner) noexcept;
-        virtual ~ComponentBase() noexcept = default;
+        ~ComponentBase() noexcept override = default;
 
         ComponentBase(const ComponentBase&)            = delete;
         ComponentBase& operator=(const ComponentBase&) = delete;

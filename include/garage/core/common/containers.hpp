@@ -19,12 +19,12 @@
 #include <utility>
 #include <vector>
 
-#include "../memory/allocator.hpp"
+#include "../memory/stl_allocator.hpp"
 
 namespace Garage
 {
     template <class TChar, class TTraits = std::char_traits<TChar>>
-    using BasicString = std::basic_string<TChar, TTraits, Memory::StdAllocator<TChar>>;
+    using BasicString = std::basic_string<TChar, TTraits, Memory::StlAllocator<TChar>>;
 
     using String    = BasicString<char>;
     using WString   = BasicString<wchar_t>;
@@ -59,46 +59,67 @@ namespace Garage
         }
     };
 
+    template <class T>
+    using Vector = std::vector<T, Memory::StlAllocator<T>>;
+
+    namespace Detail
+    {
+        template <class T, std::size_t Size>
+        struct ArrayType
+        {
+            using Type = std::array<T, Size>;
+        };
+
+        template <class T>
+        struct ArrayType<T, std::dynamic_extent>
+        {
+            using Type = Vector<T>;
+        };
+    } // namespace Detail
+
+    template <class T, std::size_t Size = std::dynamic_extent>
+    using Array = typename Detail::ArrayType<T, Size>::Type;
+
     template <class T, std::size_t Size>
-    using Array = std::array<T, Size>;
+    using FixedArray = std::array<T, Size>;
 
     template <class T>
-    using Vector = std::vector<T, Memory::StdAllocator<T>>;
+    using Deque = std::deque<T, Memory::StlAllocator<T>>;
 
     template <class T>
-    using Deque = std::deque<T, Memory::StdAllocator<T>>;
+    using ForwardList = std::forward_list<T, Memory::StlAllocator<T>>;
 
     template <class T>
-    using ForwardList = std::forward_list<T, Memory::StdAllocator<T>>;
-
-    template <class T>
-    using List = std::list<T, Memory::StdAllocator<T>>;
+    using List = std::list<T, Memory::StlAllocator<T>>;
 
     template <class TKey, class TCompare = std::less<TKey>>
-    using Set = std::set<TKey, TCompare, Memory::StdAllocator<TKey>>;
+    using Set = std::set<TKey, TCompare, Memory::StlAllocator<TKey>>;
 
     template <class TKey, class TCompare = std::less<TKey>>
-    using MultiSet = std::multiset<TKey, TCompare, Memory::StdAllocator<TKey>>;
+    using MultiSet = std::multiset<TKey, TCompare, Memory::StlAllocator<TKey>>;
 
     template <class TKey, class TValue, class TCompare = std::less<TKey>>
-    using Map = std::map<TKey, TValue, TCompare, Memory::StdAllocator<std::pair<const TKey, TValue>>>;
+    using Map = std::map<TKey, TValue, TCompare, Memory::StlAllocator<std::pair<const TKey, TValue>>>;
 
     template <class TKey, class TValue, class TCompare = std::less<TKey>>
-    using MultiMap = std::multimap<TKey, TValue, TCompare, Memory::StdAllocator<std::pair<const TKey, TValue>>>;
+    using MultiMap = std::multimap<TKey, TValue, TCompare, Memory::StlAllocator<std::pair<const TKey, TValue>>>;
 
     template <class TKey, class THash = Hash<TKey>, class TKeyEqual = std::equal_to<TKey>>
-    using UnorderedSet = std::unordered_set<TKey, THash, TKeyEqual, Memory::StdAllocator<TKey>>;
+    using UnorderedSet = std::unordered_set<TKey, THash, TKeyEqual, Memory::StlAllocator<TKey>>;
 
     template <class TKey, class THash = Hash<TKey>, class TKeyEqual = std::equal_to<TKey>>
-    using UnorderedMultiSet = std::unordered_multiset<TKey, THash, TKeyEqual, Memory::StdAllocator<TKey>>;
+    using UnorderedMultiSet = std::unordered_multiset<TKey, THash, TKeyEqual, Memory::StlAllocator<TKey>>;
 
     template <class TKey, class TValue, class THash = Hash<TKey>, class TKeyEqual = std::equal_to<TKey>>
     using UnorderedMap =
-            std::unordered_map<TKey, TValue, THash, TKeyEqual, Memory::StdAllocator<std::pair<const TKey, TValue>>>;
+            std::unordered_map<TKey, TValue, THash, TKeyEqual, Memory::StlAllocator<std::pair<const TKey, TValue>>>;
+
+    template <class TKey, class TValue, class THash = Hash<TKey>, class TKeyEqual = std::equal_to<TKey>>
+    using HashMap = UnorderedMap<TKey, TValue, THash, TKeyEqual>;
 
     template <class TKey, class TValue, class THash = Hash<TKey>, class TKeyEqual = std::equal_to<TKey>>
     using UnorderedMultiMap = std::
-            unordered_multimap<TKey, TValue, THash, TKeyEqual, Memory::StdAllocator<std::pair<const TKey, TValue>>>;
+            unordered_multimap<TKey, TValue, THash, TKeyEqual, Memory::StlAllocator<std::pair<const TKey, TValue>>>;
 
     template <class T, class TContainer = Deque<T>>
     using Stack = std::stack<T, TContainer>;
