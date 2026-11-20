@@ -91,8 +91,9 @@ namespace Garage
         }
 
         template <class TValue, USize N>
-        [[nodiscard]] bool
-                TryMapValue(StringView name, const FixedArray<std::pair<StringView, TValue>, N>& table, TValue& out) noexcept
+        [[nodiscard]] bool TryMapValue(StringView                                          name,
+                                       const FixedArray<std::pair<StringView, TValue>, N>& table,
+                                       TValue&                                             out) noexcept
         {
             for (const auto& [key, value] : table)
             {

@@ -191,17 +191,16 @@ namespace Garage
             return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(gpuMeshResult).GetError());
         }
 
-        return Result<UniquePtr<TerrainAsset>, String>::Ok(
-                MakeUniqueAt<TerrainAsset>(std::source_location::current(),
-                                           path,
-                                           WIDTH,
-                                           HEIGHT,
-                                           IS_16_BIT,
-                                           settings.cellSize,
-                                           settings.heightScale,
-                                           settings.uvTiling,
-                                           std::move(normalizedHeights),
-                                           device,
-                                           gpuMeshResult.GetValue()));
+        return Result<UniquePtr<TerrainAsset>, String>::Ok(MakeUniqueAt<TerrainAsset>(std::source_location::current(),
+                                                                                      path,
+                                                                                      WIDTH,
+                                                                                      HEIGHT,
+                                                                                      IS_16_BIT,
+                                                                                      settings.cellSize,
+                                                                                      settings.heightScale,
+                                                                                      settings.uvTiling,
+                                                                                      std::move(normalizedHeights),
+                                                                                      device,
+                                                                                      gpuMeshResult.GetValue()));
     }
 } // namespace Garage

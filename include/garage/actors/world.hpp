@@ -25,7 +25,7 @@ namespace Garage
     class GARAGE_API WorldBase : public IObjectable
     {
     public:
-        WorldBase() noexcept          = default;
+        WorldBase() noexcept           = default;
         ~WorldBase() noexcept override = default;
 
         WorldBase(const WorldBase&)            = delete;

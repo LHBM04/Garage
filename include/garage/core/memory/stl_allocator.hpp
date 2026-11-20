@@ -12,9 +12,9 @@ namespace Garage::Memory
     class StlAllocator
     {
     public:
-        using value_type = T;
+        using value_type                             = T;
         using propagate_on_container_move_assignment = std::true_type;
-        using is_always_equal = std::false_type;
+        using is_always_equal                        = std::false_type;
 
         StlAllocator() noexcept;
         explicit StlAllocator(IAllocatable* allocator) noexcept;
@@ -25,7 +25,7 @@ namespace Garage::Memory
         [[nodiscard]] IAllocatable* GetAllocator() const noexcept;
 
         [[nodiscard]] T* allocate(std::size_t count) const;
-        void deallocate(T* pointer, std::size_t count) const noexcept;
+        void             deallocate(T* pointer, std::size_t count) const noexcept;
 
         template <class U>
         [[nodiscard]] bool operator==(const StlAllocator<U>& other) const noexcept;

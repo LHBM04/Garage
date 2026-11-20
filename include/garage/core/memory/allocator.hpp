@@ -18,11 +18,12 @@ namespace Garage::Memory
         IAllocatable(const IAllocatable&) noexcept            = delete;
         IAllocatable& operator=(const IAllocatable&) noexcept = delete;
 
-        IAllocatable(IAllocatable&&) noexcept                 = delete;
-        IAllocatable& operator=(IAllocatable&&) noexcept      = delete;
+        IAllocatable(IAllocatable&&) noexcept            = delete;
+        IAllocatable& operator=(IAllocatable&&) noexcept = delete;
 
         [[nodiscard]] virtual void* Allocate(std::size_t size, std::size_t alignment = DEFAULT_ALIGNMENT) = 0;
-        virtual void Deallocate(void* pointer, std::size_t size, std::size_t alignment = DEFAULT_ALIGNMENT) noexcept = 0;
+        virtual void
+                Deallocate(void* pointer, std::size_t size, std::size_t alignment = DEFAULT_ALIGNMENT) noexcept = 0;
     };
 
     [[nodiscard]] GARAGE_API IAllocatable* GetDefaultAllocator() noexcept;

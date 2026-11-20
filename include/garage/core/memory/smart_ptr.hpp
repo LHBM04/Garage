@@ -20,7 +20,8 @@ namespace Garage
             Deleter() noexcept = default;
             Deleter(IAllocatable* allocator, T* object) noexcept;
 
-            template <class U> requires std::is_convertible_v<U*, T*>
+            template <class U>
+                requires std::is_convertible_v<U*, T*>
             Deleter(const Deleter<U>& other) noexcept;
 
             void operator()(T* pointer) const noexcept;
@@ -31,7 +32,7 @@ namespace Garage
 
             using DestroyFunction = void (*)(void*) noexcept;
 
-            IAllocatable*     allocator = nullptr;
+            IAllocatable*   allocator = nullptr;
             void*           object    = nullptr;
             std::size_t     size      = 0;
             std::size_t     alignment = 0;
@@ -133,8 +134,8 @@ namespace Garage
     }
     template <class T, class... TArgs>
         requires(!std::is_array_v<T> && std::is_constructible_v<T, TArgs...>)
-    [[nodiscard]] UniquePtr<T> MakeUniqueAt(std::source_location location, Memory::IAllocatable* allocator,
-                                            TArgs&&... args)
+    [[nodiscard]] UniquePtr<T>
+            MakeUniqueAt(std::source_location location, Memory::IAllocatable* allocator, TArgs&&... args)
     {
         const Memory::AllocationTraceScope scope(location);
         return MakeUnique<T>(allocator, std::forward<TArgs>(args)...);
@@ -150,8 +151,8 @@ namespace Garage
 
     template <class T, class... TArgs>
         requires(!std::is_array_v<T> && std::is_constructible_v<T, TArgs...>)
-    [[nodiscard]] SharedPtr<T> MakeSharedAt(std::source_location location, Memory::IAllocatable* allocator,
-                                            TArgs&&... args)
+    [[nodiscard]] SharedPtr<T>
+            MakeSharedAt(std::source_location location, Memory::IAllocatable* allocator, TArgs&&... args)
     {
         const Memory::AllocationTraceScope scope(location);
         return MakeShared<T>(allocator, std::forward<TArgs>(args)...);

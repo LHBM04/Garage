@@ -40,7 +40,8 @@ namespace Garage::JsonUtility
             ReadArray(const rapidjson::Value& object, const char* key, const rapidjson::Value*& outArray) noexcept;
 
     template <USize N>
-    [[nodiscard]] bool ReadFloatArray(const rapidjson::Value& object, const char* key, FixedArray<Float32, N>& out) noexcept;
+    [[nodiscard]] bool
+            ReadFloatArray(const rapidjson::Value& object, const char* key, FixedArray<Float32, N>& out) noexcept;
 
     [[nodiscard]] GARAGE_API bool ReadOptionalString(const rapidjson::Value& object, const char* key, String& out);
     [[nodiscard]] GARAGE_API bool
@@ -52,8 +53,9 @@ namespace Garage::JsonUtility
                                                     const rapidjson::Value*& outArray) noexcept;
 
     template <USize N>
-    [[nodiscard]] bool
-            ReadOptionalFloatArray(const rapidjson::Value& object, const char* key, FixedArray<Float32, N>& out) noexcept;
+    [[nodiscard]] bool ReadOptionalFloatArray(const rapidjson::Value& object,
+                                              const char*             key,
+                                              FixedArray<Float32, N>& out) noexcept;
 
     template <USize N>
     bool TryReadFloatArray(const rapidjson::Value& value, FixedArray<Float32, N>& out) noexcept
