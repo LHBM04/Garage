@@ -51,7 +51,7 @@ namespace Garage
         void Delete(T* pointer) noexcept;
 
         template <class T>
-        class StdAllocator final
+        class StdAllocator
         {
         public:
             // NOLINTNEXTLINE(readability-identifier-naming)
