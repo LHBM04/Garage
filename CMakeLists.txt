@@ -36,6 +36,7 @@ endif()
 include(cmake/platform-detection.cmake)
 include(cmake/architecture_detection.cmake)
 include(cmake/compiler-detection.cmake)
+option(GARAGE_ENABLE_TRACY "Enable the Tracy profiler client" OFF)
 include(cmake/dependencies.cmake)
 
 file(GLOB_RECURSE GARAGE_SOURCES CONFIGURE_DEPENDS
@@ -73,6 +74,10 @@ if(GARAGE_SOURCES)
         rapidjson::rapidjson
         freetype
     )
+
+    if(GARAGE_ENABLE_TRACY)
+        target_link_libraries(Garage PRIVATE Tracy::TracyClient)
+    endif()
 
     target_precompile_headers(Garage PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/precompiled.hpp"
