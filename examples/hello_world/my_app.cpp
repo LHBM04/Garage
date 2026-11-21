@@ -26,7 +26,7 @@ ESystemStatus MyApp::Startup(SystemContext& context)
     }
 
     context.OnAppSubsystemAdded<WorldSubsystem>(this, &MyApp::OnWorldSubsystemAdded);
-    context.OnAppSubsystemAdded<AssetSubsystem>(this, &MyApp::OnAssetSubsystemAdded);
+    context.OnAppSubsystemAdded<ContentSubsystem>(this, &MyApp::OnContentSubsystemAdded);
 
     worldSubsystem = context.AddAppSubsystem<WorldSubsystem>();
     if (worldSubsystem == nullptr)
@@ -35,10 +35,10 @@ ESystemStatus MyApp::Startup(SystemContext& context)
         return ESystemStatus::FAILURE;
     }
 
-    assetSubsystem = context.AddAppSubsystem<AssetSubsystem>();
-    if (assetSubsystem == nullptr)
+    contentSubsystem = context.AddAppSubsystem<ContentSubsystem>();
+    if (contentSubsystem == nullptr)
     {
-        LOG_ERROR("에셋 서브시스템을 추가하지 못했습니다.");
+        LOG_ERROR("콘텐츠 서브시스템을 추가하지 못했습니다.");
         return ESystemStatus::FAILURE;
     }
 
@@ -72,7 +72,7 @@ void MyApp::OnWorldSubsystemAdded(WorldSubsystem* subsystem)
     [[maybe_unused]] const bool CHANGED = subsystem->RequestWorldChange(world);
 }
 
-void MyApp::OnAssetSubsystemAdded(AssetSubsystem* subsystem)
+void MyApp::OnContentSubsystemAdded(ContentSubsystem* subsystem)
 {
     ASSERT(subsystem != nullptr);
     ASSERT(renderSubsystem != nullptr);
@@ -80,8 +80,8 @@ void MyApp::OnAssetSubsystemAdded(AssetSubsystem* subsystem)
     IGPUDevice* device = renderSubsystem->GetDevice();
     ASSERT(device != nullptr);
 
-    subsystem->AddImporter<MeshAssetImporter>(*device);
-    subsystem->AddImporter<TextureAssetImporter>(*device);
-    subsystem->AddImporter<MaterialAssetImporter>(*device, EGPUTextureFormat::B8G8R8A8_UNORM);
-    subsystem->AddImporter<ShaderAssetImporter>(*device);
+    subsystem->AddImporter<MeshContentImporter>(*device);
+    subsystem->AddImporter<TextureContentImporter>(*device);
+    subsystem->AddImporter<MaterialContentImporter>(*device, EGPUTextureFormat::B8G8R8A8_UNORM);
+    subsystem->AddImporter<ShaderContentImporter>(*device);
 }

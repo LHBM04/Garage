@@ -15,14 +15,14 @@ public:
 private:
     void OnInputSubsystemAdded(InputSubsystem* subsystem);
     void OnWorldSubsystemAdded(WorldSubsystem* subsystem);
-    void OnAssetSubsystemAdded(AssetSubsystem* subsystem);
+    void OnContentSubsystemAdded(ContentSubsystem* subsystem);
 
     EventSubsystem*   eventSubsystem   = nullptr;
     DisplaySubsystem* displaySubsystem = nullptr;
     RenderSubsystem*  renderSubsystem  = nullptr;
     InputSubsystem*   inputSubsystem   = nullptr;
     WorldSubsystem*   worldSubsystem   = nullptr;
-    AssetSubsystem*   assetSubsystem   = nullptr;
+    ContentSubsystem* contentSubsystem = nullptr;
 };
 
 #endif // MY_APP_HPP

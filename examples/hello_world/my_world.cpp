@@ -8,18 +8,19 @@ void MyWorld::OnEnter(SystemContext& context)
     camera->SetViewport(GPUViewport{0.0f, 0.0f, 800.0f, 600.0f, 0.0f, 1.0f});
     camera->SetScissorRect(GPURect{0, 0, 800, 600});
 
-    AssetSubsystem* assets = context.GetAppSubsystem<AssetSubsystem>();
-    if (assets == nullptr)
+    ContentSubsystem* contentSubsystem = context.GetAppSubsystem<ContentSubsystem>();
+    if (contentSubsystem == nullptr)
     {
-        LOG_ERROR("에셋 서브시스템을 가져오지 못했습니다.");
+        LOG_ERROR("콘텐츠 서브시스템을 가져오지 못했습니다.");
         return;
     }
 
-    const MeshAsset*     triangleMesh     = assets->LoadAsset<MeshAsset>("Resources/Meshes/Triangle.json");
-    const MaterialAsset* triangleMaterial = assets->LoadAsset<MaterialAsset>("Resources/Materials/Triangle.json");
+    const MeshContent*     triangleMesh = contentSubsystem->LoadContent<MeshContent>("content/Meshes/Triangle.json");
+    const MaterialContent* triangleMaterial =
+            contentSubsystem->LoadContent<MaterialContent>("content/Materials/Triangle.json");
     if (triangleMesh == nullptr || triangleMaterial == nullptr)
     {
-        LOG_ERROR("삼각형 에셋(Meshes/Triangle.json / Materials/Triangle.json)을 로드하지 못했습니다.");
+        LOG_ERROR("삼각형 콘텐츠(Meshes/Triangle.json / Materials/Triangle.json)를 로드하지 못했습니다.");
         return;
     }
 

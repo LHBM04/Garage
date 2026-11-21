@@ -6,24 +6,28 @@
 
 void MyWorld::OnEnter(SystemContext& context)
 {
-    AssetSubsystem* assets = context.GetAppSubsystem<AssetSubsystem>();
-    if (assets == nullptr)
+    ContentSubsystem* contentSubsystem = context.GetAppSubsystem<ContentSubsystem>();
+    if (contentSubsystem == nullptr)
     {
-        LOG_ERROR("에셋 서브시스템을 가져오지 못했습니다.");
+        LOG_ERROR("콘텐츠 서브시스템을 가져오지 못했습니다.");
         return;
     }
 
-    const TerrainAsset*  terrainAsset    = assets->LoadAsset<TerrainAsset>("Resources/Terrains/Terrain_LevelTank.json");
-    const MaterialAsset* terrainMaterial = assets->LoadAsset<MaterialAsset>("Resources/Materials/ForrestGround.json");
-    const CubemapAsset*  skyboxCubemap =
-            assets->LoadAsset<CubemapAsset>("Resources/Cubemaps/Polyverse Skies - Blue Sky.dds");
-    const MaterialAsset* skyboxMaterial = assets->LoadAsset<MaterialAsset>("Resources/Materials/Skybox.json");
+    const TerrainContent* terrainContent =
+            contentSubsystem->LoadContent<TerrainContent>("content/Terrains/Terrain_LevelTank.json");
+    const MaterialContent* terrainMaterial =
+            contentSubsystem->LoadContent<MaterialContent>("content/Materials/ForrestGround.json");
+    const CubemapContent* skyboxCubemap =
+            contentSubsystem->LoadContent<CubemapContent>("content/Cubemaps/Polyverse Skies - Blue Sky.dds");
+    const MaterialContent* skyboxMaterial =
+            contentSubsystem->LoadContent<MaterialContent>("content/Materials/Skybox.json");
 #if defined(GARAGE_DEBUG)
     Memory::DumpAllocationTrace();
 #endif
-    if (terrainAsset == nullptr || terrainMaterial == nullptr || skyboxCubemap == nullptr || skyboxMaterial == nullptr)
+    if (terrainContent == nullptr || terrainMaterial == nullptr || skyboxCubemap == nullptr ||
+        skyboxMaterial == nullptr)
     {
-        LOG_ERROR("터레인 또는 스카이박스 에셋을 로드하지 못했습니다.");
+        LOG_ERROR("터레인 또는 스카이박스 콘텐츠를 로드하지 못했습니다.");
         return;
     }
 
@@ -31,7 +35,7 @@ void MyWorld::OnEnter(SystemContext& context)
     terrainActor->SetName("Terrain");
     terrainActor->SetTag("Terrain");
     Terrain* terrain = terrainActor->AddComponent<Terrain>();
-    terrain->SetTerrain(terrainAsset);
+    terrain->SetTerrain(terrainContent);
     MeshRenderer* terrainRenderer = terrainActor->AddComponent<MeshRenderer>();
     terrainRenderer->SetMaterial(terrainMaterial);
 
