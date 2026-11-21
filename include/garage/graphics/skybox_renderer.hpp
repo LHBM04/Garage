@@ -7,7 +7,7 @@
 
 namespace Garage
 {
-    class CubemapAsset;
+    class CubemapContent;
     class SystemContext;
 
     class GARAGE_API SkyboxRenderer final : public RendererBase
@@ -18,19 +18,19 @@ namespace Garage
 
         void OnRender(SystemContext& context) override;
 
-        [[nodiscard]] const CubemapAsset* GetCubemap() const noexcept;
-        void                              SetCubemap(const CubemapAsset* value) noexcept;
+        [[nodiscard]] const CubemapContent* GetCubemap() const noexcept;
+        void                                SetCubemap(const CubemapContent* value) noexcept;
 
     private:
-        const CubemapAsset* cubemap = nullptr;
+        const CubemapContent* cubemap = nullptr;
     };
 
-    inline const CubemapAsset* SkyboxRenderer::GetCubemap() const noexcept
+    inline const CubemapContent* SkyboxRenderer::GetCubemap() const noexcept
     {
         return cubemap;
     }
 
-    inline void SkyboxRenderer::SetCubemap(const CubemapAsset* value) noexcept
+    inline void SkyboxRenderer::SetCubemap(const CubemapContent* value) noexcept
     {
         cubemap = value;
     }

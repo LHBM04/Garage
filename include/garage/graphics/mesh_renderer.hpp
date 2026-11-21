@@ -7,7 +7,7 @@
 
 namespace Garage
 {
-    class MeshAsset;
+    class MeshContent;
     class SystemContext;
 
     class GARAGE_API MeshRenderer final : public RendererBase
@@ -18,19 +18,19 @@ namespace Garage
 
         void OnRender(SystemContext& context) override;
 
-        [[nodiscard]] const MeshAsset* GetMesh() const noexcept;
-        void                           SetMesh(const MeshAsset* value) noexcept;
+        [[nodiscard]] const MeshContent* GetMesh() const noexcept;
+        void                             SetMesh(const MeshContent* value) noexcept;
 
     private:
-        const MeshAsset* mesh = nullptr;
+        const MeshContent* mesh = nullptr;
     };
 
-    inline const MeshAsset* MeshRenderer::GetMesh() const noexcept
+    inline const MeshContent* MeshRenderer::GetMesh() const noexcept
     {
         return mesh;
     }
 
-    inline void MeshRenderer::SetMesh(const MeshAsset* value) noexcept
+    inline void MeshRenderer::SetMesh(const MeshContent* value) noexcept
     {
         mesh = value;
     }

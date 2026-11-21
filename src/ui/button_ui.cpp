@@ -8,6 +8,10 @@
 #include "garage/actors/transform.hpp"
 #include "garage/actors/world.hpp"
 
+#if defined(GARAGE_DEBUG) || defined(_DEBUG)
+#    include "garage/content/material_content.hpp"
+#endif
+
 #include "garage/core/common.hpp"
 #include "garage/core/system_context.hpp"
 
@@ -32,10 +36,6 @@
 #include "garage/platform/input_provider.hpp"
 #include "garage/platform/input_states.hpp"
 #include "garage/platform/input_subsystem.hpp"
-
-#if defined(GARAGE_DEBUG) || defined(_DEBUG)
-#    include "garage/resources/material_asset.hpp"
-#endif
 
 namespace Garage
 {

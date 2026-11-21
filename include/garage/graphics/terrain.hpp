@@ -14,7 +14,7 @@ namespace Garage
     template <Scalarable TScalar>
     class Matrix4x4;
 
-    class TerrainAsset;
+    class TerrainContent;
 
     class GARAGE_API Terrain final : public ComponentBase
     {
@@ -22,8 +22,8 @@ namespace Garage
         using ComponentBase::ComponentBase;
         ~Terrain() noexcept override = default;
 
-        [[nodiscard]] const TerrainAsset* GetTerrain() const noexcept;
-        void                              SetTerrain(const TerrainAsset* value) noexcept;
+        [[nodiscard]] const TerrainContent* GetTerrain() const noexcept;
+        void                                SetTerrain(const TerrainContent* value) noexcept;
 
         [[nodiscard]] Float32                  GetCellSize() const noexcept;
         [[nodiscard]] Float32                  GetHeightScale() const noexcept;
@@ -47,17 +47,17 @@ namespace Garage
         [[nodiscard]] bool TryGetWorldMatrices(Matrix4x4<Float32>& outWorld,
                                                Matrix4x4<Float32>& outInverseWorld) const noexcept;
 
-        const TerrainAsset* asset = nullptr;
+        const TerrainContent* content = nullptr;
     };
 
-    inline const TerrainAsset* Terrain::GetTerrain() const noexcept
+    inline const TerrainContent* Terrain::GetTerrain() const noexcept
     {
-        return asset;
+        return content;
     }
 
-    inline void Terrain::SetTerrain(const TerrainAsset* value) noexcept
+    inline void Terrain::SetTerrain(const TerrainContent* value) noexcept
     {
-        asset = value;
+        content = value;
     }
 } // namespace Garage
 

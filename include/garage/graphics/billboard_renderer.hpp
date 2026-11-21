@@ -10,7 +10,7 @@
 namespace Garage
 {
     class SystemContext;
-    class TextureAsset;
+    class TextureContent;
 
     class GARAGE_API BillboardRenderer final : public RendererBase
     {
@@ -28,8 +28,8 @@ namespace Garage
                   bool    isAutoDestroyOnFinish = true) noexcept;
         void Stop() noexcept;
 
-        [[nodiscard]] const TextureAsset* GetTexture() const noexcept;
-        void                              SetTexture(const TextureAsset* value) noexcept;
+        [[nodiscard]] const TextureContent* GetTexture() const noexcept;
+        void                                SetTexture(const TextureContent* value) noexcept;
 
         [[nodiscard]] const Vector2D<Float32>& GetSize() const noexcept;
         void                                   SetSize(const Vector2D<Float32>& value) noexcept;
@@ -65,15 +65,15 @@ namespace Garage
         bool    isLooping             = false;
         bool    isAutoDestroyOnFinish = false;
 
-        const TextureAsset* texture = nullptr;
+        const TextureContent* texture = nullptr;
     };
 
-    inline const TextureAsset* BillboardRenderer::GetTexture() const noexcept
+    inline const TextureContent* BillboardRenderer::GetTexture() const noexcept
     {
         return texture;
     }
 
-    inline void BillboardRenderer::SetTexture(const TextureAsset* value) noexcept
+    inline void BillboardRenderer::SetTexture(const TextureContent* value) noexcept
     {
         texture = value;
     }

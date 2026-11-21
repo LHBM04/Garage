@@ -9,9 +9,9 @@
 
 namespace Garage
 {
-    class MaterialAsset;
+    class MaterialContent;
     class SystemContext;
-    class TextureAsset;
+    class TextureContent;
 
     class GARAGE_API ImageView final : public ComponentBase
     {
@@ -21,37 +21,37 @@ namespace Garage
 
         void OnPostRender(SystemContext& context) override;
 
-        [[nodiscard]] const TextureAsset* GetImage() const noexcept;
-        void                              SetImage(const TextureAsset* value) noexcept;
+        [[nodiscard]] const TextureContent* GetImage() const noexcept;
+        void                                SetImage(const TextureContent* value) noexcept;
 
-        [[nodiscard]] const MaterialAsset* GetMaterial() const noexcept;
-        void                               SetMaterial(const MaterialAsset* value) noexcept;
+        [[nodiscard]] const MaterialContent* GetMaterial() const noexcept;
+        void                                 SetMaterial(const MaterialContent* value) noexcept;
 
         [[nodiscard]] const ColorRGBA<Float32>& GetColor() const noexcept;
         void                                    SetColor(const ColorRGBA<Float32>& value) noexcept;
 
     private:
-        ColorRGBA<Float32>   color    = ColorRGBA<Float32>::GetWhite();
-        const TextureAsset*  texture  = nullptr;
-        const MaterialAsset* material = nullptr;
+        ColorRGBA<Float32>     color    = ColorRGBA<Float32>::GetWhite();
+        const TextureContent*  texture  = nullptr;
+        const MaterialContent* material = nullptr;
     };
 
-    inline const TextureAsset* ImageView::GetImage() const noexcept
+    inline const TextureContent* ImageView::GetImage() const noexcept
     {
         return texture;
     }
 
-    inline void ImageView::SetImage(const TextureAsset* value) noexcept
+    inline void ImageView::SetImage(const TextureContent* value) noexcept
     {
         texture = value;
     }
 
-    inline const MaterialAsset* ImageView::GetMaterial() const noexcept
+    inline const MaterialContent* ImageView::GetMaterial() const noexcept
     {
         return material;
     }
 
-    inline void ImageView::SetMaterial(const MaterialAsset* value) noexcept
+    inline void ImageView::SetMaterial(const MaterialContent* value) noexcept
     {
         material = value;
     }

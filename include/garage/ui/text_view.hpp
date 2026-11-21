@@ -10,11 +10,11 @@
 
 namespace Garage
 {
-    class BitmapFontAsset;
+    class BitmapFontContent;
     struct FontCharacterData;
-    class MaterialAsset;
+    class MaterialContent;
     class SystemContext;
-    class TextureAsset;
+    class TextureContent;
 
     enum class ETextHorizontalAlignment : UInt8
     {
@@ -31,14 +31,14 @@ namespace Garage
 
         void OnPostRender(SystemContext& context) override;
 
-        [[nodiscard]] const TextureAsset* GetTexture() const noexcept;
-        void                              SetTexture(const TextureAsset* value) noexcept;
+        [[nodiscard]] const TextureContent* GetTexture() const noexcept;
+        void                                SetTexture(const TextureContent* value) noexcept;
 
-        [[nodiscard]] const BitmapFontAsset* GetFont() const noexcept;
-        void                                 SetFont(const BitmapFontAsset* value) noexcept;
+        [[nodiscard]] const BitmapFontContent* GetFont() const noexcept;
+        void                                   SetFont(const BitmapFontContent* value) noexcept;
 
-        [[nodiscard]] const MaterialAsset* GetMaterial() const noexcept;
-        void                               SetMaterial(const MaterialAsset* value) noexcept;
+        [[nodiscard]] const MaterialContent* GetMaterial() const noexcept;
+        void                                 SetMaterial(const MaterialContent* value) noexcept;
 
         [[nodiscard]] const String& GetText() const noexcept;
         void                        SetText(StringView value) noexcept;
@@ -55,9 +55,9 @@ namespace Garage
     private:
         [[nodiscard]] const FontCharacterData* GetCharacter(UInt32 unicode) const noexcept;
 
-        const TextureAsset*    texture  = nullptr;
-        const BitmapFontAsset* font     = nullptr;
-        const MaterialAsset*   material = nullptr;
+        const TextureContent*    texture  = nullptr;
+        const BitmapFontContent* font     = nullptr;
+        const MaterialContent*   material = nullptr;
 
         String                                         text{"New Text!"};
         Float32                                        fontSize            = 32.0f;
@@ -66,27 +66,27 @@ namespace Garage
         UnorderedMap<UInt32, const FontCharacterData*> characterMap;
     };
 
-    inline const TextureAsset* TextView::GetTexture() const noexcept
+    inline const TextureContent* TextView::GetTexture() const noexcept
     {
         return texture;
     }
 
-    inline void TextView::SetTexture(const TextureAsset* value) noexcept
+    inline void TextView::SetTexture(const TextureContent* value) noexcept
     {
         texture = value;
     }
 
-    inline const BitmapFontAsset* TextView::GetFont() const noexcept
+    inline const BitmapFontContent* TextView::GetFont() const noexcept
     {
         return font;
     }
 
-    inline const MaterialAsset* TextView::GetMaterial() const noexcept
+    inline const MaterialContent* TextView::GetMaterial() const noexcept
     {
         return material;
     }
 
-    inline void TextView::SetMaterial(const MaterialAsset* value) noexcept
+    inline void TextView::SetMaterial(const MaterialContent* value) noexcept
     {
         material = value;
     }
