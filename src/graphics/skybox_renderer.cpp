@@ -1,5 +1,7 @@
 #include "garage/graphics/skybox_renderer.hpp"
 
+#include "garage/content/cubemap_content.hpp"
+
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
 #include "garage/core/system_context.hpp"
@@ -9,8 +11,6 @@
 #include "garage/graphics/gpu_graphics_pipeline_state.hpp"
 #include "garage/graphics/gpu_texture2d.hpp"
 #include "garage/graphics/render_subsystem.hpp"
-
-#include "garage/resources/cubemap_asset.hpp"
 
 #include "garage/utilities/logger.hpp"
 

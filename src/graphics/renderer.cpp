@@ -3,6 +3,8 @@
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
+#include "garage/content/material_content.hpp"
+
 #include "garage/core/common.hpp"
 
 #include "garage/graphics/gpu_command_buffer.hpp"
@@ -10,8 +12,6 @@
 #include "garage/graphics/gpu_graphics_pipeline_state.hpp"
 
 #include "garage/math/matrix4x4.hpp"
-
-#include "garage/resources/material_asset.hpp"
 
 #include "garage/utilities/logger.hpp"
 

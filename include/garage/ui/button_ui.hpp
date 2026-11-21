@@ -8,7 +8,7 @@
 namespace Garage
 {
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-    class MaterialAsset;
+    class MaterialContent;
 #endif
     class SystemContext;
 
@@ -23,8 +23,8 @@ namespace Garage
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
         void OnPostRender(SystemContext& context) override;
 
-        [[nodiscard]] const MaterialAsset* GetDebugMaterial() const noexcept;
-        void                               SetDebugMaterial(const MaterialAsset* value) noexcept;
+        [[nodiscard]] const MaterialContent* GetDebugMaterial() const noexcept;
+        void                                 SetDebugMaterial(const MaterialContent* value) noexcept;
 #endif
 
         [[nodiscard]] bool IsHovered() const noexcept;
@@ -46,17 +46,17 @@ namespace Garage
         bool isHovered = false;
         bool isPressed = false;
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-        const MaterialAsset* debugMaterial = nullptr;
+        const MaterialContent* debugMaterial = nullptr;
 #endif
     };
 
 #if defined(GARAGE_DEBUG) || defined(_DEBUG)
-    inline const MaterialAsset* ButtonUI::GetDebugMaterial() const noexcept
+    inline const MaterialContent* ButtonUI::GetDebugMaterial() const noexcept
     {
         return debugMaterial;
     }
 
-    inline void ButtonUI::SetDebugMaterial(const MaterialAsset* value) noexcept
+    inline void ButtonUI::SetDebugMaterial(const MaterialContent* value) noexcept
     {
         debugMaterial = value;
     }

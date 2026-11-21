@@ -5,6 +5,8 @@
 
 #include "garage/actors/actor.hpp"
 
+#include "garage/content/texture_content.hpp"
+
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
 #include "garage/core/system_context.hpp"
@@ -18,8 +20,6 @@
 #include "garage/math/vector3d.hpp"
 
 #include "garage/platform/time_subsystem.hpp"
-
-#include "garage/resources/texture_asset.hpp"
 
 #include "garage/utilities/logger.hpp"
 

@@ -19,18 +19,18 @@ void MyWorld::OnEnter(SystemContext& context)
     light->SetColor(ColorRGBA<Float32>::GetWhite());
     light->SetAmbientColor(ColorRGBA<Float32>{0.28f, 0.28f, 0.32f, 1.0f});
 
-    AssetSubsystem* assets = context.GetAppSubsystem<AssetSubsystem>();
-    if (assets == nullptr)
+    ContentSubsystem* contentSubsystem = context.GetAppSubsystem<ContentSubsystem>();
+    if (contentSubsystem == nullptr)
     {
-        LOG_ERROR("에셋 서브시스템을 가져오지 못했습니다.");
+        LOG_ERROR("콘텐츠 서브시스템을 가져오지 못했습니다.");
         return;
     }
 
-    const MeshAsset*     cubeMesh     = assets->LoadAsset<MeshAsset>("Resources/Meshes/Cube.json");
-    const MaterialAsset* cubeMaterial = assets->LoadAsset<MaterialAsset>("Resources/Materials/Cube.json");
+    const MeshContent*     cubeMesh     = contentSubsystem->LoadContent<MeshContent>("content/Meshes/Cube.json");
+    const MaterialContent* cubeMaterial = contentSubsystem->LoadContent<MaterialContent>("content/Materials/Cube.json");
     if (cubeMesh == nullptr || cubeMaterial == nullptr)
     {
-        LOG_ERROR("큐브 에셋(Meshes/Cube.json / Materials/Cube.json)을 로드하지 못했습니다.");
+        LOG_ERROR("큐브 콘텐츠(Meshes/Cube.json / Materials/Cube.json)를 로드하지 못했습니다.");
         return;
     }
 

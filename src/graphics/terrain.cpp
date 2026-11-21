@@ -6,45 +6,46 @@
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
+#include "garage/content/terrain_content.hpp"
+
 #include "garage/core/common.hpp"
 
 #include "garage/math/matrix4x4.hpp"
 #include "garage/math/vector2d.hpp"
 #include "garage/math/vector3d.hpp"
 
-#include "garage/resources/terrain_asset.hpp"
-
 namespace Garage
 {
     Float32 Terrain::GetCellSize() const noexcept
     {
-        return (asset != nullptr) ? asset->GetCellSize() : 0.0f;
+        return (content != nullptr) ? content->GetCellSize() : 0.0f;
     }
 
     Float32 Terrain::GetHeightScale() const noexcept
     {
-        return (asset != nullptr) ? asset->GetHeightScale() : 0.0f;
+        return (content != nullptr) ? content->GetHeightScale() : 0.0f;
     }
 
     const Vector2D<Float32>& Terrain::GetUVTiling() const noexcept
     {
         static const Vector2D<Float32> DEFAULT_UV_TILING{1.0f, 1.0f};
-        return (asset != nullptr) ? asset->GetUVTiling() : DEFAULT_UV_TILING;
+        return (content != nullptr) ? content->GetUVTiling() : DEFAULT_UV_TILING;
     }
 
     bool Terrain::IsValid() const noexcept
     {
-        return asset != nullptr && asset->GetWidth() >= 2 && asset->GetHeight() >= 2 && asset->GetCellSize() > 0.0f;
+        return content != nullptr && content->GetWidth() >= 2 && content->GetHeight() >= 2 &&
+                content->GetCellSize() > 0.0f;
     }
 
     Float32 Terrain::GetLocalWidth() const noexcept
     {
-        return IsValid() ? asset->GetLocalWidth() : 0.0f;
+        return IsValid() ? content->GetLocalWidth() : 0.0f;
     }
 
     Float32 Terrain::GetLocalDepth() const noexcept
     {
-        return IsValid() ? asset->GetLocalDepth() : 0.0f;
+        return IsValid() ? content->GetLocalDepth() : 0.0f;
     }
 
     bool Terrain::ContainsLocalPosition(Float32 localX, Float32 localZ) const noexcept
@@ -67,13 +68,13 @@ namespace Garage
             return 0.0f;
         }
 
-        const Float32 CELL_SIZE  = asset->GetCellSize();
+        const Float32 CELL_SIZE  = content->GetCellSize();
         const Float32 HALF_WIDTH = GetLocalWidth() * 0.5f;
         const Float32 HALF_DEPTH = GetLocalDepth() * 0.5f;
         const Float32 GRID_X     = (localX + HALF_WIDTH) / CELL_SIZE;
         const Float32 GRID_Z     = (localZ + HALF_DEPTH) / CELL_SIZE;
 
-        return asset->SampleNormalizedHeight(GRID_X, GRID_Z) * asset->GetHeightScale();
+        return content->SampleNormalizedHeight(GRID_X, GRID_Z) * content->GetHeightScale();
     }
 
     Vector3D<Float32> Terrain::SampleNormalAtLocalPosition(Float32 localX, Float32 localZ) const noexcept
@@ -83,9 +84,9 @@ namespace Garage
             return Vector3D<Float32>::GetUp();
         }
 
-        const UInt32  WIDTH      = asset->GetWidth();
-        const UInt32  HEIGHT     = asset->GetHeight();
-        const Float32 CELL_SIZE  = asset->GetCellSize();
+        const UInt32  WIDTH      = content->GetWidth();
+        const UInt32  HEIGHT     = content->GetHeight();
+        const Float32 CELL_SIZE  = content->GetCellSize();
         const Float32 HALF_WIDTH = GetLocalWidth() * 0.5f;
         const Float32 HALF_DEPTH = GetLocalDepth() * 0.5f;
 
@@ -100,10 +101,10 @@ namespace Garage
         const Float32 TX = GRID_X - static_cast<Float32>(X0);
         const Float32 TZ = GRID_Z - static_cast<Float32>(Z0);
 
-        const Vector3D<Float32> N00 = asset->CalculateGridNormal(X0, Z0);
-        const Vector3D<Float32> N10 = asset->CalculateGridNormal(X1, Z0);
-        const Vector3D<Float32> N01 = asset->CalculateGridNormal(X0, Z1);
-        const Vector3D<Float32> N11 = asset->CalculateGridNormal(X1, Z1);
+        const Vector3D<Float32> N00 = content->CalculateGridNormal(X0, Z0);
+        const Vector3D<Float32> N10 = content->CalculateGridNormal(X1, Z0);
+        const Vector3D<Float32> N01 = content->CalculateGridNormal(X0, Z1);
+        const Vector3D<Float32> N11 = content->CalculateGridNormal(X1, Z1);
 
         const Vector3D<Float32> N0     = Vector3D<Float32>::Lerp(N00, N10, TX);
         const Vector3D<Float32> N1     = Vector3D<Float32>::Lerp(N01, N11, TX);

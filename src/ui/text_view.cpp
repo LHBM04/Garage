@@ -5,6 +5,10 @@
 #include "garage/actors/actor.hpp"
 #include "garage/actors/transform.hpp"
 
+#include "garage/content/bitmap_font_content.hpp"
+#include "garage/content/material_content.hpp"
+#include "garage/content/texture_content.hpp"
+
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
 #include "garage/core/system_context.hpp"
@@ -19,10 +23,6 @@
 #include "garage/math/matrix4x4.hpp"
 #include "garage/math/vector2d.hpp"
 #include "garage/math/vector4d.hpp"
-
-#include "garage/resources/bitmap_font_asset.hpp"
-#include "garage/resources/material_asset.hpp"
-#include "garage/resources/texture_asset.hpp"
 
 #include "garage/utilities/logger.hpp"
 
@@ -71,7 +71,7 @@ namespace Garage
         }
     } // namespace
 
-    void TextView::SetFont(const BitmapFontAsset* value) noexcept
+    void TextView::SetFont(const BitmapFontContent* value) noexcept
     {
         font = value;
         characterMap.clear();

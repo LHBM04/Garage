@@ -5,6 +5,8 @@
 
 #include "garage/actors/actor.hpp"
 
+#include "garage/content/terrain_content.hpp"
+
 #include "garage/core/common.hpp"
 
 #include "garage/graphics/terrain.hpp"
@@ -14,8 +16,6 @@
 #include "garage/math/bounding_sphere.hpp"
 #include "garage/math/matrix4x4.hpp"
 #include "garage/math/vector3d.hpp"
-
-#include "garage/resources/terrain_asset.hpp"
 
 namespace Garage
 {
@@ -65,12 +65,13 @@ namespace Garage
         }
 
         template <class TCallback>
-        bool VisitTerrainTriangles(const TerrainAsset*       asset,
+        bool VisitTerrainTriangles(const TerrainContent*     content,
                                    const Matrix4x4<Float32>& world,
                                    const BoundingBox&        worldRegion,
                                    TCallback&&               callback) noexcept
         {
-            if (asset == nullptr || asset->GetWidth() < 2 || asset->GetHeight() < 2 || asset->GetCellSize() <= 0.0f)
+            if (content == nullptr || content->GetWidth() < 2 || content->GetHeight() < 2 ||
+                content->GetCellSize() <= 0.0f)
             {
                 return false;
             }
@@ -85,15 +86,15 @@ namespace Garage
             const Vector3D<Float32> MIN    = REGION.GetMin();
             const Vector3D<Float32> MAX    = REGION.GetMax();
 
-            const Float32 HALF_WIDTH = asset->GetLocalWidth() * 0.5f;
-            const Float32 HALF_DEPTH = asset->GetLocalDepth() * 0.5f;
+            const Float32 HALF_WIDTH = content->GetLocalWidth() * 0.5f;
+            const Float32 HALF_DEPTH = content->GetLocalDepth() * 0.5f;
             if (MAX.GetX() < -HALF_WIDTH || MIN.GetX() > HALF_WIDTH || MAX.GetZ() < -HALF_DEPTH ||
                 MIN.GetZ() > HALF_DEPTH)
             {
                 return false;
             }
 
-            const Float32 CELL_SIZE = asset->GetCellSize();
+            const Float32 CELL_SIZE = content->GetCellSize();
             const auto    CELL_INDEX =
                     [](Float32 coordinate, Float32 halfSize, Float32 spacing, UInt32 maxCell, bool lower) -> UInt32
             {
@@ -102,16 +103,16 @@ namespace Garage
                 return static_cast<UInt32>(std::clamp(INDEX, 0.0f, static_cast<Float32>(maxCell)));
             };
 
-            const UInt32 MIN_X = CELL_INDEX(MIN.GetX(), HALF_WIDTH, CELL_SIZE, asset->GetWidth() - 2, true);
-            const UInt32 MAX_X = CELL_INDEX(MAX.GetX(), HALF_WIDTH, CELL_SIZE, asset->GetWidth() - 2, false);
-            const UInt32 MIN_Z = CELL_INDEX(MIN.GetZ(), HALF_DEPTH, CELL_SIZE, asset->GetHeight() - 2, true);
-            const UInt32 MAX_Z = CELL_INDEX(MAX.GetZ(), HALF_DEPTH, CELL_SIZE, asset->GetHeight() - 2, false);
+            const UInt32 MIN_X = CELL_INDEX(MIN.GetX(), HALF_WIDTH, CELL_SIZE, content->GetWidth() - 2, true);
+            const UInt32 MAX_X = CELL_INDEX(MAX.GetX(), HALF_WIDTH, CELL_SIZE, content->GetWidth() - 2, false);
+            const UInt32 MIN_Z = CELL_INDEX(MIN.GetZ(), HALF_DEPTH, CELL_SIZE, content->GetHeight() - 2, true);
+            const UInt32 MAX_Z = CELL_INDEX(MAX.GetZ(), HALF_DEPTH, CELL_SIZE, content->GetHeight() - 2, false);
 
             const auto VERTEX = [&](UInt32 x, UInt32 z) -> Vector3D<Float32>
             {
                 return world.MultiplyPoint3x4(Vector3D<Float32>{
                         static_cast<Float32>(x) * CELL_SIZE - HALF_WIDTH,
-                        asset->GetNormalizedHeightAt(x, z) * asset->GetHeightScale(),
+                        content->GetNormalizedHeightAt(x, z) * content->GetHeightScale(),
                         static_cast<Float32>(z) * CELL_SIZE - HALF_DEPTH,
                 });
             };
@@ -136,11 +137,11 @@ namespace Garage
         }
     } // namespace
 
-    const TerrainAsset* TerrainCollider::GetTerrain() const noexcept
+    const TerrainContent* TerrainCollider::GetTerrain() const noexcept
     {
-        if (asset != nullptr)
+        if (content != nullptr)
         {
-            return asset;
+            return content;
         }
 
         const ActorBase* owner   = GetOwner();
@@ -148,14 +149,14 @@ namespace Garage
         return (terrain != nullptr) ? terrain->GetTerrain() : nullptr;
     }
 
-    void TerrainCollider::SetTerrain(const TerrainAsset* value) noexcept
+    void TerrainCollider::SetTerrain(const TerrainContent* value) noexcept
     {
-        asset = value;
+        content = value;
     }
 
     bool TerrainCollider::IsValid() const noexcept
     {
-        const TerrainAsset* terrain = GetTerrain();
+        const TerrainContent* terrain = GetTerrain();
         return terrain != nullptr && terrain->GetWidth() >= 2 && terrain->GetHeight() >= 2 &&
                 std::isfinite(terrain->GetCellSize()) && terrain->GetCellSize() > 0.0f &&
                 std::isfinite(terrain->GetHeightScale()) &&
@@ -168,7 +169,7 @@ namespace Garage
     {
         ASSERT(IsValid());
 
-        const TerrainAsset* terrain = GetTerrain();
+        const TerrainContent* terrain = GetTerrain();
         ASSERT(terrain != nullptr);
 
         const Float32 HALF_WIDTH   = terrain->GetLocalWidth() * 0.5f;

@@ -14,7 +14,7 @@
 
 namespace Garage
 {
-    class TerrainAsset;
+    class TerrainContent;
 
     class GARAGE_API TerrainCollider final : public Collider
     {
@@ -23,8 +23,8 @@ namespace Garage
         using Collider::Intersects;
         ~TerrainCollider() noexcept override = default;
 
-        [[nodiscard]] const TerrainAsset* GetTerrain() const noexcept;
-        void                              SetTerrain(const TerrainAsset* value) noexcept;
+        [[nodiscard]] const TerrainContent* GetTerrain() const noexcept;
+        void                                SetTerrain(const TerrainContent* value) noexcept;
 
         [[nodiscard]] bool IsValid() const noexcept override;
 
@@ -39,7 +39,7 @@ namespace Garage
                                    Float32 maxDistance = std::numeric_limits<Float32>::max()) const noexcept override;
 
     private:
-        const TerrainAsset* asset = nullptr;
+        const TerrainContent* content = nullptr;
     };
 } // namespace Garage
 

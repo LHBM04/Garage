@@ -2,6 +2,11 @@
 
 #include "garage/actors/actor.hpp"
 
+#include "garage/content/material_content.hpp"
+#include "garage/content/mesh_content.hpp"
+#include "garage/content/terrain_content.hpp"
+#include "garage/content/texture_content.hpp"
+
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
 #include "garage/core/system_context.hpp"
@@ -13,11 +18,6 @@
 #include "garage/graphics/gpu_texture2d.hpp"
 #include "garage/graphics/render_subsystem.hpp"
 #include "garage/graphics/terrain.hpp"
-
-#include "garage/resources/material_asset.hpp"
-#include "garage/resources/mesh_asset.hpp"
-#include "garage/resources/terrain_asset.hpp"
-#include "garage/resources/texture_asset.hpp"
 
 #include "garage/utilities/logger.hpp"
 
@@ -33,7 +33,7 @@ namespace Garage
             return;
         }
 
-        const MaterialAsset*             material      = GetMaterial();
+        const MaterialContent*           material      = GetMaterial();
         const IGPUGraphicsPipelineState* pipelineState = GetPipelineState();
         if (material == nullptr || pipelineState == nullptr)
         {
@@ -77,9 +77,9 @@ namespace Garage
         const MaterialTextures&                                            MATERIAL_TEXTURES = material->GetTextures();
         for (UInt32 index = 0; index < textures.size(); ++index)
         {
-            if (const TextureAsset* textureAsset = MATERIAL_TEXTURES[index]; textureAsset != nullptr)
+            if (const TextureContent* textureContent = MATERIAL_TEXTURES[index]; textureContent != nullptr)
             {
-                if (const IGPUTexture2D* texture = textureAsset->GetTexture(); texture != nullptr)
+                if (const IGPUTexture2D* texture = textureContent->GetTexture(); texture != nullptr)
                 {
                     textures[index] = texture;
                     constants.textureMask |= 1u << index;

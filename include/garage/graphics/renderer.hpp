@@ -12,7 +12,7 @@ namespace Garage
 {
     class IGPUCommandBuffer;
     class IGPUGraphicsPipelineState;
-    class MaterialAsset;
+    class MaterialContent;
     class SystemContext;
 
     class GARAGE_API RendererBase : public ComponentBase
@@ -23,8 +23,8 @@ namespace Garage
 
         void OnRender(SystemContext& context) override = 0;
 
-        [[nodiscard]] const MaterialAsset* GetMaterial() const noexcept;
-        void                               SetMaterial(const MaterialAsset* value) noexcept;
+        [[nodiscard]] const MaterialContent* GetMaterial() const noexcept;
+        void                                 SetMaterial(const MaterialContent* value) noexcept;
 
         [[nodiscard]] const ColorRGBA<Float32>& GetColor() const noexcept;
         void                                    SetColor(const ColorRGBA<Float32>& value) noexcept;
@@ -38,16 +38,16 @@ namespace Garage
                                 const IGPUGraphicsPipelineState& pipelineState) const noexcept;
 
     private:
-        ColorRGBA<Float32>   color    = ColorRGBA<Float32>::GetWhite();
-        const MaterialAsset* material = nullptr;
+        ColorRGBA<Float32>     color    = ColorRGBA<Float32>::GetWhite();
+        const MaterialContent* material = nullptr;
     };
 
-    inline const MaterialAsset* RendererBase::GetMaterial() const noexcept
+    inline const MaterialContent* RendererBase::GetMaterial() const noexcept
     {
         return material;
     }
 
-    inline void RendererBase::SetMaterial(const MaterialAsset* value) noexcept
+    inline void RendererBase::SetMaterial(const MaterialContent* value) noexcept
     {
         material = value;
     }

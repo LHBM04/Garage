@@ -43,7 +43,7 @@ namespace Garage::JsonUtility
         std::ifstream file(path, std::ios::binary | std::ios::ate);
         if (!file.is_open())
         {
-            String error("리소스를 열 수 없습니다: ");
+            String error("콘텐츠를 열 수 없습니다: ");
             error.append(path.generic_string());
             return Result<rapidjson::Document, String>::Err(std::move(error));
         }

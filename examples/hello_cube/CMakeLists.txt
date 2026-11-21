@@ -80,12 +80,12 @@ if(EXAMPLE_02_SOURCES)
         )
     endif()
 
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Resources")
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/content")
         add_custom_command(TARGET GarageExample02 POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy_directory
-                "${CMAKE_CURRENT_SOURCE_DIR}/Resources"
-                "$<TARGET_FILE_DIR:GarageExample02>/Resources"
-            COMMENT "Copying Resources for GarageExample02"
+                "${CMAKE_CURRENT_SOURCE_DIR}/content"
+                "$<TARGET_FILE_DIR:GarageExample02>/content"
+            COMMENT "Copying content for GarageExample02"
         )
     endif()
 else()
