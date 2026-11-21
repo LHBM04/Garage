@@ -1,4 +1,4 @@
-#include "garage/resources/bitmap_font_asset_importer.hpp"
+#include "garage/content/bitmap_font_content_importer.hpp"
 
 #include <array>
 #include <filesystem>
@@ -6,27 +6,28 @@
 
 #include <rapidjson/document.h>
 
+#include "garage/content/bitmap_font_content.hpp"
+
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
 #include "garage/core/memory.hpp"
-
-#include "garage/resources/bitmap_font_asset.hpp"
 
 #include "garage/utilities/json_utility.hpp"
 
 namespace Garage
 {
-    Result<UniquePtr<BitmapFontAsset>, String> BitmapFontAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<BitmapFontContent>, String>
+            BitmapFontContentImporter::Import(const std::filesystem::path& path) const
     {
         if (!JsonUtility::HasJsonExtension(path))
         {
-            return Result<UniquePtr<BitmapFontAsset>, String>::Err(String("폰트 로더에는 .json 파일이 필요합니다."));
+            return Result<UniquePtr<BitmapFontContent>, String>::Err(String("폰트 로더에는 .json 파일이 필요합니다."));
         }
 
         auto documentResult = JsonUtility::LoadDocument(path);
         if (!documentResult)
         {
-            return Result<UniquePtr<BitmapFontAsset>, String>::Err(std::move(documentResult).GetError());
+            return Result<UniquePtr<BitmapFontContent>, String>::Err(std::move(documentResult).GetError());
         }
 
         const rapidjson::Value& ROOT = *documentResult;
@@ -49,13 +50,13 @@ namespace Garage
             !JsonUtility::ReadFloat32(ROOT, "descentLine", descentLine) ||
             !JsonUtility::ReadInt32(ROOT, "atlasPadding", atlasPadding))
         {
-            return Result<UniquePtr<BitmapFontAsset>, String>::Err(String("폰트 헤더가 유효하지 않습니다."));
+            return Result<UniquePtr<BitmapFontContent>, String>::Err(String("폰트 헤더가 유효하지 않습니다."));
         }
 
         const rapidjson::Value* atlasesArray = nullptr;
         if (!JsonUtility::ReadArray(ROOT, "atlases", atlasesArray) || atlasesArray->Empty())
         {
-            return Result<UniquePtr<BitmapFontAsset>, String>::Err(String("폰트 아틀라스 개수가 유효하지 않습니다."));
+            return Result<UniquePtr<BitmapFontContent>, String>::Err(String("폰트 아틀라스 개수가 유효하지 않습니다."));
         }
 
         Vector<FontAtlasData> parsedAtlases;
@@ -68,7 +69,7 @@ namespace Garage
                 !JsonUtility::ReadInt32(atlasValue, "width", atlas.width) ||
                 !JsonUtility::ReadInt32(atlasValue, "height", atlas.height))
             {
-                return Result<UniquePtr<BitmapFontAsset>, String>::Err(
+                return Result<UniquePtr<BitmapFontContent>, String>::Err(
                         String("폰트 아틀라스 데이터가 유효하지 않습니다."));
             }
 
@@ -78,7 +79,7 @@ namespace Garage
         const rapidjson::Value* charactersArray = nullptr;
         if (!JsonUtility::ReadArray(ROOT, "characters", charactersArray))
         {
-            return Result<UniquePtr<BitmapFontAsset>, String>::Err(String("폰트 문자 개수가 유효하지 않습니다."));
+            return Result<UniquePtr<BitmapFontContent>, String>::Err(String("폰트 문자 개수가 유효하지 않습니다."));
         }
 
         Vector<FontCharacterData> parsedCharacters;
@@ -101,7 +102,8 @@ namespace Garage
                 !JsonUtility::ReadFloat32(characterValue, "bearingY", character.bearingY) ||
                 !JsonUtility::ReadFloat32(characterValue, "advance", character.advance))
             {
-                return Result<UniquePtr<BitmapFontAsset>, String>::Err(String("폰트 문자 데이터가 유효하지 않습니다."));
+                return Result<UniquePtr<BitmapFontContent>, String>::Err(
+                        String("폰트 문자 데이터가 유효하지 않습니다."));
             }
 
             parsedCharacters.push_back(character);
@@ -109,7 +111,7 @@ namespace Garage
 
         if (pointSize <= 0.0f || faceScale <= 0.0f || atlasPadding < 0 || parsedAtlases.empty())
         {
-            return Result<UniquePtr<BitmapFontAsset>, String>::Err(
+            return Result<UniquePtr<BitmapFontContent>, String>::Err(
                     String("폰트 메트릭이 유효하지 않거나 아틀라스가 없습니다."));
         }
 
@@ -119,7 +121,7 @@ namespace Garage
             if (atlas.index < 0 || atlas.width <= 0 || atlas.height <= 0 ||
                 !atlases.emplace(atlas.index, &atlas).second)
             {
-                return Result<UniquePtr<BitmapFontAsset>, String>::Err(
+                return Result<UniquePtr<BitmapFontContent>, String>::Err(
                         String("폰트 아틀라스가 유효하지 않거나 중복되었습니다."));
             }
         }
@@ -132,7 +134,7 @@ namespace Garage
                 (character.unicode >= 0xD800u && character.unicode <= 0xDFFFu) ||
                 !characters.insert(character.unicode).second)
             {
-                return Result<UniquePtr<BitmapFontAsset>, String>::Err(String("폰트 문자 매핑이 유효하지 않습니다."));
+                return Result<UniquePtr<BitmapFontContent>, String>::Err(String("폰트 문자 매핑이 유효하지 않습니다."));
             }
 
             const Float32 ATLAS_WIDTH  = static_cast<Float32>(PAGE->second->width);
@@ -142,13 +144,13 @@ namespace Garage
                 if (rect[0] < 0.0f || rect[1] < 0.0f || rect[2] < 0.0f || rect[3] < 0.0f ||
                     rect[0] + rect[2] > ATLAS_WIDTH || rect[1] + rect[3] > ATLAS_HEIGHT)
                 {
-                    return Result<UniquePtr<BitmapFontAsset>, String>::Err(
+                    return Result<UniquePtr<BitmapFontContent>, String>::Err(
                             String("폰트 글리프 영역이 아틀라스 범위를 벗어났습니다."));
                 }
             }
         }
 
-        UniquePtr<BitmapFontAsset> font = MakeUnique<BitmapFontAsset>(path);
+        UniquePtr<BitmapFontContent> font = MakeUnique<BitmapFontContent>(path);
         font->SetName(std::move(name));
         font->SetRenderMode(std::move(renderMode));
         font->SetDistanceField(isDistanceField);
@@ -160,6 +162,6 @@ namespace Garage
         font->SetAtlasPadding(atlasPadding);
         font->SetAtlasData(std::move(parsedAtlases));
         font->SetCharacters(std::move(parsedCharacters));
-        return Result<UniquePtr<BitmapFontAsset>, String>::Ok(std::move(font));
+        return Result<UniquePtr<BitmapFontContent>, String>::Ok(std::move(font));
     }
 } // namespace Garage

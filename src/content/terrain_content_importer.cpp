@@ -1,4 +1,4 @@
-#include "garage/resources/terrain_asset_importer.hpp"
+#include "garage/content/terrain_content_importer.hpp"
 
 #include <filesystem>
 #include <source_location>
@@ -6,6 +6,8 @@
 #include <utility>
 
 #include <rapidjson/document.h>
+
+#include "garage/content/terrain_content.hpp"
 
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
@@ -19,8 +21,6 @@
 #include "garage/math/color_rgba.hpp"
 #include "garage/math/vector2d.hpp"
 #include "garage/math/vector3d.hpp"
-
-#include "garage/resources/terrain_asset.hpp"
 
 #include "garage/utilities/json_utility.hpp"
 
@@ -67,7 +67,7 @@ namespace Garage
                     const Float32           POS_X  = static_cast<Float32>(x) * cellSize - HALF_WIDTH;
                     const Float32           POS_Y  = normalizedHeights[INDEX] * heightScale;
                     const Float32           POS_Z  = static_cast<Float32>(z) * cellSize - HALF_DEPTH;
-                    const Vector3D<Float32> NORMAL = TerrainAsset::CalculateGridNormal(
+                    const Vector3D<Float32> NORMAL = TerrainContent::CalculateGridNormal(
                             normalizedHeights, width, height, x, z, cellSize, heightScale);
 
                     outVertices[INDEX] = MeshVertex{
@@ -102,18 +102,18 @@ namespace Garage
         }
     } // namespace
 
-    Result<UniquePtr<TerrainAsset>, String> TerrainAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<TerrainContent>, String> TerrainContentImporter::Import(const std::filesystem::path& path) const
     {
         if (!JsonUtility::HasJsonExtension(path))
         {
-            return Result<UniquePtr<TerrainAsset>, String>::Err(
+            return Result<UniquePtr<TerrainContent>, String>::Err(
                     String("지형 로더에는 .json 높이맵 파일이 필요합니다."));
         }
 
         auto documentResult = JsonUtility::LoadDocument(path);
         if (!documentResult)
         {
-            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(documentResult).GetError());
+            return Result<UniquePtr<TerrainContent>, String>::Err(std::move(documentResult).GetError());
         }
 
         const rapidjson::Value& ROOT = *documentResult;
@@ -129,7 +129,7 @@ namespace Garage
         {
             String error("지형 헤더를 읽지 못했습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(error));
+            return Result<UniquePtr<TerrainContent>, String>::Err(std::move(error));
         }
 
         if (settings.width < 2 || settings.height < 2 || (settings.bitDepth != 8 && settings.bitDepth != 16) ||
@@ -137,7 +137,7 @@ namespace Garage
         {
             String error("지형 헤더의 설정값이 유효하지 않습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(error));
+            return Result<UniquePtr<TerrainContent>, String>::Err(std::move(error));
         }
         settings.uvTiling = Vector2D<Float32>{uvTiling[0], uvTiling[1]};
 
@@ -152,7 +152,7 @@ namespace Garage
         {
             String error("지형 높이 데이터 개수가 해상도와 일치하지 않습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(error));
+            return Result<UniquePtr<TerrainContent>, String>::Err(std::move(error));
         }
 
         Vector<Float32> normalizedHeights;
@@ -164,7 +164,7 @@ namespace Garage
             {
                 String error("지형 높이 샘플 값이 유효하지 않습니다: ");
                 error.append(path.generic_string());
-                return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(error));
+                return Result<UniquePtr<TerrainContent>, String>::Err(std::move(error));
             }
 
             normalizedHeights.push_back(heightSample);
@@ -188,19 +188,20 @@ namespace Garage
                                                EGPUPrimitiveTopology::TRIANGLE_LIST);
         if (!gpuMeshResult)
         {
-            return Result<UniquePtr<TerrainAsset>, String>::Err(std::move(gpuMeshResult).GetError());
+            return Result<UniquePtr<TerrainContent>, String>::Err(std::move(gpuMeshResult).GetError());
         }
 
-        return Result<UniquePtr<TerrainAsset>, String>::Ok(MakeUniqueAt<TerrainAsset>(std::source_location::current(),
-                                                                                      path,
-                                                                                      WIDTH,
-                                                                                      HEIGHT,
-                                                                                      IS_16_BIT,
-                                                                                      settings.cellSize,
-                                                                                      settings.heightScale,
-                                                                                      settings.uvTiling,
-                                                                                      std::move(normalizedHeights),
-                                                                                      device,
-                                                                                      gpuMeshResult.GetValue()));
+        return Result<UniquePtr<TerrainContent>, String>::Ok(
+                MakeUniqueAt<TerrainContent>(std::source_location::current(),
+                                             path,
+                                             WIDTH,
+                                             HEIGHT,
+                                             IS_16_BIT,
+                                             settings.cellSize,
+                                             settings.heightScale,
+                                             settings.uvTiling,
+                                             std::move(normalizedHeights),
+                                             device,
+                                             gpuMeshResult.GetValue()));
     }
 } // namespace Garage

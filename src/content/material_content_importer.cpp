@@ -1,4 +1,4 @@
-#include "garage/resources/material_asset_importer.hpp"
+#include "garage/content/material_content_importer.hpp"
 
 #include <algorithm>
 #include <filesystem>
@@ -7,6 +7,12 @@
 
 #include <fmt/format.h>
 #include <rapidjson/document.h>
+
+#include "garage/content/content_path.hpp"
+#include "garage/content/content_subsystem.hpp"
+#include "garage/content/material_content.hpp"
+#include "garage/content/shader_content.hpp"
+#include "garage/content/texture_content.hpp"
 
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
@@ -17,34 +23,29 @@
 
 #include "garage/math/color_rgba.hpp"
 
-#include "garage/resources/asset_subsystem.hpp"
-#include "garage/resources/material_asset.hpp"
-#include "garage/resources/resource_path.hpp"
-#include "garage/resources/shader_asset.hpp"
-#include "garage/resources/texture_asset.hpp"
-
 #include "garage/utilities/json_utility.hpp"
 
 namespace Garage
 {
-    Result<UniquePtr<MaterialAsset>, String> MaterialAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<MaterialContent>, String> MaterialContentImporter::Import(const std::filesystem::path& path) const
     {
-        AssetSubsystem* assets = GetOwner();
-        if (assets == nullptr)
+        ContentSubsystem* contentSubsystem = GetOwner();
+        if (contentSubsystem == nullptr)
         {
-            return Result<UniquePtr<MaterialAsset>, String>::Err(
-                    String("머티리얼 로더의 에셋 서브시스템이 nullptr입니다."));
+            return Result<UniquePtr<MaterialContent>, String>::Err(
+                    String("머티리얼 로더의 콘텐츠 서브시스템이 nullptr입니다."));
         }
 
         if (!JsonUtility::HasJsonExtension(path))
         {
-            return Result<UniquePtr<MaterialAsset>, String>::Err(String("머티리얼 로더에는 .json 파일이 필요합니다."));
+            return Result<UniquePtr<MaterialContent>, String>::Err(
+                    String("머티리얼 로더에는 .json 파일이 필요합니다."));
         }
 
         auto documentResult = JsonUtility::LoadDocument(path);
         if (!documentResult)
         {
-            return Result<UniquePtr<MaterialAsset>, String>::Err(std::move(documentResult).GetError());
+            return Result<UniquePtr<MaterialContent>, String>::Err(std::move(documentResult).GetError());
         }
 
         const rapidjson::Value& ROOT = *documentResult;
@@ -73,12 +74,12 @@ namespace Garage
         {
             String error("머티리얼 데이터가 유효하지 않습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<MaterialAsset>, String>::Err(std::move(error));
+            return Result<UniquePtr<MaterialContent>, String>::Err(std::move(error));
         }
 
         if (!hullShader.empty() || !domainShader.empty() || !geometryShader.empty())
         {
-            return Result<UniquePtr<MaterialAsset>, String>::Err(
+            return Result<UniquePtr<MaterialContent>, String>::Err(
                     String("SDL_GPU 백엔드는 헐/도메인/지오메트리 셰이더 스테이지를 지원하지 않습니다."));
         }
 
@@ -91,7 +92,7 @@ namespace Garage
             {
                 String error("머티리얼 텍스처 항목이 유효하지 않습니다: ");
                 error.append(path.generic_string());
-                return Result<UniquePtr<MaterialAsset>, String>::Err(std::move(error));
+                return Result<UniquePtr<MaterialContent>, String>::Err(std::move(error));
             }
 
             constexpr Array<std::pair<const char*, EMaterialTextureSlot>, 8> TEXTURE_SLOTS{{
@@ -112,22 +113,22 @@ namespace Garage
                 {
                     String error("머티리얼 텍스처 참조가 유효하지 않습니다: ");
                     error.append(slotKey);
-                    return Result<UniquePtr<MaterialAsset>, String>::Err(std::move(error));
+                    return Result<UniquePtr<MaterialContent>, String>::Err(std::move(error));
                 }
             }
         }
 
-        const auto ROOT_DIR = FindResourceRoot(path, "Materials");
+        const auto ROOT_DIR = FindContentRoot(path, "Materials");
         if (!ROOT_DIR)
         {
-            return Result<UniquePtr<MaterialAsset>, String>::Err(ROOT_DIR.GetError());
+            return Result<UniquePtr<MaterialContent>, String>::Err(ROOT_DIR.GetError());
         }
 
-        const auto VERTEX_PATH   = ResolveResourcePath(*ROOT_DIR, vertexShader);
-        const auto FRAGMENT_PATH = ResolveResourcePath(*ROOT_DIR, fragmentShader);
+        const auto VERTEX_PATH   = ResolveContentPath(*ROOT_DIR, vertexShader);
+        const auto FRAGMENT_PATH = ResolveContentPath(*ROOT_DIR, fragmentShader);
         if (!VERTEX_PATH || !FRAGMENT_PATH)
         {
-            return Result<UniquePtr<MaterialAsset>, String>::Err(
+            return Result<UniquePtr<MaterialContent>, String>::Err(
                     String("머티리얼의 셰이더 참조 경로가 유효하지 않습니다."));
         }
 
@@ -146,36 +147,36 @@ namespace Garage
                 continue;
             }
 
-            const auto TEXTURE_PATH = ResolveResourcePath(*ROOT_DIR, REFERENCE);
+            const auto TEXTURE_PATH = ResolveContentPath(*ROOT_DIR, REFERENCE);
             if (!TEXTURE_PATH)
             {
-                return Result<UniquePtr<MaterialAsset>, String>::Err(TEXTURE_PATH.GetError());
+                return Result<UniquePtr<MaterialContent>, String>::Err(TEXTURE_PATH.GetError());
             }
 
-            const TextureAsset* texture = assets->LoadAsset<TextureAsset>(*TEXTURE_PATH);
+            const TextureContent* texture = contentSubsystem->LoadContent<TextureContent>(*TEXTURE_PATH);
             if (texture == nullptr)
             {
                 String error("머티리얼 텍스처를 로드하지 못했습니다: ");
                 error.append(TEXTURE_PATH->generic_string());
-                return Result<UniquePtr<MaterialAsset>, String>::Err(std::move(error));
+                return Result<UniquePtr<MaterialContent>, String>::Err(std::move(error));
             }
 
             textures[slot] = texture;
         }
 
-        const ShaderAsset* vertex = assets->LoadAsset<ShaderAsset>(*VERTEX_PATH);
+        const ShaderContent* vertex = contentSubsystem->LoadContent<ShaderContent>(*VERTEX_PATH);
         if (vertex == nullptr)
         {
             const std::string MSG = fmt::format("정점 셰이더를 로드하지 못했습니다: {}", VERTEX_PATH->generic_string());
-            return Result<UniquePtr<MaterialAsset>, String>::Err(String(MSG));
+            return Result<UniquePtr<MaterialContent>, String>::Err(String(MSG));
         }
 
-        const ShaderAsset* fragment = assets->LoadAsset<ShaderAsset>(*FRAGMENT_PATH);
+        const ShaderContent* fragment = contentSubsystem->LoadContent<ShaderContent>(*FRAGMENT_PATH);
         if (fragment == nullptr)
         {
             const std::string MSG =
                     fmt::format("프래그먼트 셰이더를 로드하지 못했습니다: {}", FRAGMENT_PATH->generic_string());
-            return Result<UniquePtr<MaterialAsset>, String>::Err(String(MSG));
+            return Result<UniquePtr<MaterialContent>, String>::Err(String(MSG));
         }
 
         const GPUGraphicsPipelineDesc DESCRIPTION =
@@ -186,11 +187,11 @@ namespace Garage
         {
             const std::string MSG =
                     fmt::format("그래픽스 파이프라인 상태 생성에 실패했습니다: {}", pipelineResult.GetError());
-            return Result<UniquePtr<MaterialAsset>, String>::Err(String(MSG));
+            return Result<UniquePtr<MaterialContent>, String>::Err(String(MSG));
         }
 
-        UniquePtr<MaterialAsset> material =
-                MakeUnique<MaterialAsset>(path, device, vertex, fragment, pipelineResult.GetValue());
+        UniquePtr<MaterialContent> material =
+                MakeUnique<MaterialContent>(path, device, vertex, fragment, pipelineResult.GetValue());
         material->SetCullMode(DESCRIPTION.cullMode);
         material->SetFillMode(DESCRIPTION.fillMode);
         material->SetBaseColor(PARSED_BASE_COLOR);
@@ -202,6 +203,6 @@ namespace Garage
         material->SetTargetFormat(DESCRIPTION.colorTargetFormat);
         material->SetPrimitive(DESCRIPTION.primitiveTopology);
 
-        return Result<UniquePtr<MaterialAsset>, String>::Ok(std::move(material));
+        return Result<UniquePtr<MaterialContent>, String>::Ok(std::move(material));
     }
 } // namespace Garage

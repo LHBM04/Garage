@@ -1,7 +1,7 @@
-#include "garage/resources/shader_asset_importer.hpp"
+#include "garage/content/shader_content_importer.hpp"
 
-#include <charconv>
 #include <cctype>
+#include <charconv>
 #include <filesystem>
 #include <fstream>
 #include <ios>
@@ -9,6 +9,8 @@
 #include <utility>
 
 #include <rapidjson/document.h>
+
+#include "garage/content/shader_content.hpp"
 
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
@@ -18,8 +20,6 @@
 #include "garage/graphics/gpu_shader.hpp"
 #include "garage/graphics/gpu_types.hpp"
 #include "garage/graphics/mesh_vertex.hpp"
-
-#include "garage/resources/shader_asset.hpp"
 
 #include "garage/utilities/json_utility.hpp"
 
@@ -436,12 +436,12 @@ namespace Garage
         }
     } // namespace
 
-    Result<UniquePtr<ShaderAsset>, String> ShaderAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<ShaderContent>, String> ShaderContentImporter::Import(const std::filesystem::path& path) const
     {
         const EGPUShaderFormat FORMAT = DetectShaderFormat(path);
         if (FORMAT == EGPUShaderFormat::INVALID)
         {
-            return Result<UniquePtr<ShaderAsset>, String>::Err(
+            return Result<UniquePtr<ShaderContent>, String>::Err(
                     String("셰이더 로더에는 .spv, .dxil, .msl, .dxbc 또는 .metallib 파일이 필요합니다."));
         }
 
@@ -450,7 +450,7 @@ namespace Garage
         {
             String error("셰이더 파일을 열 수 없습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(error));
+            return Result<UniquePtr<ShaderContent>, String>::Err(std::move(error));
         }
 
         const std::streamsize FILE_SIZE = file.tellg();
@@ -458,7 +458,7 @@ namespace Garage
         {
             String error("셰이더 파일이 비어 있습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(error));
+            return Result<UniquePtr<ShaderContent>, String>::Err(std::move(error));
         }
 
         file.seekg(0, std::ios::beg);
@@ -467,7 +467,7 @@ namespace Garage
         {
             String error("셰이더 바이트코드 읽기에 실패했습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(error));
+            return Result<UniquePtr<ShaderContent>, String>::Err(std::move(error));
         }
 
         ShaderMetadata metadata{};
@@ -482,7 +482,7 @@ namespace Garage
         {
             String error("셰이더 스테이지(Vertex/Fragment)를 판별할 수 없습니다: ");
             error.append(path.generic_string());
-            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(error));
+            return Result<UniquePtr<ShaderContent>, String>::Err(std::move(error));
         }
 
         if (*metadata.stage == EGPUShaderStage::VERTEX && !metadata.hasCustomVertexDecl)
@@ -505,28 +505,28 @@ namespace Garage
         auto shaderResult = device.CreateShader(CREATE_INFO);
         if (!shaderResult)
         {
-            return Result<UniquePtr<ShaderAsset>, String>::Err(std::move(shaderResult).GetError());
+            return Result<UniquePtr<ShaderContent>, String>::Err(std::move(shaderResult).GetError());
         }
 
-        UniquePtr<ShaderAsset> asset = MakeUnique<ShaderAsset>(path, device, shaderResult.GetValue());
-        asset->SetVertexAttributes(std::move(metadata.vertexAttributes));
-        asset->SetVertexStride(metadata.vertexStride);
-        asset->SetCullMode(metadata.cullMode);
-        asset->SetFillMode(metadata.fillMode);
-        asset->SetFrontFace(metadata.frontFace);
-        asset->SetDepthTestEnabled(metadata.enableDepthTest);
-        asset->SetDepthWriteEnabled(metadata.enableDepthWrite);
-        asset->SetDepthCompareOp(metadata.depthCompareOp);
+        UniquePtr<ShaderContent> content = MakeUnique<ShaderContent>(path, device, shaderResult.GetValue());
+        content->SetVertexAttributes(std::move(metadata.vertexAttributes));
+        content->SetVertexStride(metadata.vertexStride);
+        content->SetCullMode(metadata.cullMode);
+        content->SetFillMode(metadata.fillMode);
+        content->SetFrontFace(metadata.frontFace);
+        content->SetDepthTestEnabled(metadata.enableDepthTest);
+        content->SetDepthWriteEnabled(metadata.enableDepthWrite);
+        content->SetDepthCompareOp(metadata.depthCompareOp);
         if (metadata.alphaBlend)
         {
-            asset->SetAlphaBlend();
+            content->SetAlphaBlend();
         }
         else
         {
-            asset->ResetOpaqueBlend();
+            content->ResetOpaqueBlend();
         }
-        asset->SetPrimitive(metadata.primitive);
+        content->SetPrimitive(metadata.primitive);
 
-        return Result<UniquePtr<ShaderAsset>, String>::Ok(std::move(asset));
+        return Result<UniquePtr<ShaderContent>, String>::Ok(std::move(content));
     }
 } // namespace Garage

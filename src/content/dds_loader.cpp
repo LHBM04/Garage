@@ -16,7 +16,7 @@
 #include "garage/graphics/gpu_texture2d.hpp"
 #include "garage/graphics/gpu_types.hpp"
 
-namespace Garage::ResourcesDetail
+namespace Garage::ContentDetail
 {
     namespace
     {
@@ -578,4 +578,4 @@ namespace Garage::ResourcesDetail
 
         return device.CreateTexture2D(CREATE_INFO, subresources);
     }
-} // namespace Garage::ResourcesDetail
+} // namespace Garage::ContentDetail

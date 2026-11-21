@@ -1,4 +1,4 @@
-#include "garage/resources/model_asset_importer.hpp"
+#include "garage/content/model_content_importer.hpp"
 
 #include <filesystem>
 #include <string>
@@ -7,43 +7,44 @@
 #include <fmt/format.h>
 #include <rapidjson/document.h>
 
+#include "garage/content/content_path.hpp"
+#include "garage/content/content_subsystem.hpp"
+#include "garage/content/material_content.hpp"
+#include "garage/content/mesh_content.hpp"
+#include "garage/content/model_content.hpp"
+
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
 #include "garage/core/memory.hpp"
-
-#include "garage/resources/asset_subsystem.hpp"
-#include "garage/resources/material_asset.hpp"
-#include "garage/resources/mesh_asset.hpp"
-#include "garage/resources/model_asset.hpp"
-#include "garage/resources/resource_path.hpp"
 
 #include "garage/utilities/json_utility.hpp"
 
 namespace Garage
 {
-    Result<UniquePtr<ModelAsset>, String> ModelAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<ModelContent>, String> ModelContentImporter::Import(const std::filesystem::path& path) const
     {
-        AssetSubsystem* assets = GetOwner();
-        if (assets == nullptr)
+        ContentSubsystem* contentSubsystem = GetOwner();
+        if (contentSubsystem == nullptr)
         {
-            return Result<UniquePtr<ModelAsset>, String>::Err(String("모델 로더의 에셋 서브시스템이 nullptr입니다."));
+            return Result<UniquePtr<ModelContent>, String>::Err(
+                    String("모델 로더의 콘텐츠 서브시스템이 nullptr입니다."));
         }
 
         if (!JsonUtility::HasJsonExtension(path))
         {
-            return Result<UniquePtr<ModelAsset>, String>::Err(String("모델 로더에는 .json 파일이 필요합니다."));
+            return Result<UniquePtr<ModelContent>, String>::Err(String("모델 로더에는 .json 파일이 필요합니다."));
         }
 
         auto documentResult = JsonUtility::LoadDocument(path);
         if (!documentResult)
         {
-            return Result<UniquePtr<ModelAsset>, String>::Err(std::move(documentResult).GetError());
+            return Result<UniquePtr<ModelContent>, String>::Err(std::move(documentResult).GetError());
         }
 
-        const auto ROOT_DIR = FindResourceRoot(path, "Models");
+        const auto ROOT_DIR = FindContentRoot(path, "Models");
         if (!ROOT_DIR)
         {
-            return Result<UniquePtr<ModelAsset>, String>::Err(ROOT_DIR.GetError());
+            return Result<UniquePtr<ModelContent>, String>::Err(ROOT_DIR.GetError());
         }
 
         struct PendingNode final
@@ -64,7 +65,7 @@ namespace Garage
 
             if (nodes.size() >= JsonUtility::MAX_ELEMENTS || CURRENT.depth > JsonUtility::MAX_DEPTH)
             {
-                return Result<UniquePtr<ModelAsset>, String>::Err(
+                return Result<UniquePtr<ModelContent>, String>::Err(
                         String("모델 노드 수 또는 계층 깊이가 제한을 초과했습니다."));
             }
 
@@ -72,7 +73,7 @@ namespace Garage
             {
                 String error("모델 노드 데이터가 유효하지 않습니다: ");
                 error.append(path.generic_string());
-                return Result<UniquePtr<ModelAsset>, String>::Err(std::move(error));
+                return Result<UniquePtr<ModelContent>, String>::Err(std::move(error));
             }
 
             const rapidjson::Value& NODE_VALUE = *CURRENT.jsonNode;
@@ -97,7 +98,7 @@ namespace Garage
             {
                 String error("모델 노드 데이터가 유효하지 않습니다: ");
                 error.append(path.generic_string());
-                return Result<UniquePtr<ModelAsset>, String>::Err(std::move(error));
+                return Result<UniquePtr<ModelContent>, String>::Err(std::move(error));
             }
 
             node.localPosition.Set(position[0], position[1], position[2]);
@@ -108,27 +109,27 @@ namespace Garage
             {
                 String error("모델 노드의 메시와 머티리얼 참조는 함께 지정해야 합니다: ");
                 error.append(node.name);
-                return Result<UniquePtr<ModelAsset>, String>::Err(std::move(error));
+                return Result<UniquePtr<ModelContent>, String>::Err(std::move(error));
             }
 
             if (!meshReference.empty() && !materialReference.empty())
             {
-                const auto MESH_PATH     = ResolveResourcePath(*ROOT_DIR, meshReference);
-                const auto MATERIAL_PATH = ResolveResourcePath(*ROOT_DIR, materialReference);
+                const auto MESH_PATH     = ResolveContentPath(*ROOT_DIR, meshReference);
+                const auto MATERIAL_PATH = ResolveContentPath(*ROOT_DIR, materialReference);
                 if (!MESH_PATH || !MATERIAL_PATH)
                 {
-                    return Result<UniquePtr<ModelAsset>, String>::Err(
-                            String("모델 리소스 참조 경로가 유효하지 않습니다."));
+                    return Result<UniquePtr<ModelContent>, String>::Err(
+                            String("모델 콘텐츠 참조 경로가 유효하지 않습니다."));
                 }
 
-                node.mesh     = assets->LoadAsset<MeshAsset>(*MESH_PATH);
-                node.material = assets->LoadAsset<MaterialAsset>(*MATERIAL_PATH);
+                node.mesh     = contentSubsystem->LoadContent<MeshContent>(*MESH_PATH);
+                node.material = contentSubsystem->LoadContent<MaterialContent>(*MATERIAL_PATH);
                 if (node.mesh == nullptr || node.material == nullptr)
                 {
-                    const std::string MSG = fmt::format("모델 리소스를 로드하지 못했습니다: {}, {}",
+                    const std::string MSG = fmt::format("모델 콘텐츠를 로드하지 못했습니다: {}, {}",
                                                         MESH_PATH->generic_string(),
                                                         MATERIAL_PATH->generic_string());
-                    return Result<UniquePtr<ModelAsset>, String>::Err(String(MSG));
+                    return Result<UniquePtr<ModelContent>, String>::Err(String(MSG));
                 }
             }
 
@@ -147,6 +148,6 @@ namespace Garage
             }
         }
 
-        return Result<UniquePtr<ModelAsset>, String>::Ok(MakeUnique<ModelAsset>(path, std::move(nodes)));
+        return Result<UniquePtr<ModelContent>, String>::Ok(MakeUnique<ModelContent>(path, std::move(nodes)));
     }
 } // namespace Garage

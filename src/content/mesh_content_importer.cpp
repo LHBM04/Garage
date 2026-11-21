@@ -1,10 +1,12 @@
-#include "garage/resources/mesh_asset_importer.hpp"
+#include "garage/content/mesh_content_importer.hpp"
 
 #include <filesystem>
 #include <span>
 #include <utility>
 
 #include <rapidjson/document.h>
+
+#include "garage/content/mesh_content.hpp"
 
 #include "garage/core/common.hpp"
 #include "garage/core/common/containers.hpp"
@@ -18,8 +20,6 @@
 #include "garage/math/color_rgba.hpp"
 #include "garage/math/vector2d.hpp"
 #include "garage/math/vector3d.hpp"
-
-#include "garage/resources/mesh_asset.hpp"
 
 #include "garage/utilities/json_utility.hpp"
 
@@ -48,17 +48,17 @@ namespace Garage
         }
     } // namespace
 
-    Result<UniquePtr<MeshAsset>, String> MeshAssetImporter::Import(const std::filesystem::path& path) const
+    Result<UniquePtr<MeshContent>, String> MeshContentImporter::Import(const std::filesystem::path& path) const
     {
         if (!JsonUtility::HasJsonExtension(path))
         {
-            return Result<UniquePtr<MeshAsset>, String>::Err(String("메시 로더에는 .json 파일이 필요합니다."));
+            return Result<UniquePtr<MeshContent>, String>::Err(String("메시 로더에는 .json 파일이 필요합니다."));
         }
 
         auto documentResult = JsonUtility::LoadDocument(path);
         if (!documentResult)
         {
-            return Result<UniquePtr<MeshAsset>, String>::Err(std::move(documentResult).GetError());
+            return Result<UniquePtr<MeshContent>, String>::Err(std::move(documentResult).GetError());
         }
 
         const rapidjson::Value& ROOT           = *documentResult;
@@ -74,7 +74,7 @@ namespace Garage
             !JsonUtility::ReadOptionalArray(ROOT, "colors", colorsArray) ||
             !JsonUtility::ReadArray(ROOT, "indices", indicesArray))
         {
-            return Result<UniquePtr<MeshAsset>, String>::Err(String("메시 속성 데이터가 유효하지 않습니다."));
+            return Result<UniquePtr<MeshContent>, String>::Err(String("메시 속성 데이터가 유효하지 않습니다."));
         }
 
         auto makeVector3 = [](const Array<Float32, 3>& components) noexcept
@@ -101,7 +101,7 @@ namespace Garage
             (uvsArray != nullptr && !ReadComponentVectorArray<2>(*uvsArray, parsedUVs, makeVector2)) ||
             (colorsArray != nullptr && !ReadComponentVectorArray<4>(*colorsArray, parsedColors, makeColor)))
         {
-            return Result<UniquePtr<MeshAsset>, String>::Err(String("메시 속성 데이터가 유효하지 않습니다."));
+            return Result<UniquePtr<MeshContent>, String>::Err(String("메시 속성 데이터가 유효하지 않습니다."));
         }
 
         parsedIndices.reserve(indicesArray->Size());
@@ -110,7 +110,7 @@ namespace Garage
             UInt32 index = 0;
             if (!JsonUtility::TryReadUInt32(indexValue, index) || index >= parsedPositions.size())
             {
-                return Result<UniquePtr<MeshAsset>, String>::Err(String("메시 인덱스가 정점 범위를 벗어났습니다."));
+                return Result<UniquePtr<MeshContent>, String>::Err(String("메시 인덱스가 정점 범위를 벗어났습니다."));
             }
 
             parsedIndices.push_back(index);
@@ -121,7 +121,7 @@ namespace Garage
             (!parsedColors.empty() && parsedColors.size() != parsedPositions.size()) || parsedIndices.empty() ||
             parsedIndices.size() % 3 != 0)
         {
-            return Result<UniquePtr<MeshAsset>, String>::Err(
+            return Result<UniquePtr<MeshContent>, String>::Err(
                     String("메시 정점 속성 또는 인덱스 개수가 유효하지 않습니다."));
         }
 
@@ -163,10 +163,10 @@ namespace Garage
                                                EGPUPrimitiveTopology::TRIANGLE_LIST);
         if (!gpuMeshResult)
         {
-            return Result<UniquePtr<MeshAsset>, String>::Err(std::move(gpuMeshResult).GetError());
+            return Result<UniquePtr<MeshContent>, String>::Err(std::move(gpuMeshResult).GetError());
         }
 
-        UniquePtr<MeshAsset> mesh = MakeUnique<MeshAsset>(path, device, gpuMeshResult.GetValue());
+        UniquePtr<MeshContent> mesh = MakeUnique<MeshContent>(path, device, gpuMeshResult.GetValue());
         mesh->SetBoundsCenter(PARSED_BOUNDS_CENTER);
         mesh->SetBoundsExtents(PARSED_BOUNDS_EXTENTS);
         mesh->SetPositions(std::move(parsedPositions));
@@ -176,6 +176,6 @@ namespace Garage
         mesh->SetVertices(std::move(builtVertices));
         mesh->SetIndices(std::move(parsedIndices));
 
-        return Result<UniquePtr<MeshAsset>, String>::Ok(std::move(mesh));
+        return Result<UniquePtr<MeshContent>, String>::Ok(std::move(mesh));
     }
 } // namespace Garage
