@@ -1,4 +1,4 @@
-#include "garage/resources/shader_asset.hpp"
+#include "garage/content/shader_content.hpp"
 
 #include <filesystem>
 #include <utility>
@@ -10,14 +10,14 @@
 
 namespace Garage
 {
-    ShaderAsset::ShaderAsset(std::filesystem::path path, IGPUDevice& device, IGPUShader* shader) noexcept
-        : AssetBase(std::move(path))
+    ShaderContent::ShaderContent(std::filesystem::path path, IGPUDevice& device, IGPUShader* shader) noexcept
+        : ContentBase(std::move(path))
         , device(&device)
         , shader(shader)
     {
     }
 
-    ShaderAsset::~ShaderAsset() noexcept
+    ShaderContent::~ShaderContent() noexcept
     {
         if (device != nullptr && shader != nullptr)
         {
@@ -26,9 +26,10 @@ namespace Garage
         }
     }
 
-    GPUGraphicsPipelineDesc ShaderAsset::CreatePipelineDescription(const ShaderAsset& fragmentShader,
-                                                                   EGPUTextureFormat  colorTargetFormat,
-                                                                   EGPUTextureFormat  depthStencilFormat) const noexcept
+    GPUGraphicsPipelineDesc
+            ShaderContent::CreatePipelineDescription(const ShaderContent& fragmentShader,
+                                                     EGPUTextureFormat    colorTargetFormat,
+                                                     EGPUTextureFormat    depthStencilFormat) const noexcept
     {
         return GPUGraphicsPipelineDesc{
                 .vertexShader          = shader,

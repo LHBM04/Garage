@@ -1,5 +1,5 @@
-#ifndef GARAGE_RESOURCES_SHADER_ASSET_HPP
-#define GARAGE_RESOURCES_SHADER_ASSET_HPP
+#ifndef GARAGE_CONTENT_SHADER_CONTENT_HPP
+#define GARAGE_CONTENT_SHADER_CONTENT_HPP
 
 #include <filesystem>
 #include <utility>
@@ -11,18 +11,18 @@
 #include "../graphics/gpu_target.hpp"
 #include "../graphics/gpu_types.hpp"
 
-#include "asset.hpp"
+#include "content.hpp"
 
 namespace Garage
 {
     class IGPUDevice;
     class IGPUShader;
 
-    class GARAGE_API ShaderAsset final : public AssetBase
+    class GARAGE_API ShaderContent final : public ContentBase
     {
     public:
-        explicit ShaderAsset(std::filesystem::path path, IGPUDevice& device, IGPUShader* shader) noexcept;
-        ~ShaderAsset() noexcept override;
+        explicit ShaderContent(std::filesystem::path path, IGPUDevice& device, IGPUShader* shader) noexcept;
+        ~ShaderContent() noexcept override;
 
         [[nodiscard]] const IGPUShader* GetShader() const noexcept;
 
@@ -60,9 +60,9 @@ namespace Garage
         void                                SetPrimitive(EGPUPrimitiveTopology value) noexcept;
 
         [[nodiscard]] GPUGraphicsPipelineDesc CreatePipelineDescription(
-                const ShaderAsset& fragmentShader,
-                EGPUTextureFormat  colorTargetFormat  = EGPUTextureFormat::R8G8B8A8_UNORM,
-                EGPUTextureFormat  depthStencilFormat = GPUTarget::DEPTH_FORMAT) const noexcept;
+                const ShaderContent& fragmentShader,
+                EGPUTextureFormat    colorTargetFormat  = EGPUTextureFormat::R8G8B8A8_UNORM,
+                EGPUTextureFormat    depthStencilFormat = GPUTarget::DEPTH_FORMAT) const noexcept;
 
     private:
         IGPUDevice*                device = nullptr;
@@ -85,102 +85,102 @@ namespace Garage
         EGPUBlendOp                alphaBlendOp        = EGPUBlendOp::ADD;
     };
 
-    inline const IGPUShader* ShaderAsset::GetShader() const noexcept
+    inline const IGPUShader* ShaderContent::GetShader() const noexcept
     {
         return shader;
     }
 
-    inline Span<const GPUVertexAttribute> ShaderAsset::GetVertexAttributes() const noexcept
+    inline Span<const GPUVertexAttribute> ShaderContent::GetVertexAttributes() const noexcept
     {
         return vertexAttributes;
     }
 
-    inline void ShaderAsset::SetVertexAttributes(Vector<GPUVertexAttribute>&& value) noexcept
+    inline void ShaderContent::SetVertexAttributes(Vector<GPUVertexAttribute>&& value) noexcept
     {
         vertexAttributes = std::move(value);
     }
 
-    inline UInt32 ShaderAsset::GetVertexStride() const noexcept
+    inline UInt32 ShaderContent::GetVertexStride() const noexcept
     {
         return vertexStride;
     }
 
-    inline void ShaderAsset::SetVertexStride(UInt32 value) noexcept
+    inline void ShaderContent::SetVertexStride(UInt32 value) noexcept
     {
         vertexStride = value;
     }
 
-    inline EGPUFillMode ShaderAsset::GetFillMode() const noexcept
+    inline EGPUFillMode ShaderContent::GetFillMode() const noexcept
     {
         return fillMode;
     }
 
-    inline void ShaderAsset::SetFillMode(EGPUFillMode value) noexcept
+    inline void ShaderContent::SetFillMode(EGPUFillMode value) noexcept
     {
         fillMode = value;
     }
 
-    inline EGPUCullMode ShaderAsset::GetCullMode() const noexcept
+    inline EGPUCullMode ShaderContent::GetCullMode() const noexcept
     {
         return cullMode;
     }
 
-    inline void ShaderAsset::SetCullMode(EGPUCullMode value) noexcept
+    inline void ShaderContent::SetCullMode(EGPUCullMode value) noexcept
     {
         cullMode = value;
     }
 
-    inline EGPUFrontFace ShaderAsset::GetFrontFace() const noexcept
+    inline EGPUFrontFace ShaderContent::GetFrontFace() const noexcept
     {
         return frontFace;
     }
 
-    inline void ShaderAsset::SetFrontFace(EGPUFrontFace value) noexcept
+    inline void ShaderContent::SetFrontFace(EGPUFrontFace value) noexcept
     {
         frontFace = value;
     }
 
-    inline bool ShaderAsset::IsDepthTestEnabled() const noexcept
+    inline bool ShaderContent::IsDepthTestEnabled() const noexcept
     {
         return enableDepthTest;
     }
 
-    inline void ShaderAsset::SetDepthTestEnabled(bool value) noexcept
+    inline void ShaderContent::SetDepthTestEnabled(bool value) noexcept
     {
         enableDepthTest = value;
     }
 
-    inline bool ShaderAsset::IsDepthWriteEnabled() const noexcept
+    inline bool ShaderContent::IsDepthWriteEnabled() const noexcept
     {
         return enableDepthWrite;
     }
 
-    inline void ShaderAsset::SetDepthWriteEnabled(bool value) noexcept
+    inline void ShaderContent::SetDepthWriteEnabled(bool value) noexcept
     {
         enableDepthWrite = value;
     }
 
-    inline EGPUCompareOp ShaderAsset::GetDepthCompareOp() const noexcept
+    inline EGPUCompareOp ShaderContent::GetDepthCompareOp() const noexcept
     {
         return depthCompareOp;
     }
 
-    inline void ShaderAsset::SetDepthCompareOp(EGPUCompareOp value) noexcept
+    inline void ShaderContent::SetDepthCompareOp(EGPUCompareOp value) noexcept
     {
         depthCompareOp = value;
     }
 
-    inline bool ShaderAsset::IsBlendEnabled() const noexcept
+    inline bool ShaderContent::IsBlendEnabled() const noexcept
     {
         return enableBlend;
     }
 
-    inline void ShaderAsset::SetBlendEnabled(bool value) noexcept
+    inline void ShaderContent::SetBlendEnabled(bool value) noexcept
     {
         enableBlend = value;
     }
 
-    inline void ShaderAsset::SetAlphaBlend() noexcept
+    inline void ShaderContent::SetAlphaBlend() noexcept
     {
         enableBlend         = true;
         srcColorBlendFactor = EGPUBlendFactor::SRC_ALPHA;
@@ -191,7 +191,7 @@ namespace Garage
         alphaBlendOp        = EGPUBlendOp::ADD;
     }
 
-    inline void ShaderAsset::ResetOpaqueBlend() noexcept
+    inline void ShaderContent::ResetOpaqueBlend() noexcept
     {
         enableBlend         = false;
         srcColorBlendFactor = EGPUBlendFactor::ONE;
@@ -202,15 +202,15 @@ namespace Garage
         alphaBlendOp        = EGPUBlendOp::ADD;
     }
 
-    inline EGPUPrimitiveTopology ShaderAsset::GetPrimitive() const noexcept
+    inline EGPUPrimitiveTopology ShaderContent::GetPrimitive() const noexcept
     {
         return primitive;
     }
 
-    inline void ShaderAsset::SetPrimitive(EGPUPrimitiveTopology value) noexcept
+    inline void ShaderContent::SetPrimitive(EGPUPrimitiveTopology value) noexcept
     {
         primitive = value;
     }
 } // namespace Garage
 
-#endif // GARAGE_RESOURCES_SHADER_ASSET_HPP
+#endif // GARAGE_CONTENT_SHADER_CONTENT_HPP

@@ -1,5 +1,5 @@
-#ifndef GARAGE_RESOURCES_ANIMATION_ASSET_HPP
-#define GARAGE_RESOURCES_ANIMATION_ASSET_HPP
+#ifndef GARAGE_CONTENT_ANIMATION_CONTENT_HPP
+#define GARAGE_CONTENT_ANIMATION_CONTENT_HPP
 
 #include <filesystem>
 #include <utility>
@@ -7,7 +7,7 @@
 #include "../core/common.hpp"
 #include "../core/common/containers.hpp"
 
-#include "asset.hpp"
+#include "content.hpp"
 
 namespace Garage
 {
@@ -25,14 +25,14 @@ namespace Garage
         Vector<AnimationFrame> frames;
     };
 
-    class GARAGE_API AnimationAsset final : public AssetBase
+    class GARAGE_API AnimationContent final : public ContentBase
     {
     public:
-        explicit AnimationAsset(std::filesystem::path        path,
-                                String                       name,
-                                Float32                      length,
-                                Float32                      frameRate,
-                                Vector<AnimationTransform>&& transforms) noexcept;
+        explicit AnimationContent(std::filesystem::path        path,
+                                  String                       name,
+                                  Float32                      length,
+                                  Float32                      frameRate,
+                                  Vector<AnimationTransform>&& transforms) noexcept;
 
         [[nodiscard]] const String&                  GetName() const noexcept;
         [[nodiscard]] Float32                        GetLength() const noexcept;
@@ -46,12 +46,12 @@ namespace Garage
         Vector<AnimationTransform> transforms;
     };
 
-    inline AnimationAsset::AnimationAsset(std::filesystem::path        path,
-                                          String                       name,
-                                          Float32                      length,
-                                          Float32                      frameRate,
-                                          Vector<AnimationTransform>&& transforms) noexcept
-        : AssetBase(std::move(path))
+    inline AnimationContent::AnimationContent(std::filesystem::path        path,
+                                              String                       name,
+                                              Float32                      length,
+                                              Float32                      frameRate,
+                                              Vector<AnimationTransform>&& transforms) noexcept
+        : ContentBase(std::move(path))
         , name(std::move(name))
         , length(length)
         , frameRate(frameRate)
@@ -59,25 +59,25 @@ namespace Garage
     {
     }
 
-    inline const String& AnimationAsset::GetName() const noexcept
+    inline const String& AnimationContent::GetName() const noexcept
     {
         return name;
     }
 
-    inline Float32 AnimationAsset::GetLength() const noexcept
+    inline Float32 AnimationContent::GetLength() const noexcept
     {
         return length;
     }
 
-    inline Float32 AnimationAsset::GetFrameRate() const noexcept
+    inline Float32 AnimationContent::GetFrameRate() const noexcept
     {
         return frameRate;
     }
 
-    inline Span<const AnimationTransform> AnimationAsset::GetTransforms() const noexcept
+    inline Span<const AnimationTransform> AnimationContent::GetTransforms() const noexcept
     {
         return transforms;
     }
 } // namespace Garage
 
-#endif // GARAGE_RESOURCES_ANIMATION_ASSET_HPP
+#endif // GARAGE_CONTENT_ANIMATION_CONTENT_HPP

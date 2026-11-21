@@ -1,5 +1,5 @@
-#ifndef GARAGE_RESOURCES_MODEL_ASSET_HPP
-#define GARAGE_RESOURCES_MODEL_ASSET_HPP
+#ifndef GARAGE_CONTENT_MODEL_CONTENT_HPP
+#define GARAGE_CONTENT_MODEL_CONTENT_HPP
 
 #include <filesystem>
 #include <utility>
@@ -10,12 +10,12 @@
 #include "../math/quaternion.hpp"
 #include "../math/vector3d.hpp"
 
-#include "asset.hpp"
+#include "content.hpp"
 
 namespace Garage
 {
-    class MaterialAsset;
-    class MeshAsset;
+    class MaterialContent;
+    class MeshContent;
 
     struct GARAGE_API Submodel final
     {
@@ -26,14 +26,14 @@ namespace Garage
         Quaternion<Float32> localRotation{0.0f, 0.0f, 0.0f, 1.0f};
         Vector3D<Float32>   localScale{1.0f, 1.0f, 1.0f};
 
-        const MeshAsset*     mesh     = nullptr;
-        const MaterialAsset* material = nullptr;
+        const MeshContent*     mesh     = nullptr;
+        const MaterialContent* material = nullptr;
     };
 
-    class GARAGE_API ModelAsset final : public AssetBase
+    class GARAGE_API ModelContent final : public ContentBase
     {
     public:
-        explicit ModelAsset(std::filesystem::path path, Vector<Submodel>&& submodels) noexcept;
+        explicit ModelContent(std::filesystem::path path, Vector<Submodel>&& submodels) noexcept;
 
         [[nodiscard]] Span<const Submodel> GetSubmodels() const noexcept;
 
@@ -41,16 +41,16 @@ namespace Garage
         Vector<Submodel> submodels;
     };
 
-    inline ModelAsset::ModelAsset(std::filesystem::path path, Vector<Submodel>&& submodels) noexcept
-        : AssetBase(std::move(path))
+    inline ModelContent::ModelContent(std::filesystem::path path, Vector<Submodel>&& submodels) noexcept
+        : ContentBase(std::move(path))
         , submodels(std::move(submodels))
     {
     }
 
-    inline Span<const Submodel> ModelAsset::GetSubmodels() const noexcept
+    inline Span<const Submodel> ModelContent::GetSubmodels() const noexcept
     {
         return submodels;
     }
 } // namespace Garage
 
-#endif // GARAGE_RESOURCES_MODEL_ASSET_HPP
+#endif // GARAGE_CONTENT_MODEL_CONTENT_HPP

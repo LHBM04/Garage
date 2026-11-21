@@ -1,4 +1,4 @@
-#include "garage/resources/terrain_asset.hpp"
+#include "garage/content/terrain_content.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -16,17 +16,17 @@
 
 namespace Garage
 {
-    TerrainAsset::TerrainAsset(std::filesystem::path    path,
-                               UInt32                   width,
-                               UInt32                   height,
-                               bool                     is16Bit,
-                               Float32                  cellSize,
-                               Float32                  heightScale,
-                               const Vector2D<Float32>& uvTiling,
-                               Vector<Float32>&&        normalizedHeights,
-                               IGPUDevice&              device,
-                               IGPUMesh*                gpuMesh) noexcept
-        : AssetBase(std::move(path))
+    TerrainContent::TerrainContent(std::filesystem::path    path,
+                                   UInt32                   width,
+                                   UInt32                   height,
+                                   bool                     is16Bit,
+                                   Float32                  cellSize,
+                                   Float32                  heightScale,
+                                   const Vector2D<Float32>& uvTiling,
+                                   Vector<Float32>&&        normalizedHeights,
+                                   IGPUDevice&              device,
+                                   IGPUMesh*                gpuMesh) noexcept
+        : ContentBase(std::move(path))
         , device(&device)
         , width(width)
         , height(height)
@@ -39,7 +39,7 @@ namespace Garage
     {
     }
 
-    TerrainAsset::~TerrainAsset() noexcept
+    TerrainContent::~TerrainContent() noexcept
     {
         if (device != nullptr && gpuMesh != nullptr)
         {
@@ -48,7 +48,7 @@ namespace Garage
         }
     }
 
-    Float32 TerrainAsset::GetNormalizedHeightAt(UInt32 x, UInt32 z) const noexcept
+    Float32 TerrainContent::GetNormalizedHeightAt(UInt32 x, UInt32 z) const noexcept
     {
         if (width == 0 || height == 0 || normalizedHeights.empty())
         {
@@ -66,7 +66,7 @@ namespace Garage
         return normalizedHeights[INDEX];
     }
 
-    Float32 TerrainAsset::SampleNormalizedHeight(Float32 gridX, Float32 gridZ) const noexcept
+    Float32 TerrainContent::SampleNormalizedHeight(Float32 gridX, Float32 gridZ) const noexcept
     {
         if (width < 2 || height < 2 || normalizedHeights.empty())
         {
@@ -94,18 +94,18 @@ namespace Garage
         return H0 + (H1 - H0) * TZ;
     }
 
-    Vector3D<Float32> TerrainAsset::CalculateGridNormal(UInt32 x, UInt32 z) const noexcept
+    Vector3D<Float32> TerrainContent::CalculateGridNormal(UInt32 x, UInt32 z) const noexcept
     {
         return CalculateGridNormal(normalizedHeights, width, height, x, z, cellSize, heightScale);
     }
 
-    Vector3D<Float32> TerrainAsset::CalculateGridNormal(Span<const Float32> normalizedHeights,
-                                                        UInt32              width,
-                                                        UInt32              height,
-                                                        UInt32              x,
-                                                        UInt32              z,
-                                                        Float32             cellSize,
-                                                        Float32             heightScale) noexcept
+    Vector3D<Float32> TerrainContent::CalculateGridNormal(Span<const Float32> normalizedHeights,
+                                                          UInt32              width,
+                                                          UInt32              height,
+                                                          UInt32              x,
+                                                          UInt32              z,
+                                                          Float32             cellSize,
+                                                          Float32             heightScale) noexcept
     {
         if (width < 2 || height < 2 || cellSize <= 0.0f ||
             normalizedHeights.size() < static_cast<USize>(width) * height)

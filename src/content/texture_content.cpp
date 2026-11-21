@@ -1,4 +1,4 @@
-#include "garage/resources/texture_asset.hpp"
+#include "garage/content/texture_content.hpp"
 
 #include <filesystem>
 #include <utility>
@@ -8,14 +8,14 @@
 
 namespace Garage
 {
-    TextureAsset::TextureAsset(std::filesystem::path path, IGPUDevice& device, IGPUTexture2D* texture) noexcept
-        : AssetBase(std::move(path))
+    TextureContent::TextureContent(std::filesystem::path path, IGPUDevice& device, IGPUTexture2D* texture) noexcept
+        : ContentBase(std::move(path))
         , device(&device)
         , texture(texture)
     {
     }
 
-    TextureAsset::~TextureAsset() noexcept
+    TextureContent::~TextureContent() noexcept
     {
         if (device != nullptr && texture != nullptr)
         {

@@ -1,5 +1,5 @@
-#ifndef GARAGE_RESOURCES_BITMAP_FONT_ASSET_HPP
-#define GARAGE_RESOURCES_BITMAP_FONT_ASSET_HPP
+#ifndef GARAGE_CONTENT_BITMAP_FONT_CONTENT_HPP
+#define GARAGE_CONTENT_BITMAP_FONT_CONTENT_HPP
 
 #include <filesystem>
 #include <utility>
@@ -7,7 +7,7 @@
 #include "../core/common.hpp"
 #include "../core/common/containers.hpp"
 
-#include "asset.hpp"
+#include "content.hpp"
 
 namespace Garage
 {
@@ -37,10 +37,10 @@ namespace Garage
         Float32           advance  = 0.0f;
     };
 
-    class GARAGE_API BitmapFontAsset final : public AssetBase
+    class GARAGE_API BitmapFontContent final : public ContentBase
     {
     public:
-        explicit BitmapFontAsset(std::filesystem::path path) noexcept;
+        explicit BitmapFontContent(std::filesystem::path path) noexcept;
 
         [[nodiscard]] const String& GetName() const noexcept;
         void                        SetName(String&& value) noexcept;
@@ -89,120 +89,120 @@ namespace Garage
         Vector<FontCharacterData> characters;
     };
 
-    inline BitmapFontAsset::BitmapFontAsset(std::filesystem::path path) noexcept
-        : AssetBase(std::move(path))
+    inline BitmapFontContent::BitmapFontContent(std::filesystem::path path) noexcept
+        : ContentBase(std::move(path))
     {
     }
 
-    inline const String& BitmapFontAsset::GetName() const noexcept
+    inline const String& BitmapFontContent::GetName() const noexcept
     {
         return name;
     }
 
-    inline void BitmapFontAsset::SetName(String&& value) noexcept
+    inline void BitmapFontContent::SetName(String&& value) noexcept
     {
         name = std::move(value);
     }
 
-    inline const String& BitmapFontAsset::GetRenderMode() const noexcept
+    inline const String& BitmapFontContent::GetRenderMode() const noexcept
     {
         return renderMode;
     }
 
-    inline void BitmapFontAsset::SetRenderMode(String&& value) noexcept
+    inline void BitmapFontContent::SetRenderMode(String&& value) noexcept
     {
         renderMode = std::move(value);
     }
 
-    inline bool BitmapFontAsset::IsDistanceField() const noexcept
+    inline bool BitmapFontContent::IsDistanceField() const noexcept
     {
         return isDistanceField;
     }
 
-    inline void BitmapFontAsset::SetDistanceField(bool value) noexcept
+    inline void BitmapFontContent::SetDistanceField(bool value) noexcept
     {
         isDistanceField = value;
     }
 
-    inline Float32 BitmapFontAsset::GetPointSize() const noexcept
+    inline Float32 BitmapFontContent::GetPointSize() const noexcept
     {
         return pointSize;
     }
 
-    inline void BitmapFontAsset::SetPointSize(Float32 value) noexcept
+    inline void BitmapFontContent::SetPointSize(Float32 value) noexcept
     {
         pointSize = value;
     }
 
-    inline Float32 BitmapFontAsset::GetFaceScale() const noexcept
+    inline Float32 BitmapFontContent::GetFaceScale() const noexcept
     {
         return faceScale;
     }
 
-    inline void BitmapFontAsset::SetFaceScale(Float32 value) noexcept
+    inline void BitmapFontContent::SetFaceScale(Float32 value) noexcept
     {
         faceScale = value;
     }
 
-    inline Float32 BitmapFontAsset::GetLineHeight() const noexcept
+    inline Float32 BitmapFontContent::GetLineHeight() const noexcept
     {
         return lineHeight;
     }
 
-    inline void BitmapFontAsset::SetLineHeight(Float32 value) noexcept
+    inline void BitmapFontContent::SetLineHeight(Float32 value) noexcept
     {
         lineHeight = value;
     }
 
-    inline Float32 BitmapFontAsset::GetAscentLine() const noexcept
+    inline Float32 BitmapFontContent::GetAscentLine() const noexcept
     {
         return ascentLine;
     }
 
-    inline void BitmapFontAsset::SetAscentLine(Float32 value) noexcept
+    inline void BitmapFontContent::SetAscentLine(Float32 value) noexcept
     {
         ascentLine = value;
     }
 
-    inline Float32 BitmapFontAsset::GetDescentLine() const noexcept
+    inline Float32 BitmapFontContent::GetDescentLine() const noexcept
     {
         return descentLine;
     }
 
-    inline void BitmapFontAsset::SetDescentLine(Float32 value) noexcept
+    inline void BitmapFontContent::SetDescentLine(Float32 value) noexcept
     {
         descentLine = value;
     }
 
-    inline Int32 BitmapFontAsset::GetAtlasPadding() const noexcept
+    inline Int32 BitmapFontContent::GetAtlasPadding() const noexcept
     {
         return atlasPadding;
     }
 
-    inline void BitmapFontAsset::SetAtlasPadding(Int32 value) noexcept
+    inline void BitmapFontContent::SetAtlasPadding(Int32 value) noexcept
     {
         atlasPadding = value;
     }
 
-    inline Span<const FontAtlasData> BitmapFontAsset::GetAtlasData() const noexcept
+    inline Span<const FontAtlasData> BitmapFontContent::GetAtlasData() const noexcept
     {
         return atlasData;
     }
 
-    inline void BitmapFontAsset::SetAtlasData(Vector<FontAtlasData>&& value) noexcept
+    inline void BitmapFontContent::SetAtlasData(Vector<FontAtlasData>&& value) noexcept
     {
         atlasData = std::move(value);
     }
 
-    inline Span<const FontCharacterData> BitmapFontAsset::GetCharacters() const noexcept
+    inline Span<const FontCharacterData> BitmapFontContent::GetCharacters() const noexcept
     {
         return characters;
     }
 
-    inline void BitmapFontAsset::SetCharacters(Vector<FontCharacterData>&& value) noexcept
+    inline void BitmapFontContent::SetCharacters(Vector<FontCharacterData>&& value) noexcept
     {
         characters = std::move(value);
     }
 } // namespace Garage
 
-#endif // GARAGE_RESOURCES_BITMAP_FONT_ASSET_HPP
+#endif // GARAGE_CONTENT_BITMAP_FONT_CONTENT_HPP

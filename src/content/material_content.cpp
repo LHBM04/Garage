@@ -1,4 +1,4 @@
-#include "garage/resources/material_asset.hpp"
+#include "garage/content/material_content.hpp"
 
 #include <filesystem>
 #include <utility>
@@ -10,12 +10,12 @@
 
 namespace Garage
 {
-    MaterialAsset::MaterialAsset(std::filesystem::path      path,
-                                 IGPUDevice&                device,
-                                 const ShaderAsset*         vertexShader,
-                                 const ShaderAsset*         fragmentShader,
-                                 IGPUGraphicsPipelineState* pipelineState) noexcept
-        : AssetBase(std::move(path))
+    MaterialContent::MaterialContent(std::filesystem::path      path,
+                                     IGPUDevice&                device,
+                                     const ShaderContent*       vertexShader,
+                                     const ShaderContent*       fragmentShader,
+                                     IGPUGraphicsPipelineState* pipelineState) noexcept
+        : ContentBase(std::move(path))
         , device(&device)
         , vertexShader(vertexShader)
         , fragmentShader(fragmentShader)
@@ -26,7 +26,7 @@ namespace Garage
         ASSERT(this->pipelineState != nullptr);
     }
 
-    MaterialAsset::~MaterialAsset() noexcept
+    MaterialContent::~MaterialContent() noexcept
     {
         if (device != nullptr && pipelineState != nullptr)
         {

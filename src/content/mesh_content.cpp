@@ -1,4 +1,4 @@
-#include "garage/resources/mesh_asset.hpp"
+#include "garage/content/mesh_content.hpp"
 
 #include <filesystem>
 #include <utility>
@@ -8,14 +8,14 @@
 
 namespace Garage
 {
-    MeshAsset::MeshAsset(std::filesystem::path path, IGPUDevice& device, IGPUMesh* gpuMesh) noexcept
-        : AssetBase(std::move(path))
+    MeshContent::MeshContent(std::filesystem::path path, IGPUDevice& device, IGPUMesh* gpuMesh) noexcept
+        : ContentBase(std::move(path))
         , device(&device)
         , gpuMesh(gpuMesh)
     {
     }
 
-    MeshAsset::~MeshAsset() noexcept
+    MeshContent::~MeshContent() noexcept
     {
         if (device != nullptr && gpuMesh != nullptr)
         {

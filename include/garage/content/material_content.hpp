@@ -1,5 +1,5 @@
-#ifndef GARAGE_RESOURCES_MATERIAL_ASSET_HPP
-#define GARAGE_RESOURCES_MATERIAL_ASSET_HPP
+#ifndef GARAGE_CONTENT_MATERIAL_CONTENT_HPP
+#define GARAGE_CONTENT_MATERIAL_CONTENT_HPP
 
 #include <filesystem>
 
@@ -10,14 +10,14 @@
 
 #include "../math/color_rgba.hpp"
 
-#include "asset.hpp"
+#include "content.hpp"
 
 namespace Garage
 {
     class IGPUDevice;
     class IGPUGraphicsPipelineState;
-    class ShaderAsset;
-    class TextureAsset;
+    class ShaderContent;
+    class TextureContent;
 
     enum class EMaterialTextureSlot : UInt32
     {
@@ -32,17 +32,17 @@ namespace Garage
         COUNT,
     };
 
-    using MaterialTextures = Array<const TextureAsset*, static_cast<USize>(EMaterialTextureSlot::COUNT)>;
+    using MaterialTextures = Array<const TextureContent*, static_cast<USize>(EMaterialTextureSlot::COUNT)>;
 
-    class GARAGE_API MaterialAsset final : public AssetBase
+    class GARAGE_API MaterialContent final : public ContentBase
     {
     public:
-        explicit MaterialAsset(std::filesystem::path      path,
-                               IGPUDevice&                device,
-                               const ShaderAsset*         vertexShader,
-                               const ShaderAsset*         fragmentShader,
-                               IGPUGraphicsPipelineState* pipelineState) noexcept;
-        ~MaterialAsset() noexcept override;
+        explicit MaterialContent(std::filesystem::path      path,
+                                 IGPUDevice&                device,
+                                 const ShaderContent*       vertexShader,
+                                 const ShaderContent*       fragmentShader,
+                                 IGPUGraphicsPipelineState* pipelineState) noexcept;
+        ~MaterialContent() noexcept override;
 
         [[nodiscard]] EGPUCullMode GetCullMode() const noexcept;
         void                       SetCullMode(EGPUCullMode value) noexcept;
@@ -74,8 +74,8 @@ namespace Garage
         [[nodiscard]] EGPUPrimitiveTopology GetPrimitive() const noexcept;
         void                                SetPrimitive(EGPUPrimitiveTopology value) noexcept;
 
-        [[nodiscard]] const ShaderAsset* GetVertexShader() const noexcept;
-        [[nodiscard]] const ShaderAsset* GetFragmentShader() const noexcept;
+        [[nodiscard]] const ShaderContent* GetVertexShader() const noexcept;
+        [[nodiscard]] const ShaderContent* GetFragmentShader() const noexcept;
 
         [[nodiscard]] const IGPUGraphicsPipelineState* GetGraphicsPipelineState() const noexcept;
 
@@ -95,137 +95,137 @@ namespace Garage
         Float32 roughness = 0.5f;
 
         MaterialTextures           textures{};
-        const ShaderAsset*         vertexShader   = nullptr;
-        const ShaderAsset*         fragmentShader = nullptr;
+        const ShaderContent*       vertexShader   = nullptr;
+        const ShaderContent*       fragmentShader = nullptr;
         IGPUGraphicsPipelineState* pipelineState  = nullptr;
         EGPUTextureFormat          targetFormat   = EGPUTextureFormat::UNKNOWN;
         EGPUPrimitiveTopology      primitive      = EGPUPrimitiveTopology::TRIANGLE_LIST;
     };
 
-    inline EGPUCullMode MaterialAsset::GetCullMode() const noexcept
+    inline EGPUCullMode MaterialContent::GetCullMode() const noexcept
     {
         return cullMode;
     }
 
-    inline void MaterialAsset::SetCullMode(EGPUCullMode value) noexcept
+    inline void MaterialContent::SetCullMode(EGPUCullMode value) noexcept
     {
         cullMode = value;
     }
 
-    inline EGPUFillMode MaterialAsset::GetFillMode() const noexcept
+    inline EGPUFillMode MaterialContent::GetFillMode() const noexcept
     {
         return fillMode;
     }
 
-    inline void MaterialAsset::SetFillMode(EGPUFillMode value) noexcept
+    inline void MaterialContent::SetFillMode(EGPUFillMode value) noexcept
     {
         fillMode = value;
     }
 
-    inline const ColorRGBA<Float32>& MaterialAsset::GetBaseColor() const noexcept
+    inline const ColorRGBA<Float32>& MaterialContent::GetBaseColor() const noexcept
     {
         return baseColor;
     }
 
-    inline void MaterialAsset::SetBaseColor(const ColorRGBA<Float32>& value) noexcept
+    inline void MaterialContent::SetBaseColor(const ColorRGBA<Float32>& value) noexcept
     {
         baseColor = value;
     }
 
-    inline const ColorRGBA<Float32>& MaterialAsset::GetEmissiveColor() const noexcept
+    inline const ColorRGBA<Float32>& MaterialContent::GetEmissiveColor() const noexcept
     {
         return emissiveColor;
     }
 
-    inline void MaterialAsset::SetEmissiveColor(const ColorRGBA<Float32>& value) noexcept
+    inline void MaterialContent::SetEmissiveColor(const ColorRGBA<Float32>& value) noexcept
     {
         emissiveColor = value;
     }
 
-    inline const ColorRGBA<Float32>& MaterialAsset::GetSpecularColor() const noexcept
+    inline const ColorRGBA<Float32>& MaterialContent::GetSpecularColor() const noexcept
     {
         return specularColor;
     }
 
-    inline void MaterialAsset::SetSpecularColor(const ColorRGBA<Float32>& value) noexcept
+    inline void MaterialContent::SetSpecularColor(const ColorRGBA<Float32>& value) noexcept
     {
         specularColor = value;
     }
 
-    inline Float32 MaterialAsset::GetMetallic() const noexcept
+    inline Float32 MaterialContent::GetMetallic() const noexcept
     {
         return metallic;
     }
 
-    inline void MaterialAsset::SetMetallic(Float32 value) noexcept
+    inline void MaterialContent::SetMetallic(Float32 value) noexcept
     {
         metallic = value;
     }
 
-    inline Float32 MaterialAsset::GetRoughness() const noexcept
+    inline Float32 MaterialContent::GetRoughness() const noexcept
     {
         return roughness;
     }
 
-    inline void MaterialAsset::SetRoughness(Float32 value) noexcept
+    inline void MaterialContent::SetRoughness(Float32 value) noexcept
     {
         roughness = value;
     }
 
-    inline Float32 MaterialAsset::GetSmoothness() const noexcept
+    inline Float32 MaterialContent::GetSmoothness() const noexcept
     {
         return 1.0f - roughness;
     }
 
-    inline void MaterialAsset::SetSmoothness(Float32 value) noexcept
+    inline void MaterialContent::SetSmoothness(Float32 value) noexcept
     {
         roughness = 1.0f - value;
     }
 
-    inline const MaterialTextures& MaterialAsset::GetTextures() const noexcept
+    inline const MaterialTextures& MaterialContent::GetTextures() const noexcept
     {
         return textures;
     }
 
-    inline void MaterialAsset::SetTextures(const MaterialTextures& value) noexcept
+    inline void MaterialContent::SetTextures(const MaterialTextures& value) noexcept
     {
         textures = value;
     }
 
-    inline EGPUPrimitiveTopology MaterialAsset::GetPrimitive() const noexcept
+    inline EGPUPrimitiveTopology MaterialContent::GetPrimitive() const noexcept
     {
         return primitive;
     }
 
-    inline void MaterialAsset::SetPrimitive(EGPUPrimitiveTopology value) noexcept
+    inline void MaterialContent::SetPrimitive(EGPUPrimitiveTopology value) noexcept
     {
         primitive = value;
     }
 
-    inline const ShaderAsset* MaterialAsset::GetVertexShader() const noexcept
+    inline const ShaderContent* MaterialContent::GetVertexShader() const noexcept
     {
         return vertexShader;
     }
 
-    inline const ShaderAsset* MaterialAsset::GetFragmentShader() const noexcept
+    inline const ShaderContent* MaterialContent::GetFragmentShader() const noexcept
     {
         return fragmentShader;
     }
 
-    inline const IGPUGraphicsPipelineState* MaterialAsset::GetGraphicsPipelineState() const noexcept
+    inline const IGPUGraphicsPipelineState* MaterialContent::GetGraphicsPipelineState() const noexcept
     {
         return pipelineState;
     }
 
-    inline EGPUTextureFormat MaterialAsset::GetTargetFormat() const noexcept
+    inline EGPUTextureFormat MaterialContent::GetTargetFormat() const noexcept
     {
         return targetFormat;
     }
 
-    inline void MaterialAsset::SetTargetFormat(EGPUTextureFormat value) noexcept
+    inline void MaterialContent::SetTargetFormat(EGPUTextureFormat value) noexcept
     {
         targetFormat = value;
     }
 } // namespace Garage
 
-#endif // GARAGE_RESOURCES_MATERIAL_ASSET_HPP
+#endif // GARAGE_CONTENT_MATERIAL_CONTENT_HPP

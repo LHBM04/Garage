@@ -1,4 +1,4 @@
-#include "garage/resources/cubemap_asset.hpp"
+#include "garage/content/cubemap_content.hpp"
 
 #include <filesystem>
 #include <utility>
@@ -8,14 +8,14 @@
 
 namespace Garage
 {
-    CubemapAsset::CubemapAsset(std::filesystem::path path, IGPUDevice& device, IGPUTexture2D* texture) noexcept
-        : AssetBase(std::move(path))
+    CubemapContent::CubemapContent(std::filesystem::path path, IGPUDevice& device, IGPUTexture2D* texture) noexcept
+        : ContentBase(std::move(path))
         , device(&device)
         , texture(texture)
     {
     }
 
-    CubemapAsset::~CubemapAsset() noexcept
+    CubemapContent::~CubemapContent() noexcept
     {
         if (device != nullptr && texture != nullptr)
         {
