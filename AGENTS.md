@@ -16,7 +16,7 @@
 - 이 `AGENTS.md`가 위치한 저장소 루트를 작업 기준으로 삼는다. 현재 위치가 하위 폴더라면 Git 루트를 확인하여 기준으로 사용한다.
 - 명령 실행 시 확인한 저장소 루트를 작업 디렉터리로 명시한다. 다른 경로의 저장소로 자동 전환하지 않는다.
 - 문서와 설정에 PC별 절대 경로를 고정하지 않는다. 별도 기준이 명시되지 않은 파일 경로는 저장소 루트를 기준으로 해석한다.
-- 프로그램의 `./Resources/...` 같은 실행 시 상대 경로는 작업 디렉터리를 기준으로 해석한다. 저장소 기준 경로와 혼동하지 않고, 해당 프로젝트의 실행 설정을 확인한다.
+- 프로그램의 `./content/...` 같은 실행 시 상대 경로는 작업 디렉터리를 기준으로 해석한다. 저장소 기준 경로와 혼동하지 않고, 해당 프로젝트의 실행 설정을 확인한다.
 
 ## 3. 빌드 및 실행 확인
 
@@ -68,7 +68,7 @@
 
 ### 객체 참조 및 매개변수/반환값 규칙 (언리얼 엔진 스타일)
 
-- **엔진 생명주기 관리 객체**: `App`, `SubsystemBase` 파생, `World`, `Entity`, `ComponentBase` 파생, `AssetBase` 파생, `Display`, `IInputProvider` 등 힙에 할당되어 프레임워크가 생명주기를 관리하거나 `nullptr` 상태가 유효한 객체는 입출력/조회/소유자 참조 모두 원시 포인터(`T*` / `const T*`)를 기본으로 사용한다. `std::reference_wrapper`는 사용하지 않는다.
+- **엔진 생명주기 관리 객체**: `App`, `SubsystemBase` 파생, `World`, `Entity`, `ComponentBase` 파생, `ContentBase` 파생, `Display`, `IInputProvider` 등 힙에 할당되어 프레임워크가 생명주기를 관리하거나 `nullptr` 상태가 유효한 객체는 입출력/조회/소유자 참조 모두 원시 포인터(`T*` / `const T*`)를 기본으로 사용한다. `std::reference_wrapper`는 사용하지 않는다.
 - **값 타입 및 RHI 실행 컨텍스트**: `Vector*`, `Quaternion`, `Matrix4x4`, `Color*`, 옵션 구조체, `Event` 파생 구조체, `std::string_view`, `std::span<const T>`, `std::filesystem::path` 등 복사 비용이 있거나 불변인 값 타입은 `const T&`(또는 뷰·경량 기본 타입은 값)로 전달한다. 읽기 전용 연속 버퍼는 `const std::vector<T>&` 대신 `std::span<const T>`를 우선 사용한다. 렌더링 프레임 내 유효성이 상시 보장되는 GPU 실행 컨텍스트(`GPUCommandBuffer&` 등)는 참조자를 사용한다.
 
 ### 컨테이너 및 컬렉션 조회 규칙
