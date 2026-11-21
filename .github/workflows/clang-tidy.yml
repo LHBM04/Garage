@@ -54,16 +54,19 @@ jobs:
             libpipewire-0.3-dev
 
       - name: Configure with Clang
-        run: cmake --preset debug -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+        run: cmake --preset debug -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DGARAGE_BUILD_EXAMPLES=OFF
 
       - name: Build (generate PCH and fetched headers)
-        run: cmake --build --preset debug --parallel
+        run: cmake --build --preset debug --target Garage --parallel
 
       - name: Run clang-tidy on project sources
         run: |
-          mapfile -t files < <(find src -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp' \))
-          if [ ${#files[@]} -eq 0 ]; then
+          if [ -z "$(find src -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cxx' -o -name '*.cpp' \) -print -quit)" ]; then
             echo "No C/C++ source files found to analyze."
             exit 0
           fi
-          clang-tidy -p out/debug --header-filter="^${{ github.workspace }}/(include|src)/.*" "${files[@]}"
+          run-clang-tidy \
+            -p out/debug \
+            -j "$(nproc)" \
+            -header-filter="^${{ github.workspace }}/(include|src)/.*" \
+            "^${{ github.workspace }}/src/.*"
